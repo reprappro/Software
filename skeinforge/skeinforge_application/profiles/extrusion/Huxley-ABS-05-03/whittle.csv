@@ -1,0 +1,6 @@
+Format is tab separated whittle settings.
+Name                          	Value
+WindowPosition	700+0
+Open File to be Whittled	
+Activate Whittle:	False
+Maximum Vertical Step (mm):	0.1

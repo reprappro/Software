@@ -1,0 +1,6 @@
+Format is tab separated flow settings.
+Name                          	Value
+WindowPosition	700+0
+Open File for Flow	
+Activate Flow:	True
+Flow Rate (arbitrary units):	210.0

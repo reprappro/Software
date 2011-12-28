@@ -1,0 +1,7 @@
+Format is tab separated drill settings.
+Name                          	Value
+WindowPosition	700+0
+Open File for Drill	
+Activate Drill	True
+Drilling Margin on Bottom (millimeters):	1.0
+Drilling Margin on Top (millimeters):	3.0

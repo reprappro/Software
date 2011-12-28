@@ -1,0 +1,12 @@
+Format is tab separated binary 16 byte settings.
+Name                          	Value
+WindowPosition	735+93
+Open File to be Converted to Binary 16 Byte	/home/jeanmarc/emaker_forge/models/20mm_with_hole_export.gcode
+Feed Rate Step Length (millimeters/second)	0.1
+File Extension:	bin
+X Offset (millimeters)	0.0
+Y Offset (millimeters)	0.0
+Z Offset (millimeters)	0.0
+X Step Length (millimeters)	0.1
+Y Step Length (millimeters)	0.1
+Z Step Length (millimeters)	0.01

@@ -117,7 +117,7 @@ def estimate_duration(g):
         i=i.split(";")[0]
         if "G4" in i or "G1" in i:
             if "G4" in i:
-            parts = i.split(" ")
+                parts = i.split(" ")
                 moveduration = get_coordinate_value("P", parts[1:])
                 if moveduration is None:
                     continue

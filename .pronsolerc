@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/things/screw cup thing 3270
+set last_file_path tempstl
 set xy_feedrate 12000
 set z_feedrate 200
 set e_feedrate 200
@@ -22,7 +22,7 @@ button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22
 button 2 "LIST" /c "#C8C8C8" M20
 
-set temperature_abs 237
+set temperature_abs 250
 set baudrate 115200
 set last_temperature 200.0
 set bedtemp_pla 85
@@ -30,7 +30,7 @@ set bedtemp_abs 120
 set temperature_pla 205
 set bed_size_x 140.0
 set bed_size_y 140.0
-button 3 "FAN ON" /c "#C8C8C8" M106 S255
+button 3 "FAN ON" /c "#C8C8C8" M106 S200
 button 4 "GET POS" /c "#C8C8C8" M114
 button 5 "ECHO" /c "#C8C8C8" loud
 button 6 "QUIET" /c "#C8C8C8" quiet

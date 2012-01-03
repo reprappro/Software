@@ -7,6 +7,7 @@ from __future__ import absolute_import
 #Init has to be imported first because it has code to workaround the python bug where relative imports don't work if the module is imported as a main module.
 import __init__
 
+from fabmetheus_utilities import archive
 from fabmetheus_utilities import settings
 from skeinforge_application.skeinforge_utilities import skeinforge_profile
 
@@ -58,6 +59,7 @@ class HelpRepository:
 		settings.LabelDisplay().getFromName('Web Search:', self )
 		settings.HelpPage().getFromNameAfterHTTP('members.axion.net/~enrique/search_web.html', 'Web Search', self )
 		settings.LabelSeparator().getFromRepository(self)
+		self.version = settings.LabelDisplay().getFromName('Version: ' + archive.getFileText(archive.getVersionFileName()), self)
 		self.wikiManualPrimary = settings.BooleanSetting().getFromValue('Wiki Manual Primary', self, True )
 		self.wikiManualPrimary.setUpdateFunction( self.save )
 

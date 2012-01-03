@@ -53,7 +53,7 @@ def getChainTextFromProcedures(fileName, procedures, text):
 
 def getCraftModule(fileName):
 	"Get craft module."
-	return archive.getModuleWithDirectoryPath( getPluginsDirectoryPath(), fileName )
+	return archive.getModuleWithDirectoryPath(getPluginsDirectoryPath(), fileName)
 
 def getLastModule():
 	"Get the last tool."
@@ -66,15 +66,15 @@ def getNewRepository():
 	'Get new repository.'
 	return CraftRepository()
 
-def getPluginsDirectoryPath():
-	"Get the plugins directory path."
-	return archive.getSkeinforgePluginsPath('craft_plugins')
-
 def getPluginFileNames():
 	"Get craft plugin fileNames."
 	craftSequence = getReadCraftSequence()
 	craftSequence.sort()
 	return craftSequence
+
+def getPluginsDirectoryPath():
+	"Get the plugins directory path."
+	return archive.getCraftPluginsDirectoryPath()
 
 def getProcedures( procedure, text ):
 	"Get the procedures up to and including the given procedure."
@@ -119,7 +119,7 @@ def writeChainTextWithNounMessage(fileName, procedure, shouldAnalyze=True):
 	archive.writeFileText(fileNameSuffix, craftText)
 	window = None
 	if shouldAnalyze:
-		window = skeinforge_analyze.writeOutput(fileName, fileNameSuffix, craftText)
+		window = skeinforge_analyze.writeOutput(fileName, fileNameSuffix, fileNameSuffix, True, craftText)
 	print('')
 	print('The %s tool has created the file:' % procedure)
 	print(fileNameSuffix)

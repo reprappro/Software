@@ -1,12 +1,12 @@
 """
 This page is in the table of contents.
-Skeiniso is an analysis script to display a gcode file in an isometric view.
+Skeiniso is an analyze viewer to display a gcode file in an isometric view.
 
 The skeiniso manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeiniso
 
 ==Operation==
-The default 'Activate Skeiniso' checkbox is on.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Skeiniso' checkbox is on, when skeiniso is run directly.
+The default 'Activate Skeiniso' checkbox is off.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Skeiniso' checkbox is on, when skeiniso is run directly.
 
 Skeiniso requires skeinforge comments in the gcode file to distinguish the loops and perimeters.  If the comments are deleted, all threads will be displayed as generic threads.  To get the penultimate file of the tool chain, just before export deletes the comments, select 'Save Penultimate Gcode' in export, and open the gcode file with the suffix '_penultimate.gcode' with skeiniso.
 
@@ -281,8 +281,13 @@ def getWindowGivenTextRepository( fileName, gcodeText, repository ):
 	skein.parseGcode( fileName, gcodeText, repository )
 	return SkeinWindow( repository, skein )
 
-def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
+def writeOutput(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText=''):
 	"Write a skeinisoed gcode file for a skeinforge gcode file, if 'Activate Skeiniso' is selected."
+	try:
+		import Tkinter
+	except:
+		print('Warning, skeiniso will do nothing because Tkinter is not installed.')
+		return
 	repository = settings.getReadRepository( SkeinisoRepository() )
 	if repository.activateSkeiniso.value:
 		gcodeText = archive.getTextIfEmpty( fileNameSuffix, gcodeText )
@@ -297,7 +302,7 @@ class SkeinisoRepository( tableau.TableauRepository ):
 		self.baseNameSynonym = 'behold.csv'
 		self.fileNameInput = settings.FileNameInput().getFromFileName( [ ('Gcode text files', '*.gcode') ], 'Open File for Skeiniso', self, '')
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeiniso')
-		self.activateSkeiniso = settings.BooleanSetting().getFromValue('Activate Skeiniso', self, True )
+		self.activateSkeiniso = settings.BooleanSetting().getFromValue('Activate Skeiniso', self, False)
 		self.addAnimation()
 		self.axisRulings = settings.BooleanSetting().getFromValue('Axis Rulings', self, True )
 		settings.LabelSeparator().getFromRepository(self)
@@ -358,7 +363,7 @@ class SkeinisoSkein:
 	def __init__(self):
 		self.coloredThread = []
 		self.feedRateMinute = 960.1
-		self.hasASurroundingLoopBeenReached = False
+		self.hasANestedRingBeenReached = False
 		self.isLoop = False
 		self.isPerimeter = False
 		self.isOuter = False
@@ -443,7 +448,7 @@ class SkeinisoSkein:
 		if self.isLoop:
 			self.setColoredThread( ( 255.0, 255.0, 0.0 ), self.skeinPane.loopLines ) #yellow
 			return
-		if not self.hasASurroundingLoopBeenReached:
+		if not self.hasANestedRingBeenReached:
 			self.setColoredThread( ( 165.0, 42.0, 42.0 ), self.skeinPane.raftLines ) #brown
 			return
 		if layerZoneIndex < self.repository.numberOfFillBottomLayers.value:
@@ -524,7 +529,7 @@ class SkeinisoSkein:
 		self.marginCornerLow = self.scaleCornerLow - margin
 		self.screenSize = margin + 2.0 * ( self.scaleCornerHigh - self.marginCornerLow )
 		self.initializeActiveLocation()
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 
@@ -567,7 +572,7 @@ class SkeinisoSkein:
 			self.moveColoredThreadToSkeinPane()
 			self.isLoop = False
 		elif firstWord == '(<nestedRing>)':
-			self.hasASurroundingLoopBeenReached = True
+			self.hasANestedRingBeenReached = True
 		elif firstWord == '(<perimeter>':
 			self.isPerimeter = True
 			self.isOuter = ( splitLine[1] == 'outer')
@@ -741,16 +746,16 @@ class SkeinWindow( tableau.TableauWindow ):
 		if self.repository.widthOfAxisPositiveSide.value > 0:
 			self.getDrawnColoredLine('last', self.positiveAxisLineZ, projectiveSpace, self.positiveAxisLineZ.tagString, self.repository.widthOfAxisPositiveSide.value )
 
+	def getCanvasRadius(self):
+		"Get half of the minimum of the canvas height and width."
+		return 0.5 * min( float( self.canvasHeight ), float( self.canvasWidth ) )
+
 	def getCentered( self, coordinate ):
 		"Get the centered coordinate."
 		relativeToCenter = complex( coordinate.real - self.center.real, self.center.imag - coordinate.imag )
 		if abs( relativeToCenter ) < 1.0:
 			relativeToCenter = complex( 0.0, 1.0 )
 		return relativeToCenter
-
-	def getCanvasRadius(self):
-		"Get half of the minimum of the canvas height and width."
-		return 0.5 * min( float( self.canvasHeight ), float( self.canvasWidth ) )
 
 	def getCenteredScreened( self, coordinate ):
 		"Get the normalized centered coordinate."
@@ -875,7 +880,7 @@ def main():
 	if len(sys.argv) > 1:
 		settings.startMainLoopFromWindow( getWindowAnalyzeFile(' '.join(sys.argv[1 :])) )
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

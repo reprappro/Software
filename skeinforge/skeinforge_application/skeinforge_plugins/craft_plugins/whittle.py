@@ -75,7 +75,7 @@ class WhittleRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.whittle.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File to be Whittled', self, '')
-		self.activateWhittle = settings.BooleanSetting().getFromValue('Activate Whittle:', self, False )
+		self.activateWhittle = settings.BooleanSetting().getFromValue('Activate Whittle', self, False )
 		self.maximumVerticalStep = settings.FloatSpin().getFromValue( 0.02, 'Maximum Vertical Step (mm):', self, 0.42, 0.1 )
 		self.executeTitle = 'Whittle'
 
@@ -120,7 +120,7 @@ class WhittleSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addTagBracketedLine('procedureName', 'whittle')
+				self.distanceFeedRate.addTagBracketedProcedure('whittle')
 				return
 			elif firstWord == '(<layerThickness>':
 				self.setLayerThinknessVerticalDeltas(splitLine)
@@ -166,7 +166,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

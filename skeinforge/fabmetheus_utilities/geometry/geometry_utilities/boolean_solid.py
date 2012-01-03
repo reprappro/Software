@@ -72,9 +72,9 @@ def addLoopsXSegmentIntersections( lineLoopsIntersections, loops, segmentFirstX,
 
 def addLoopXSegmentIntersections( lineLoopsIntersections, loop, segmentFirstX, segmentSecondX, segmentYMirror, y ):
 	'Add intersections of the loop with the x segment.'
-	rotatedLoop = euclidean.getPointsRoundZAxis( segmentYMirror, loop )
+	rotatedLoop = euclidean.getRotatedComplexes( segmentYMirror, loop )
 	for pointIndex in xrange( len( rotatedLoop ) ):
-		pointFirst = rotatedLoop[ pointIndex ]
+		pointFirst = rotatedLoop[pointIndex]
 		pointSecond = rotatedLoop[ (pointIndex + 1) % len( rotatedLoop ) ]
 		addLineXSegmentIntersection( lineLoopsIntersections, segmentFirstX, segmentSecondX, pointFirst, pointSecond, y )
 
@@ -95,7 +95,7 @@ def getInsetPointsByInsetLoop( insetLoop, inside, loops, radius ):
 	insetPointsByInsetLoop = []
 	for pointIndex in xrange( len( insetLoop ) ):
 		pointBegin = insetLoop[ ( pointIndex + len( insetLoop ) - 1 ) % len( insetLoop ) ]
-		pointCenter = insetLoop[ pointIndex ]
+		pointCenter = insetLoop[pointIndex]
 		pointEnd = insetLoop[ (pointIndex + 1) % len( insetLoop ) ]
 		if getIsInsetPointInsideLoops( inside, loops, pointBegin, pointCenter, pointEnd, radius ):
 			insetPointsByInsetLoop.append( pointCenter )
@@ -223,7 +223,7 @@ class BooleanSolid( group.Group ):
 
 	def getTransformedPaths(self):
 		'Get all transformed paths.'
-		importRadius = setting.getImportRadius(self.xmlElement)
+		importRadius = setting.getImportRadius(self.elementNode)
 		loopsFromObjectLoopsList = self.getLoopsFromObjectLoopsList(importRadius, self.getComplexTransformedPathLists())
 		return euclidean.getVector3Paths(loopsFromObjectLoopsList)
 
@@ -231,6 +231,6 @@ class BooleanSolid( group.Group ):
 		'Get joined loops sliced through shape.'
 		return getLoopsUnified(importRadius, visibleObjectLoopsList)
 
-	def getXMLClassName(self):
+	def getXMLLocalName(self):
 		'Get xml class name.'
 		return self.operationFunction.__name__.lower()[ len('get') : ]

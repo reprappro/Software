@@ -39,12 +39,12 @@ class ZoomIn( MouseToolBase ):
 		self.window.mouseTool = self
 		self.mouseButton['relief'] = settings.Tkinter.SUNKEN
 
+	def getMultiplier(self):
+		"Get the scale multiplier."
+		return 2.0
+
 	def getReset( self, window ):
 		"Reset the mouse tool to default."
 		self.setWindowItems( window )
 		self.mouseButton = None
 		return self
-
-	def getMultiplier(self):
-		"Get the scale multiplier."
-		return 2.0

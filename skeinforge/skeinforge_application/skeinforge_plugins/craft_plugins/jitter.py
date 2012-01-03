@@ -73,23 +73,23 @@ def getJitteredLoop( jitterDistance, jitterLoop ):
 	totalLength = 0.0
 	jitterPosition = ( jitterDistance + 256.0 * loopLength ) % loopLength
 	while totalLength < jitterPosition and pointIndex < len( jitterLoop ):
-		firstPoint = jitterLoop[ pointIndex ]
+		firstPoint = jitterLoop[pointIndex]
 		secondPoint  = jitterLoop[ (pointIndex + 1) % len( jitterLoop ) ]
 		pointIndex += 1
 		lastLength = totalLength
-		totalLength += abs( firstPoint - secondPoint )
+		totalLength += abs(firstPoint - secondPoint)
 	remainingLength = jitterPosition - lastLength
 	pointIndex = pointIndex % len( jitterLoop )
-	ultimateJitteredPoint = jitterLoop[ pointIndex ]
+	ultimateJitteredPoint = jitterLoop[pointIndex]
 	penultimateJitteredPointIndex = ( pointIndex + len( jitterLoop ) - 1 ) % len( jitterLoop )
 	penultimateJitteredPoint = jitterLoop[ penultimateJitteredPointIndex ]
 	segment = ultimateJitteredPoint - penultimateJitteredPoint
-	segmentLength = abs( segment )
+	segmentLength = abs(segment)
 	originalOffsetLoop = euclidean.getAroundLoop( pointIndex, pointIndex, jitterLoop )
 	if segmentLength <= 0.0:
 		return originalOffsetLoop
 	newUltimatePoint = penultimateJitteredPoint + segment * remainingLength / segmentLength
-	return [ newUltimatePoint ] + originalOffsetLoop
+	return [newUltimatePoint] + originalOffsetLoop
 
 def getNewRepository():
 	'Get new repository.'
@@ -188,7 +188,7 @@ class JitterSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> jitter </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('jitter')
 				return
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.operatingFeedRatePerMinute = 60.0 * float(splitLine[1])
@@ -247,7 +247,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == '__main__':
 	main()

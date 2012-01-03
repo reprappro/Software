@@ -212,8 +212,7 @@ class StretchRepository:
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Stretch')
 		self.activateStretch = settings.BooleanSetting().getFromValue('Activate Stretch', self, False )
 		self.crossLimitDistanceOverPerimeterWidth = settings.FloatSpin().getFromValue( 3.0, 'Cross Limit Distance Over Perimeter Width (ratio):', self, 10.0, 5.0 )
-		self.loopInSideStretchOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.05, 'Loop Inside Stretch Over Perimeter Width (ratio):', self, 0.25, 0.11 )
-		self.loopOutSideStretchOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.05, 'Loop OutSide Stretch Over Perimeter Width (ratio):', self, 0.25, 0.11 )
+		self.loopStretchOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.05, 'Loop Stretch Over Perimeter Width (ratio):', self, 0.25, 0.11 )
 		self.pathStretchOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.0, 'Path Stretch Over Perimeter Width (ratio):', self, 0.2, 0.0 )
 		settings.LabelSeparator().getFromRepository(self)
 		settings.LabelDisplay().getFromName('- Perimeter -', self )
@@ -247,7 +246,7 @@ class StretchSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		self.stretchRepository = stretchRepository
 		self.parseInitialization()
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseStretch(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -355,13 +354,12 @@ class StretchSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> stretch </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('stretch')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				perimeterWidth = float(splitLine[1])
 				self.crossLimitDistance = self.perimeterWidth * self.stretchRepository.crossLimitDistanceOverPerimeterWidth.value
-				self.loopOutSideMaximumAbsoluteStretch = self.perimeterWidth * self.stretchRepository.loopOutSideStretchOverPerimeterWidth.value
-				self.loopInSideMaximumAbsoluteStretch = self.perimeterWidth * self.stretchRepository.loopInSideStretchOverPerimeterWidth.value
+				self.loopMaximumAbsoluteStretch = self.perimeterWidth * self.stretchRepository.loopStretchOverPerimeterWidth.value
 				self.pathAbsoluteStretch = self.perimeterWidth * self.stretchRepository.pathStretchOverPerimeterWidth.value
 				self.perimeterInsideAbsoluteStretch = self.perimeterWidth * self.stretchRepository.perimeterInsideStretchOverPerimeterWidth.value
 				self.perimeterOutsideAbsoluteStretch = self.perimeterWidth * self.stretchRepository.perimeterOutsideStretchOverPerimeterWidth.value
@@ -386,9 +384,7 @@ class StretchSkein:
 			self.setStretchToPath()
 		elif firstWord == '(<loop>':
 			self.isLoop = True
-			self.threadMaximumAbsoluteStretch = self.loopInSideMaximumAbsoluteStretch
-			if splitLine[1] == 'outer':
-				self.threadMaximumAbsoluteStretch = self.loopOutSideMaximumAbsoluteStretch
+			self.threadMaximumAbsoluteStretch = self.loopMaximumAbsoluteStretch
 		elif firstWord == '(</loop>)':
 			self.setStretchToPath()
 		elif firstWord == '(<perimeter>':
@@ -411,7 +407,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

@@ -1,12 +1,12 @@
 """
 This page is in the table of contents.
-Comment is a script to comment a gcode file.
+Comment is an analyze plugin to comment a gcode file.
 
 The comment manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Comment
 
 ==Operation==
-The default 'Activate Comment' checkbox is on.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Comment' checkbox is on, when comment is run directly.
+The default 'Activate Comment' checkbox is off.  When it is on, the file will be commented when called from the skeinforge toolchain, when it is off, the file will not be commented when called from the toolchain.  The file will still be commented, whether or not the 'Activate Comment' checkbox is on, when comment is run directly.
 
 ==Gcodes==
 An explanation of the gcodes is at:
@@ -62,7 +62,7 @@ def getWindowAnalyzeFileGivenText(fileName, gcodeText):
 	skein.parseGcode(gcodeText)
 	archive.writeFileMessageEnd('_comment.gcode', fileName, skein.output.getvalue(), 'The commented file is saved as ')
 
-def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
+def writeOutput(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText=''):
 	"Write a commented gcode file for a skeinforge gcode file, if 'Write Commented File for Skeinforge Chain' is selected."
 	repository = settings.getReadRepository( CommentRepository() )
 	if gcodeText == '':
@@ -163,7 +163,7 @@ def main():
 	if len(sys.argv) > 1:
 		getWindowAnalyzeFile(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

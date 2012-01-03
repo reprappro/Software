@@ -1,6 +1,6 @@
 """
 This page is in the table of contents.
-Statistic is a script to generate statistics a gcode file.
+Statistic is an extremely valuable analyze plugin to print and/or save the statistics of the generated gcode.
 
 The statistic manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Statistic
@@ -41,7 +41,61 @@ Below are examples of statistic being used.  These examples are run in a termina
 This brings up the statistic dialog.
 
 > python statistic.py Screw Holder_penultimate.gcode
-The statistic file is saved as Screw_Holder_penultimate_statistic.txt
+Statistics are being generated for the file /home/enrique/Desktop/backup/babbleold/script/reprap/fabmetheus/models/Screw Holder_penultimate.gcode
+
+Cost
+Machine time cost is 0.31$.
+Material cost is 0.2$.
+Total cost is 0.51$.
+
+Extent
+X axis extrusion starts at 61 mm and ends at 127 mm, for a width of 65 mm.
+Y axis extrusion starts at 81 mm and ends at 127 mm, for a depth of 45 mm.
+Z axis extrusion starts at 0 mm and ends at 15 mm, for a height of 15 mm.
+
+Extruder
+Build time is 18 minutes 47 seconds.
+Distance extruded is 46558.4 mm.
+Distance traveled is 58503.3 mm.
+Extruder speed is 50.0
+Extruder was extruding 79.6 percent of the time.
+Extruder was toggled 1688 times.
+Operating flow rate is 9.8 mm3/s.
+Feed rate average is 51.9 mm/s, (3113.8 mm/min).
+
+Filament
+Cross section area is 0.2 mm2.
+Extrusion diameter is 0.5 mm.
+Extrusion fill density ratio is 0.68
+
+Material
+Mass extruded is 9.8 grams.
+Volume extruded is 9.1 cc.
+
+Meta
+Text has 33738 lines and a size of 1239.0 KB.
+Version is 11.09.28
+
+Procedures
+carve
+bottom
+preface
+inset
+fill
+multiply
+speed
+temperature
+raft
+skirt
+dimension
+bookend
+
+Profile
+UM-PLA-HighQuality
+
+Slice
+Layer thickness is 0.4 mm.
+Perimeter width is 0.72 mm.
 
 """
 
@@ -88,7 +142,7 @@ def getWindowAnalyzeFileGivenText( fileName, gcodeText, repository=None):
 	if repository.saveStatistics.value:
 		archive.writeFileMessageEnd('.txt', fileName, statisticGcode, 'The statistics file is saved as ')
 
-def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
+def writeOutput(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText=''):
 	"Write statistics for a skeinforge gcode file, if 'Write Statistics File for Skeinforge Chain' is selected."
 	repository = settings.getReadRepository( StatisticRepository() )
 	if gcodeText == '':
@@ -334,7 +388,7 @@ class StatisticSkein:
 		elif firstWord == '(<procedureName>':
 			self.procedures.append(splitLine[1])
 		elif firstWord == '(<profileName>':
-			self.profileName = splitLine[1]
+			self.profileName = line.replace('(<profileName>', '').replace('</profileName>)', '').strip()
 		elif firstWord == '(<version>':
 			self.version = splitLine[1]
 
@@ -344,7 +398,7 @@ def main():
 	if len(sys.argv) > 1:
 		getWindowAnalyzeFile(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

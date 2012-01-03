@@ -64,7 +64,7 @@ def getCraftedTextFromText( gcodeText, repository = None ):
 		repository = settings.getReadRepository( HomeRepository() )
 	if not repository.activateHome.value:
 		return gcodeText
-	return HomeSkein().getCraftedGcode( gcodeText, repository )
+	return HomeSkein().getCraftedGcode(gcodeText, repository)
 
 def getNewRepository():
 	'Get new repository.'
@@ -115,11 +115,6 @@ class HomeSkein:
 		closeToEnd.z = self.highestZ
 		self.distanceFeedRate.addLine( self.distanceFeedRate.getLinearGcodeMovementWithFeedRate( self.travelFeedRateMinute, closeToEnd.dropAxis(), closeToEnd.z ) )
 
-	def addHopUp(self, location):
-		"Add hop to highest point."
-		locationUp = Vector3( location.x, location.y, self.highestZ )
-		self.distanceFeedRate.addLine( self.distanceFeedRate.getLinearGcodeMovementWithFeedRate( self.travelFeedRateMinute, locationUp.dropAxis(), locationUp.z ) )
-
 	def addHomeTravel( self, splitLine ):
 		"Add the home travel gcode."
 		location = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
@@ -138,15 +133,20 @@ class HomeSkein:
 		if self.extruderActive:
 			self.distanceFeedRate.addLine('M101')
 
+	def addHopUp(self, location):
+		"Add hop to highest point."
+		locationUp = Vector3( location.x, location.y, self.highestZ )
+		self.distanceFeedRate.addLine( self.distanceFeedRate.getLinearGcodeMovementWithFeedRate( self.travelFeedRateMinute, locationUp.dropAxis(), locationUp.z ) )
+
 	def getCraftedGcode( self, gcodeText, repository ):
 		"Parse gcode text and store the home gcode."
 		self.repository = repository
-		self.homingLines = settings.getLinesInAlterationsOrGivenDirectory(repository.nameOfHomingFile.value)
+		self.homingLines = settings.getAlterationFileLines(repository.nameOfHomingFile.value)
 		if len(self.homingLines) < 1:
 			return gcodeText
 		self.lines = archive.getTextLines(gcodeText)
 		self.parseInitialization( repository )
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -159,7 +159,7 @@ class HomeSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> home </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('home')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.absolutePerimeterWidth = abs(float(splitLine[1]))
@@ -192,7 +192,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

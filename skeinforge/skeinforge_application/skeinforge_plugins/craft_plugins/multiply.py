@@ -30,6 +30,11 @@ Default is one.
 
 Defines the number of rows in the table.
 
+===Reverse Sequence every Odd Layer===
+Default is off.
+
+When selected the build sequence will be reversed on every odd layer so that the tool will travel less.  The problem is that the builds would be made with different amount of time to cool, so some would be too hot and some too cold, which is why the default is off.
+
 ===Separation over Perimeter Width===
 Default is fifteen.
 
@@ -105,7 +110,7 @@ class MultiplyRepository:
 		self.fileNameInput = settings.FileNameInput().getFromFileName(
 			fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Multiply', self, '')
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Multiply')
-		self.activateMultiply = settings.BooleanSetting().getFromValue('Activate Multiply:', self, False )
+		self.activateMultiply = settings.BooleanSetting().getFromValue('Activate Multiply', self, False)
 		settings.LabelSeparator().getFromRepository(self)
 		settings.LabelDisplay().getFromName('- Center -', self )
 		self.centerX = settings.FloatSpin().getFromValue(-100.0, 'Center X (mm):', self, 100.0, 0.0)
@@ -115,6 +120,7 @@ class MultiplyRepository:
 		self.numberOfColumns = settings.IntSpin().getFromValue(1, 'Number of Columns (integer):', self, 10, 1)
 		self.numberOfRows = settings.IntSpin().getFromValue(1, 'Number of Rows (integer):', self, 10, 1)
 		settings.LabelSeparator().getFromRepository(self)
+		self.reverseSequenceEveryOddLayer = settings.BooleanSetting().getFromValue('Reverse Sequence every Odd Layer', self, False)
 		self.separationOverPerimeterWidth = settings.FloatSpin().getFromValue(
 			5.0, 'Separation over Perimeter Width (ratio):', self, 25.0, 15.0)
 		self.executeTitle = 'Multiply'
@@ -146,12 +152,15 @@ class MultiplySkein:
 		for line in self.layerLines:
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
-			if firstWord == 'G1':
-				movedLocation = self.getMovedLocationSetOldLocation(offset, splitLine)
-				line = self.distanceFeedRate.getLinearGcodeMovement(movedLocation.dropAxis(), movedLocation.z)
-			elif firstWord == '(<boundaryPoint>':
+			if firstWord == '(<boundaryPoint>':
 				movedLocation = self.getMovedLocationSetOldLocation(offset, splitLine)
 				line = self.distanceFeedRate.getBoundaryLine(movedLocation)
+			elif firstWord == 'G1':
+				movedLocation = self.getMovedLocationSetOldLocation(offset, splitLine)
+				line = self.distanceFeedRate.getLinearGcodeMovement(movedLocation.dropAxis(), movedLocation.z)
+			elif firstWord == '(<infillPoint>':
+				movedLocation = self.getMovedLocationSetOldLocation(offset, splitLine)
+				line = self.distanceFeedRate.getInfillBoundaryLine(movedLocation)
 			self.distanceFeedRate.addLine(line)
 
 	def addLayer(self):
@@ -161,7 +170,7 @@ class MultiplySkein:
 		offset = self.centerOffset - self.arrayCenter - self.shapeCenter
 		for rowIndex in xrange(self.repository.numberOfRows.value):
 			yRowOffset = float(rowIndex) * self.extentPlusSeparation.imag
-			if self.layerIndex % 2 == 1:
+			if self.layerIndex % 2 == 1 and self.repository.reverseSequenceEveryOddLayer.value:
 				yRowOffset = self.arrayExtent.imag - yRowOffset
 			for columnIndex in xrange(self.repository.numberOfColumns.value):
 				xColumnOffset = float(columnIndex) * self.extentPlusSeparation.real
@@ -212,7 +221,7 @@ class MultiplySkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> multiply </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('multiply')
 				self.distanceFeedRate.addLine(line)
 				self.lineIndex += 1
 				return

@@ -62,7 +62,7 @@ class DisplayLine( MouseToolBase ):
 		begin = complex( lineCoordinates[0], lineCoordinates[1] )
 		end = complex( lineCoordinates[2], lineCoordinates[3] )
 		segment = end - begin
-		segmentLength = abs( segment )
+		segmentLength = abs(segment)
 		if segmentLength <= 0.0:
 			return
 		towardEnd = 0.75 * segment

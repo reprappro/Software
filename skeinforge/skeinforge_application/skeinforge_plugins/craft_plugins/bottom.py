@@ -3,6 +3,9 @@
 This page is in the table of contents.
 Bottom sets the bottom of the carving to the defined altitude.
 
+The bottom manual page is at:
+http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Bottom
+
 ==Operation==
 The default 'Activate Bottom' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
 
@@ -45,7 +48,6 @@ from datetime import date
 from fabmetheus_utilities.fabmetheus_tools import fabmetheus_interpret
 from fabmetheus_utilities.svg_reader import SVGReader
 from fabmetheus_utilities.vector3 import Vector3
-from fabmetheus_utilities.xml_simple_reader import XMLSimpleReader
 from fabmetheus_utilities import archive
 from fabmetheus_utilities import euclidean
 from fabmetheus_utilities import gcodec
@@ -97,6 +99,7 @@ class BottomRepository:
 			'skeinforge_application.skeinforge_plugins.craft_plugins.bottom.html', self)
 		self.fileNameInput = settings.FileNameInput().getFromFileName(
 			fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Bottom', self, '')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Bottom')
 		self.activateBottom = settings.BooleanSetting().getFromValue('Activate Bottom', self, True)
 		self.additionalHeightOverLayerThickness = settings.FloatSpin().getFromValue(
 			0.0, 'Additional Height over Layer Thickness (ratio):', self, 1.0, 0.5)
@@ -140,7 +143,7 @@ class BottomSkein:
 			decimalPlacesCarried,
 			layerThickness,
 			perimeterWidth)
-		commentElement = svg_writer.getCommentElement(svgReader.root)
+		commentElement = svg_writer.getCommentElement(svgReader.documentElement)
 		procedureNameString = svgReader.sliceDictionary['procedureName'] + ',bottom'
 		return svgWriter.getReplacedSVGTemplate(fileName, procedureNameString, rotatedLoopLayers, commentElement)
 
@@ -150,7 +153,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

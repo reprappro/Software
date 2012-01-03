@@ -8,6 +8,17 @@ from __future__ import absolute_import
 import __init__
 try:
 	import Tkinter
+	class HiddenScrollbar(Tkinter.Scrollbar):
+		'A class to hide the scrollbar if it is not needed.'
+		def set(self, lo, hi):
+			'Add to grid is needed, remove if not.'
+			if float(lo) <= 0.0 and float(hi) >= 1.0:
+				self.grid_remove()
+				self.visible = False
+			else:
+				self.grid()
+				self.visible = True
+			Tkinter.Scrollbar.set(self, lo, hi)
 except:
 	pass
 
@@ -15,17 +26,3 @@ except:
 __author__ = 'Enrique Perez (perez_enrique@yahoo.com)'
 __date__ = '$Date: 2008/23/04 $'
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-
-
-class HiddenScrollbar(Tkinter.Scrollbar):
-	'A class to hide the scrollbar if it is not needed.'
-	def set(self, lo, hi):
-		'Add to grid is needed, remove if not.'
-		if float(lo) <= 0.0 and float(hi) >= 1.0:
-			self.grid_remove()
-			self.visible = False
-		else:
-			self.grid()
-			self.visible = True
-		Tkinter.Scrollbar.set(self, lo, hi)
-

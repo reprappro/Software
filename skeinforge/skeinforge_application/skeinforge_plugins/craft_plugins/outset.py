@@ -76,7 +76,7 @@ class OutsetRepository:
 		'Set the default settings, execute title & settings fileName.'
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.outset.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Outset', self, '')
-		self.activateOutset = settings.BooleanSetting().getFromValue('Activate Outset:', self, True )
+		self.activateOutset = settings.BooleanSetting().getFromValue('Activate Outset', self, True )
 		self.executeTitle = 'Outset'
 
 	def execute(self):
@@ -98,7 +98,7 @@ class OutsetSkein:
 	def addGcodeFromRemainingLoop( self, loop, radius, z ):
 		'Add the remainder of the loop.'
 		boundary = intercircle.getLargestInsetLoopFromLoopRegardless( loop, radius )
-		euclidean.addSurroundingLoopBeginning( self.distanceFeedRate, boundary, z )
+		euclidean.addNestedRingBeginning( self.distanceFeedRate, boundary, z )
 		self.distanceFeedRate.addPerimeterBlock(loop, z)
 		self.distanceFeedRate.addLine('(</boundaryPerimeter>)')
 		self.distanceFeedRate.addLine('(</nestedRing>)')
@@ -115,7 +115,7 @@ class OutsetSkein:
 		self.repository = repository
 		self.lines = archive.getTextLines(gcodeText)
 		self.parseInitialization()
-		for lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for lineIndex in xrange(self.lineIndex, len(self.lines)):
 			self.parseLine( lineIndex )
 		return self.distanceFeedRate.output.getvalue()
 
@@ -127,7 +127,7 @@ class OutsetSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addTagBracketedLine('procedureName', 'outset')
+				self.distanceFeedRate.addTagBracketedProcedure('outset')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.absoluteHalfPerimeterWidth = 0.5 * abs(float(splitLine[1]))
@@ -162,7 +162,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == '__main__':
 	main()

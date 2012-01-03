@@ -330,7 +330,7 @@ class MillSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> mill </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('mill')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.perimeterWidth = float(splitLine[1])
@@ -374,7 +374,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == '__main__':
 	main()

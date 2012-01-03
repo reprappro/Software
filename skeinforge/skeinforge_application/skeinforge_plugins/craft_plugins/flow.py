@@ -75,7 +75,7 @@ class FlowRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.flow.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Flow', self, '')
-		self.activateFlow = settings.BooleanSetting().getFromValue('Activate Flow:', self, True )
+		self.activateFlow = settings.BooleanSetting().getFromValue('Activate Flow', self, True )
 		self.flowRate = settings.FloatSpin().getFromValue( 50.0, 'Flow Rate (arbitrary units):', self, 250.0, 210.0 )
 		self.executeTitle = 'Flow'
 
@@ -92,15 +92,15 @@ class FlowSkein:
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.lineIndex = 0
 		self.lines = None
-		self.oldFlowRateString = None
+		self.oldFlowRate = None
 		self.oldLocation = None
 
-	def addFlowRateLineIfNecessary(self):
+	def addFlowRateLine(self):
 		"Add flow rate line."
-		flowRateString = euclidean.getRoundedToThreePlaces( self.flowRepository.flowRate.value )
-		if flowRateString != self.oldFlowRateString:
-			self.distanceFeedRate.addLine('M108 S' + flowRateString )
-		self.oldFlowRateString = flowRateString
+		flowRate = self.flowRepository.flowRate.value
+		if flowRate != self.oldFlowRate:
+			self.distanceFeedRate.addLine('M108 S' + euclidean.getFourSignificantFigures(flowRate))
+		self.oldFlowRate = flowRate
 
 	def getCraftedGcode( self, gcodeText, flowRepository ):
 		"Parse gcode text and store the flow gcode."
@@ -119,7 +119,7 @@ class FlowSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> flow </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('flow')
 				return
 			self.distanceFeedRate.addLine(line)
 
@@ -130,7 +130,7 @@ class FlowSkein:
 			return
 		firstWord = splitLine[0]
 		if firstWord == 'G1' or firstWord == '(<layer>':
-			self.addFlowRateLineIfNecessary()
+			self.addFlowRateLine()
 		self.distanceFeedRate.addLine(line)
 
 
@@ -139,7 +139,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

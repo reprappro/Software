@@ -189,7 +189,7 @@ def addSymmetricYPaths(outputs, paths, y):
 
 def addWithLeastLength(importRadius, loops, point):
 	'Insert a point into a loop, at the index at which the loop would be shortest.'
-	close = importRadius + importRadius
+	close = 1.65 * importRadius # a bit over the experimental minimum additional loop length to restore a right angle
 	shortestAdditionalLength = close
 	shortestLoop = None
 	shortestPointIndex = None
@@ -205,13 +205,13 @@ def addWithLeastLength(importRadius, loops, point):
 	if shortestPointIndex != None:
 		shortestLoop.insert( shortestPointIndex, point )
 
-def convertXMLElement(geometryOutput, xmlElement):
+def convertElementNode(elementNode, geometryOutput):
 	'Convert the xml element to a TriangleMesh xml element.'
-	xmlElement.linkObject(TriangleMesh())
-	matrix.getBranchMatrixSetXMLElement(xmlElement)
-	vertex.addGeometryList(geometryOutput['vertex'], xmlElement)
-	face.addGeometryList(geometryOutput['face'], xmlElement)
-	xmlElement.getXMLProcessor().processChildren(xmlElement)
+	elementNode.linkObject(TriangleMesh())
+	matrix.getBranchMatrixSetElementNode(elementNode)
+	vertex.addGeometryList(elementNode, geometryOutput['vertex'])
+	face.addGeometryList(elementNode, geometryOutput['face'])
+	elementNode.getXMLProcessor().processChildNodes(elementNode)
 
 def getAddIndexedGrid( grid, vertexes, z ):
 	'Get and add an indexed grid.'
@@ -304,11 +304,12 @@ def getDescendingAreaLoops(allPoints, corners, importRadius):
 	sortLoopsInOrderOfArea(True, loops)
 	pointDictionary = {}
 	for loop in loops:
-		if len(loop) > 2 and getOverlapRatio(loop, pointDictionary) < 0.2:
+		if len(loop) > 2 and getOverlapRatio(loop, pointDictionary) < 0.3:
 			intercircle.directLoop(not euclidean.getIsInFilledRegion(descendingAreaLoops, loop[0]), loop)
 			descendingAreaLoops.append(loop)
 			addLoopToPointTable(loop, pointDictionary)
 	descendingAreaLoops = euclidean.getSimplifiedLoops(descendingAreaLoops, importRadius)
+#	return descendingAreaLoops
 	return getLoopsWithCorners(corners, importRadius, descendingAreaLoops, pointDictionary)
 
 def getDescendingAreaOrientedLoops(allPoints, corners, importRadius):
@@ -374,6 +375,25 @@ def getIndexedLoopFromIndexedGrid( indexedGrid ):
 		indexedLoop.append( row[0] )
 	return indexedLoop
 
+def getInfillDictionary(aroundInset, arounds, aroundWidth, infillInset, infillWidth, pixelTable, rotatedLoops, testLoops=None):
+	'Get combined fill loops which include most of the points.'
+	slightlyGreaterThanInfillInset = intercircle.globalIntercircleMultiplier * infillInset
+	allPoints = intercircle.getPointsFromLoops(rotatedLoops, infillInset, 0.7)
+	centers = intercircle.getCentersFromPoints(allPoints, slightlyGreaterThanInfillInset)
+	infillDictionary = {}
+	for center in centers:
+		insetCenter = intercircle.getSimplifiedInsetFromClockwiseLoop(center, infillInset)
+		insetPoint = insetCenter[0]
+		if len(insetCenter) > 2 and intercircle.getIsLarge(insetCenter, infillInset) and euclidean.getIsInFilledRegion(rotatedLoops, insetPoint):
+			around = intercircle.getSimplifiedInsetFromClockwiseLoop(center, aroundInset)
+			euclidean.addLoopToPixelTable(around, pixelTable, aroundWidth)
+			arounds.append(around)
+			insetLoop = intercircle.getSimplifiedInsetFromClockwiseLoop(center, infillInset)
+			euclidean.addXIntersectionsFromLoopForTable(insetLoop, infillDictionary, infillWidth)
+			if testLoops != None:
+				testLoops.append(insetLoop)
+	return infillDictionary
+
 def getInsetPoint( loop, tinyRadius ):
 	'Get the inset vertex.'
 	pointIndex = getWideAnglePointIndex(loop)
@@ -388,6 +408,15 @@ def getInsetPoint( loop, tinyRadius ):
 	midpointNormalized = midpoint / abs( midpoint )
 	return point + midpointNormalized * tinyRadius
 
+def getIsPathEntirelyOutsideTriangle(begin, center, end, vector3Path):
+	'Determine if a path is entirely outside another loop.'
+	loop = [begin.dropAxis(), center.dropAxis(), end.dropAxis()]
+	for vector3 in vector3Path:
+		point = vector3.dropAxis()
+		if euclidean.isPointInsideLoop(loop, point):
+			return False
+	return True
+
 def getIsPointCloseInline(close, loop, point, pointIndex):
 	'Insert a point into a loop, at the index at which the loop would be shortest.'
 	afterCenterComplex = loop[pointIndex]
@@ -401,15 +430,6 @@ def getIsPointCloseInline(close, loop, point, pointIndex):
 		return False
 	beforeEndComplex = loop[(pointIndex + len(loop) - 2) % len(loop)]
 	return isInline(point, beforeCenterComplex, beforeEndComplex)
-
-def getIsPathEntirelyOutsideTriangle(begin, center, end, vector3Path):
-	'Determine if a path is entirely outside another loop.'
-	loop = [begin.dropAxis(), center.dropAxis(), end.dropAxis()]
-	for vector3 in vector3Path:
-		point = vector3.dropAxis()
-		if euclidean.isPointInsideLoop(loop, point):
-			return False
-	return True
 
 def getLoopsFromCorrectMesh( edges, faces, vertexes, z ):
 	'Get loops from a carve of a correct mesh.'
@@ -505,7 +525,7 @@ def getOverhangDirection( belowOutsetLoops, segmentBegin, segmentEnd ):
 	solidXIntersectionList.append( euclidean.XIntersectionIndex( - 1.0, segmentEnd.real ) )
 	for belowLoopIndex in xrange( len( belowOutsetLoops ) ):
 		belowLoop = belowOutsetLoops[ belowLoopIndex ]
-		rotatedOutset = euclidean.getPointsRoundZAxis( segmentYMirror, belowLoop )
+		rotatedOutset = euclidean.getRotatedComplexes( segmentYMirror, belowLoop )
 		euclidean.addXIntersectionIndexesFromLoopY( rotatedOutset, belowLoopIndex, solidXIntersectionList, y )
 	overhangingSegments = euclidean.getSegmentsFromXIntersectionIndexes( solidXIntersectionList, y )
 	overhangDirection = complex()
@@ -693,9 +713,9 @@ def isPathAdded( edges, faces, loops, remainingEdgeTable, vertexes, z ):
 	loops.append( getPath( edges, pathIndexes, vertexes, z ) )
 	return True
 
-def processXMLElement(xmlElement):
+def processElementNode(elementNode):
 	'Process the xml element.'
-	evaluate.processArchivable(TriangleMesh, xmlElement)
+	evaluate.processArchivable(TriangleMesh, elementNode)
 
 def setEdgeMaximumMinimum(edge, vertexes):
 	'Set the edge maximum and minimum.'
@@ -824,7 +844,7 @@ class TriangleMesh( group.Group ):
 
 	def getTransformedVertexes(self):
 		'Get all transformed vertexes.'
-		if self.xmlElement == None:
+		if self.elementNode == None:
 			return self.vertexes
 		chainTetragrid = self.getMatrixChainTetragrid()
 		if self.oldChainTetragrid != chainTetragrid:
@@ -854,28 +874,28 @@ class TriangleMesh( group.Group ):
 
 	def liftByMinimumZ(self, minimumZ):
 		'Lift the triangle mesh to the altitude.'
-		altitude = evaluate.getEvaluatedFloat(None, 'altitude', self.xmlElement)
+		altitude = evaluate.getEvaluatedFloat(None, self.elementNode, 'altitude')
 		if altitude == None:
 			return
 		lift = altitude - minimumZ
 		for vertex in self.vertexes:
 			vertex.z += lift
 
-	def setCarveInfillInDirectionOfBridge( self, infillInDirectionOfBridge ):
-		'Set the infill in direction of bridge.'
-		self.infillInDirectionOfBridge = infillInDirectionOfBridge
-
-	def setCarveLayerThickness( self, layerThickness ):
-		'Set the layer thickness.'
-		self.layerThickness = layerThickness
-
 	def setCarveImportRadius( self, importRadius ):
 		'Set the import radius.'
 		self.importRadius = importRadius
 
+	def setCarveInfillInDirectionOfBridge( self, infillInDirectionOfBridge ):
+		'Set the infill in direction of bridge.'
+		self.infillInDirectionOfBridge = infillInDirectionOfBridge
+
 	def setCarveIsCorrectMesh( self, isCorrectMesh ):
 		'Set the is correct mesh flag.'
 		self.isCorrectMesh = isCorrectMesh
+
+	def setCarveLayerThickness( self, layerThickness ):
+		'Set the layer thickness.'
+		self.layerThickness = layerThickness
 
 	def setEdgesForAllFaces(self):
 		'Set the face edges of all the faces.'

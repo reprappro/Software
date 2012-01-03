@@ -111,6 +111,10 @@ def getFloatFromCharacterSplitLine(character, splitLine):
 		return None
 	return float(lineFromCharacter)
 
+def getNewRepository():
+	'Get new repository.'
+	return GcodeStepRepository()
+
 def getOutput(gcodeText, repository=None):
 	'Get the exported version of a gcode file.'
 	if gcodeText == '':
@@ -119,10 +123,6 @@ def getOutput(gcodeText, repository=None):
 		repository = GcodeStepRepository()
 		settings.getReadRepository(repository)
 	return GcodeStepSkein().getCraftedGcode(repository, gcodeText)
-
-def getNewRepository():
-	'Get new repository.'
-	return GcodeStepRepository()
 
 def writeOutput( fileName, gcodeText = ''):
 	'Write the exported version of a gcode file.'

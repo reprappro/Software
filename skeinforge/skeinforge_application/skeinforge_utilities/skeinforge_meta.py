@@ -19,6 +19,10 @@ __date__ = '$Date: 2008/21/04 $'
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 
 
+def getNewRepository():
+	'Get new repository.'
+	return MetaRepository()
+
 def getPluginFileNames():
 	"Get meta plugin file names."
 	return archive.getPluginFileNamesFromDirectoryPath( getPluginsDirectoryPath() )
@@ -26,10 +30,6 @@ def getPluginFileNames():
 def getPluginsDirectoryPath():
 	"Get the plugins directory path."
 	return archive.getSkeinforgePluginsPath('meta_plugins')
-
-def getNewRepository():
-	'Get new repository.'
-	return MetaRepository()
 
 
 class MetaRepository:

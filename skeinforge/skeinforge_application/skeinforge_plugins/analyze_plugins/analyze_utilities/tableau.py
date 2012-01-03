@@ -7,7 +7,6 @@ from __future__ import absolute_import
 #Init has to be imported first because it has code to workaround the python bug where relative imports don't work if the module is imported as a main module.
 import __init__
 
-from fabmetheus_utilities.hidden_scrollbar import HiddenScrollbar
 from fabmetheus_utilities import archive
 from fabmetheus_utilities import euclidean
 from fabmetheus_utilities import gcodec
@@ -177,6 +176,7 @@ class TableauWindow:
 		self.gcodeStringVar = settings.Tkinter.StringVar(self.root)
 		self.gcodeLabel = settings.Tkinter.Label(self.root, anchor = settings.Tkinter.W, textvariable = self.gcodeStringVar)
 		self.gcodeLabel.grid(row = 0, column = 5, columnspan = 93, sticky = settings.Tkinter.W)
+		from fabmetheus_utilities.hidden_scrollbar import HiddenScrollbar
 		self.xScrollbar = HiddenScrollbar(self.root, orient = settings.Tkinter.HORIZONTAL)
 		self.xScrollbar.grid(row = 98, column = 2, columnspan = 96, sticky = settings.Tkinter.E + settings.Tkinter.W)
 		self.yScrollbar = HiddenScrollbar(self.root)
@@ -533,17 +533,6 @@ class TableauWindow:
 			self.arrowType = 'last'
 		self.canvas.delete( settings.Tkinter.ALL )
 
-	def lineEntryReturnPressed(self, event=None):
-		'The line index entry return was pressed.'
-		self.repository.line.value = int( self.lineEntry.get() )
-		if self.isLineBelowZeroSetLayer():
-			return
-		if self.isLineBeyondListSetLayer():
-			return
-		self.cancelTimerResetButtons()
-		self.updateMouseToolIfSelection()
-		self.setLineButtonsState()
-
 	def lineDive(self):
 		'Line dive, go down periodically.'
 		oldLineDiveButtonText = self.lineDiveButton['text']
@@ -569,6 +558,17 @@ class TableauWindow:
 		self.setButtonImageText( self.lineDiveButton, 'stop')
 		coloredLine = self.getColoredLines()[ self.repository.line.value ]
 		self.timerID = self.canvas.after( self.getAnimationLineDelay( coloredLine ), self.lineDiveCycle )
+
+	def lineEntryReturnPressed(self, event=None):
+		'The line index entry return was pressed.'
+		self.repository.line.value = int( self.lineEntry.get() )
+		if self.isLineBelowZeroSetLayer():
+			return
+		if self.isLineBeyondListSetLayer():
+			return
+		self.cancelTimerResetButtons()
+		self.updateMouseToolIfSelection()
+		self.setLineButtonsState()
 
 	def lineSoar(self):
 		'Line soar, go up periodically.'
@@ -605,6 +605,12 @@ class TableauWindow:
 		'Update the skein, and deiconify a new window and destroy the old.'
 		self.updateNewDestroyOld( self.getScrollPaneCenter() )
 
+	def redisplayWindowUpdate(self, event=None):
+		'Deiconify a new window and destroy the old.'
+		self.repository.setToDisplaySave()
+		self.getCopy().updateDeiconify( self.getScrollPaneCenter() )
+		self.root.after( 1, self.root.destroy ) # to get around 'Font Helvetica -12 still in cache.' segmentation bug, instead of simply calling self.root.destroy()
+
 	def relayXview( self, *args ):
 		'Relay xview changes.'
 		self.canvas.xview( *args )
@@ -619,12 +625,6 @@ class TableauWindow:
 		self.setButtonImageText( self.soarButton, 'soar')
 		self.setButtonImageText( self.lineDiveButton, 'dive')
 		self.setButtonImageText( self.lineSoarButton, 'soar')
-
-	def redisplayWindowUpdate(self, event=None):
-		'Deiconify a new window and destroy the old.'
-		self.repository.setToDisplaySave()
-		self.getCopy().updateDeiconify( self.getScrollPaneCenter() )
-		self.root.after( 1, self.root.destroy ) # to get around 'Font Helvetica -12 still in cache.' segmentation bug, instead of simply calling self.root.destroy()
 
 	def save(self):
 		'Set the setting values to the display, save the new values.'

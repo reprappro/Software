@@ -1,6 +1,6 @@
 """
 This page is in the table of contents.
-Skeinlayer is a script to display each layer of a gcode file.
+Skeinlayer is an analyze viewer to display each layer of a gcode file.
 
 The skeinlayer manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeinlayer
@@ -179,8 +179,13 @@ def getWindowGivenTextRepository( fileName, gcodeText, repository ):
 	skein.parseGcode( fileName, gcodeText, repository )
 	return SkeinWindow( repository, skein )
 
-def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
+def writeOutput(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText=''):
 	"Display a skeinlayered gcode file for a skeinforge gcode file, if 'Activate Skeinlayer' is selected."
+	try:
+		import Tkinter
+	except:
+		print('Warning, skeinlayer will do nothing because Tkinter is not installed.')
+		return
 	repository = settings.getReadRepository( SkeinlayerRepository() )
 	if repository.activateSkeinlayer.value:
 		gcodeText = archive.getTextIfEmpty( fileNameSuffix, gcodeText )
@@ -319,7 +324,7 @@ class SkeinlayerSkein:
 		self.screenSize = self.marginCornerHigh - self.marginCornerLow
 		self.initializeActiveLocation()
 		self.colorNames = ['brown', 'red', 'orange', 'yellow', 'green', 'blue', 'purple']
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 

@@ -176,7 +176,7 @@ class OozebaneSkein:
 	def getActiveFeedRateRatio(self):
 		"Get the feed rate of the first active move over the operating feed rate."
 		isSearchExtruderActive = self.isExtruderActive
-		for afterIndex in xrange( self.lineIndex, len(self.lines) ):
+		for afterIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[ afterIndex ]
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
@@ -271,7 +271,7 @@ class OozebaneSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		self.oozebaneRepository = oozebaneRepository
 		self.parseInitialization( oozebaneRepository )
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -433,7 +433,7 @@ class OozebaneSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> oozebane </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('oozebane')
 				return
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.operatingFeedRateMinute = 60.0 * float(splitLine[1])
@@ -506,6 +506,34 @@ class OozebaneSkein:
 		if afterStartupSteps > 0:
 			self.afterStartupFlowRates.append(1.0)
 
+	def setEarlyShutdown(self):
+		"Set the early shutdown variables."
+		distanceToThreadBeginning = self.getDistanceToThreadBeginningAfterThreadEnd( self.minimumDistanceForEarlyShutdown )
+		earlyShutdownRatio = 1.0
+		if distanceToThreadBeginning != None:
+			if self.minimumDistanceForEarlyShutdown > 0.0:
+				earlyShutdownRatio = distanceToThreadBeginning / self.minimumDistanceForEarlyShutdown
+		self.setEarlyShutdownFlowRates( earlyShutdownRatio )
+		if len( self.earlyShutdownDistances ) > 0:
+			self.shutdownStepIndex = 0
+
+	def setEarlyShutdownFlowRates( self, earlyShutdownRatio ):
+		"Set the extrusion width."
+		earlyShutdownRatio = min( 1.0, earlyShutdownRatio )
+		earlyShutdownRatio = max( 0.0, earlyShutdownRatio )
+		self.earlyShutdownDistance = earlyShutdownRatio * self.getActiveFeedRateRatio() * self.oozebaneRepository.earlyShutdownDistance.value
+		self.earlyShutdownDistances = []
+		self.earlyShutdownFlowRates = []
+		earlyShutdownSteps = int( math.floor( earlyShutdownRatio * float( self.oozebaneRepository.slowdownStartupSteps.value ) ) )
+		if earlyShutdownSteps < 2:
+			earlyShutdownSteps = 0
+		earlyShutdownStepsMinusOne = float( earlyShutdownSteps ) - 1.0
+		for stepIndex in xrange( earlyShutdownSteps ):
+			downMiddleWay = self.getShutdownFlowRateMultiplier( stepIndex / earlyShutdownStepsMinusOne, earlyShutdownSteps )
+			downWay = 1.0 - stepIndex / earlyShutdownStepsMinusOne
+			self.earlyShutdownFlowRates.append( downMiddleWay )
+			self.earlyShutdownDistances.append( downWay * self.earlyShutdownDistance )
+
 	def setEarlyStartupDistance( self, splitLine ):
 		"Set the early startup distance."
 		if self.earlyStartupDistance != None:
@@ -541,41 +569,13 @@ class OozebaneSkein:
 		self.setEarlyShutdownFlowRates(1.0)
 		self.setAfterStartupFlowRates(1.0)
 
-	def setEarlyShutdown(self):
-		"Set the early shutdown variables."
-		distanceToThreadBeginning = self.getDistanceToThreadBeginningAfterThreadEnd( self.minimumDistanceForEarlyShutdown )
-		earlyShutdownRatio = 1.0
-		if distanceToThreadBeginning != None:
-			if self.minimumDistanceForEarlyShutdown > 0.0:
-				earlyShutdownRatio = distanceToThreadBeginning / self.minimumDistanceForEarlyShutdown
-		self.setEarlyShutdownFlowRates( earlyShutdownRatio )
-		if len( self.earlyShutdownDistances ) > 0:
-			self.shutdownStepIndex = 0
-
-	def setEarlyShutdownFlowRates( self, earlyShutdownRatio ):
-		"Set the extrusion width."
-		earlyShutdownRatio = min( 1.0, earlyShutdownRatio )
-		earlyShutdownRatio = max( 0.0, earlyShutdownRatio )
-		self.earlyShutdownDistance = earlyShutdownRatio * self.getActiveFeedRateRatio() * self.oozebaneRepository.earlyShutdownDistance.value
-		self.earlyShutdownDistances = []
-		self.earlyShutdownFlowRates = []
-		earlyShutdownSteps = int( math.floor( earlyShutdownRatio * float( self.oozebaneRepository.slowdownStartupSteps.value ) ) )
-		if earlyShutdownSteps < 2:
-			earlyShutdownSteps = 0
-		earlyShutdownStepsMinusOne = float( earlyShutdownSteps ) - 1.0
-		for stepIndex in xrange( earlyShutdownSteps ):
-			downMiddleWay = self.getShutdownFlowRateMultiplier( stepIndex / earlyShutdownStepsMinusOne, earlyShutdownSteps )
-			downWay = 1.0 - stepIndex / earlyShutdownStepsMinusOne
-			self.earlyShutdownFlowRates.append( downMiddleWay )
-			self.earlyShutdownDistances.append( downWay * self.earlyShutdownDistance )
-
 
 def main():
 	"Display the oozebane dialog."
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

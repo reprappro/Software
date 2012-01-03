@@ -115,6 +115,13 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 globalIsReplaceable = False
 
 
+def getIntegerFlagFromCharacterSplitLine(character, splitLine):
+	"Get the integer flag after the first occurence of the character in the split line."
+	lineFromCharacter = gcodec.getStringFromCharacterSplitLine(character, splitLine)
+	if lineFromCharacter == None:
+		return 0
+	return 1
+
 def getIntegerFromCharacterLengthLineOffset( character, offset, splitLine, stepLength ):
 	"Get the integer after the first occurence of the character in the split line."
 	lineFromCharacter = gcodec.getStringFromCharacterSplitLine(character, splitLine)
@@ -123,12 +130,9 @@ def getIntegerFromCharacterLengthLineOffset( character, offset, splitLine, stepL
 	floatValue = ( float( lineFromCharacter ) + offset ) / stepLength
 	return int( round( floatValue ) )
 
-def getIntegerFlagFromCharacterSplitLine(character, splitLine):
-	"Get the integer flag after the first occurence of the character in the split line."
-	lineFromCharacter = gcodec.getStringFromCharacterSplitLine(character, splitLine)
-	if lineFromCharacter == None:
-		return 0
-	return 1
+def getNewRepository():
+	'Get new repository.'
+	return Binary16ByteRepository()
 
 def getOutput( gcodeText, binary16ByteRepository = None ):
 	'Get the exported version of a gcode file.'
@@ -138,10 +142,6 @@ def getOutput( gcodeText, binary16ByteRepository = None ):
 		binary16ByteRepository = Binary16ByteRepository()
 		settings.getReadRepository( binary16ByteRepository )
 	return Binary16ByteSkein().getCraftedGcode( gcodeText, binary16ByteRepository )
-
-def getNewRepository():
-	'Get new repository.'
-	return Binary16ByteRepository()
 
 def writeOutput( fileName, gcodeText = ''):
 	"Write the exported version of a gcode file."
@@ -225,7 +225,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

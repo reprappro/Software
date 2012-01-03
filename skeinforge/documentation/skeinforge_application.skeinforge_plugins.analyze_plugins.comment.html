@@ -1,5 +1,5 @@
 
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module skeinforge_application.skeinforge_plugins.analyze_plugins.comment</title>
 </head><body bgcolor="#f0f0f8">
 
@@ -10,10 +10,10 @@
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/enrique/Desktop/backup/babbleold/script/reprap/fabmetheus/skeinforge_application/skeinforge_plugins/analyze_plugins/comment.py">/home/enrique/Desktop/backup/babbleold/script/reprap/fabmetheus/skeinforge_application/skeinforge_plugins/analyze_plugins/comment.py</a></font></td></tr></table>
     <p>
-<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.analyze_utilities.zoom_out.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.export_canvas_plugins.postscript.html">Next</a> / <a href="contents.html">Contents</a>
+<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.clairvoyance.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.export_canvas_plugins.postscript.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <p><tt><br>
-Comment is a script to comment a gcode file.<br>
+Comment is an analyze plugin to comment a gcode file.<br>
  <br>
 The comment manual page is at:<br>
 <a href="http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Comment">http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Comment</a><br>
@@ -26,7 +26,7 @@ The comment manual page is at:<br>
 <a name="Operation" id="Operation"></a><h2>Operation</h2>
 <hr>
 
-The default 'Activate Comment' checkbox is on.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Comment' checkbox is on, when comment is run directly.<br>
+The default 'Activate Comment' checkbox is off.  When it is on, the file will be commented when called from the skeinforge toolchain, when it is off, the file will not be commented when called from the toolchain.  The file will still be commented, whether or not the 'Activate Comment' checkbox is on, when comment is run directly.<br>
  <br>
 <a name="Gcodes" id="Gcodes"></a><h2>Gcodes</h2>
 <hr>
@@ -53,7 +53,7 @@ The comment file is saved as Screw_Holder_penultimate_comment.gcode</tt>
 <br />
 <br />
 <p>
-<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.analyze_utilities.zoom_out.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.export_canvas_plugins.postscript.html">Next</a> / <a href="contents.html">Contents</a>
+<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.clairvoyance.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.export_canvas_plugins.postscript.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <hr>
 </p>
@@ -61,7 +61,7 @@ The comment file is saved as Screw_Holder_penultimate_comment.gcode</tt>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__init__.html">__init__</a><br>
@@ -130,7 +130,7 @@ The comment file is saved as Screw_Holder_penultimate_comment.gcode</tt>
  <dl><dt><a name="-getWindowAnalyzeFile"><strong>getWindowAnalyzeFile</strong></a>(fileName)</dt><dd><tt>Comment&nbsp;a&nbsp;gcode&nbsp;file.</tt></dd></dl>
  <dl><dt><a name="-getWindowAnalyzeFileGivenText"><strong>getWindowAnalyzeFileGivenText</strong></a>(fileName, gcodeText)</dt><dd><tt>Write&nbsp;a&nbsp;commented&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;gcode&nbsp;file.</tt></dd></dl>
  <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Display&nbsp;the&nbsp;comment&nbsp;dialog.</tt></dd></dl>
- <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNameSuffix, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;a&nbsp;commented&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;'Write&nbsp;Commented&nbsp;File&nbsp;for&nbsp;Skeinforge&nbsp;Chain'&nbsp;is&nbsp;selected.</tt></dd></dl>
+ <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;a&nbsp;commented&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;'Write&nbsp;Commented&nbsp;File&nbsp;for&nbsp;Skeinforge&nbsp;Chain'&nbsp;is&nbsp;selected.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

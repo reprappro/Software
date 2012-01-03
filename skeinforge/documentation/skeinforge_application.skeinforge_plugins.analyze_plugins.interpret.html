@@ -1,5 +1,5 @@
 
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module skeinforge_application.skeinforge_plugins.analyze_plugins.interpret</title>
 </head><body bgcolor="#f0f0f8">
 
@@ -13,13 +13,17 @@
 <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.export_canvas_plugins.scalable_vector_graphics.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.skeiniso.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <p><tt><br>
-Interpret is a script to interpret a file, turning it into xml.<br>
+Interpret is an analyze plugin to interpret a file, turning a 2D file into svg and a 3D file into constructive solid geometry xml.<br>
+ <br>
+The comment manual page is at:<br>
+<a href="http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Interpret">http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Interpret</a><br>
  <br>
 <br />
 <a href="#Operation">Operation</a><br />
 <a href="#Settings">Settings</a><br />
 &nbsp;&nbsp;<a href="#Print Interpretion">Print Interpretion</a><br />
 &nbsp;&nbsp;<a href="#Text Program">Text Program</a><br />
+<a href="#Examples">Examples</a><br />
 <br />
 <a name="Operation" id="Operation"></a><h2>Operation</h2>
 <hr>
@@ -39,7 +43,18 @@ When selected, the xml text will be printed to the console.<br>
 
 Default is webbrowser.<br>
  <br>
-If the 'Text Program' is set the default 'webbrowser', the XML file will be sent to the default browser to be opened.  If the 'Text Program' is set to a program name, the XML file will be sent to that program to be opened.</tt>
+If the 'Text Program' is set the default 'webbrowser', the XML file will be sent to the default browser to be opened.  If the 'Text Program' is set to a program name, the XML file will be sent to that program to be opened.<br>
+ <br>
+<a name="Examples" id="Examples"></a><h2>Examples</h2>
+<hr>
+
+Below are examples of interpret being used.  These examples are run in a terminal in the folder which contains Screw_Holder.stl and interpret.py.<br>
+ <br>
+&gt; python interpret.py<br>
+This brings up the interpret dialog.<br>
+ <br>
+&gt; python interpret.py Screw_Holder.stl<br>
+The comment file is saved as Screw_Holder_interpret.xml</tt>
 <br />
 <br />
 <p>
@@ -51,7 +66,7 @@ If the 'Text Program' is set the default 'webbrowser', the XML file will be sent
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__init__.html">__init__</a><br>
@@ -67,7 +82,7 @@ If the 'Text Program' is set the default 'webbrowser', the XML file will be sent
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-getNewRepository"><strong>getNewRepository</strong></a>()</dt><dd><tt>Get&nbsp;new&nbsp;repository.</tt></dd></dl>
  <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Display&nbsp;the&nbsp;interpret&nbsp;dialog.</tt></dd></dl>
- <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNameSuffix, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;file&nbsp;interpretation,&nbsp;if&nbsp;activate&nbsp;interpret&nbsp;is&nbsp;selected.</tt></dd></dl>
+ <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;file&nbsp;interpretation,&nbsp;if&nbsp;activate&nbsp;interpret&nbsp;is&nbsp;selected.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

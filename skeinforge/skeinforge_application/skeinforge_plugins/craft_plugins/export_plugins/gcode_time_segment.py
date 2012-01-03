@@ -96,6 +96,10 @@ def getFloatFromCharacterSplitLine(character, splitLine):
 		return None
 	return float(lineFromCharacter)
 
+def getNewRepository():
+	'Get new repository.'
+	return GcodeTimeSegmentRepository()
+
 def getOutput(gcodeText, repository=None):
 	'Get the exported version of a gcode file.'
 	if gcodeText == '':
@@ -104,10 +108,6 @@ def getOutput(gcodeText, repository=None):
 		repository = GcodeTimeSegmentRepository()
 		settings.getReadRepository(repository)
 	return GcodeTimeSegmentSkein().getCraftedGcode(gcodeText, repository)
-
-def getNewRepository():
-	'Get new repository.'
-	return GcodeTimeSegmentRepository()
 
 def writeOutput( fileName, gcodeText = ''):
 	"Write the exported version of a gcode file."
@@ -239,7 +239,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

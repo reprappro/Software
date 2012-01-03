@@ -1,7 +1,0 @@
-Format is tab separated mcomp settings.
-Name                          	Value
-WindowPosition	600+0
-Open File for mcomp	
-Activate mcomp	False
-X measurement distance (mm):	100.0
-Y error (mm):	0.75

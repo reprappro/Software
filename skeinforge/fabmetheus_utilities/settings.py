@@ -140,6 +140,38 @@ def getAlongWayHexadecimalPrimary( beginBrightness, beginRatio, colorWidth, endB
 	brightness = beginRatio * float( beginBrightness ) + endRatio * float( endBrightness )
 	return getWidthHex( int( round( brightness ) ), colorWidth )
 
+def getAlterationFile(fileName):
+	"Get the file from the fileName or the lowercase fileName in the alterations directories."
+	settingsAlterationsDirectory = archive.getSettingsPath('alterations')
+	archive.makeDirectory(settingsAlterationsDirectory)
+	fileInSettingsAlterationsDirectory = getFileInGivenDirectory(settingsAlterationsDirectory, fileName)
+	if fileInSettingsAlterationsDirectory != '':
+		return fileInSettingsAlterationsDirectory
+	alterationsDirectory = archive.getSkeinforgePath('alterations')
+	return getFileInGivenDirectory(alterationsDirectory, fileName)
+
+def getAlterationFileLine(fileName):
+	"Get the alteration file line from the fileName."
+	lines = getAlterationLines(fileName)
+	if len(lines) == 0:
+		return []
+	return getAlterationFileLineBlindly(fileName)
+
+def getAlterationFileLineBlindly(fileName):
+	"Get the alteration file line from the fileName."
+	return '(<alterationFile>) %s (</alterationFile>)' % fileName
+
+def getAlterationFileLines(fileName):
+	'Get the alteration file line and the text lines from the fileName in the alterations directories.'
+	lines = getAlterationLines(fileName)
+	if len(lines) == 0:
+		return []
+	return [getAlterationFileLineBlindly(fileName)] + lines
+
+def getAlterationLines(fileName):
+	"Get the text lines from the fileName in the alterations directories."
+	return archive.getTextLines(getAlterationFile(fileName))
+
 def getDisplayedDialogFromConstructor(repository):
 	"Display the repository dialog."
 	try:
@@ -175,16 +207,6 @@ def getEachWordCapitalized( name ):
 		capitalizedStrings.append( word.capitalize() )
 	return ' '.join( capitalizedStrings )
 
-def getFileInAlterationsOrGivenDirectory(fileName):
-	"Get the file from the fileName or the lowercase fileName in the alterations directories."
-	settingsAlterationsDirectory = archive.getSettingsPath('alterations')
-	archive.makeDirectory(settingsAlterationsDirectory)
-	fileInSettingsAlterationsDirectory = getFileInGivenDirectory(settingsAlterationsDirectory, fileName)
-	if fileInSettingsAlterationsDirectory != '':
-		return fileInSettingsAlterationsDirectory
-	alterationsDirectory = archive.getSkeinforgePath('alterations')
-	return getFileInGivenDirectory(alterationsDirectory, fileName)
-
 def getFileInGivenDirectory( directory, fileName ):
 	"Get the file from the fileName or the lowercase fileName in the given directory."
 	directoryListing = os.listdir(directory)
@@ -219,10 +241,6 @@ def getGlobalRepositoryDialogValues():
 	"Get the global repository dialog values."
 	global globalRepositoryDialogListTable
 	return euclidean.getListTableElements(globalRepositoryDialogListTable)
-
-def getLinesInAlterationsOrGivenDirectory(fileName):
-	"Get the text lines from the fileName in the alterations directories, if there is no file look in the given directory."
-	return archive.getTextLines(getFileInAlterationsOrGivenDirectory(fileName))
 
 def getPathInFabmetheusFromFileNameHelp( fileNameHelp ):
 	"Get the directory path from file name help."
@@ -284,18 +302,23 @@ def getReadRepository(repository):
 
 def getRepositoryText(repository):
 	"Get the text representation of the repository."
-	repositoryWriter = cStringIO.StringIO()
-	repositoryWriter.write('Format is tab separated %s.\n' % repository.title.lower() )
-	repositoryWriter.write('_Name                          %sValue\n' % globalSpreadsheetSeparator )
+	repositoryWriter = getRepositoryWriter(repository.title.lower())
 	for setting in repository.preferences:
-		setting.writeToRepositoryWriter( repositoryWriter )
+		setting.writeToRepositoryWriter(repositoryWriter)
 	return repositoryWriter.getvalue()
 
-def getSelectedPluginModuleFromPath( filePath, plugins ):
+def getRepositoryWriter(title):
+	"Get the repository writer for the title."
+	repositoryWriter = cStringIO.StringIO()
+	repositoryWriter.write('Format is tab separated %s.\n' % title)
+	repositoryWriter.write('_Name                          %sValue\n' % globalSpreadsheetSeparator)
+	return repositoryWriter
+
+def getSelectedPluginModuleFromPath(filePath, plugins):
 	"Get the selected plugin module."
 	for plugin in plugins:
 		if plugin.value:
-			return gcodec.getModuleFromPath( plugin.name, filePath )
+			return gcodec.getModuleFromPath(plugin.name, filePath)
 	return None
 
 def getSelectedPluginName( plugins ):
@@ -395,31 +418,36 @@ def openWebPage( webPagePath ):
 		webPagePath = archive.getDocumentationPath('redirect.html')
 		archive.writeFileText( webPagePath, redirectionText )
 	webPagePath = '"%s"' % webPagePath # " to get around space in url bug
-	try:
-		os.startfile( webPagePath )#this is available on some python environments, but not all
-		return
+	try: # " to get around using gnome-open or internet explorer for webbrowser default
+		webbrowserController = webbrowser.get('firefox')
 	except:
-		pass
-	webbrowserName = webbrowser.get().name
+		webbrowserController = webbrowser.get()
+	webbrowserName = webbrowserController.name
 	if webbrowserName == '':
-		print('Skeinforge was not able to open the documentation file in a web browser.  To see the documentation, open the following file in a web browser:')
+		try:
+			os.startfile( webPagePath )#this is available on some python environments, but not all
+			return
+		except:
+			pass
+		print('Skeinforge was not able to open the file in a web browser.  To see the documentation, open the following file in a web browser:')
 		print( webPagePath )
 		return
-	os.system( webbrowserName + ' ' + webPagePath )#used this instead of webbrowser.open() to workaround webbrowser open() bug
+	else:
+		os.system(webbrowserName + ' ' + webPagePath)#used this instead of webbrowser.open() to workaround webbrowser open() bug
 
 def printProgress(layerIndex, procedureName):
 	"Print layerIndex followed by a carriage return."
 	printProgressByString('%s layer count %s...' % (procedureName.capitalize(), layerIndex + 1))
+
+def printProgressByNumber(layerIndex, numberOfLayers, procedureName):
+	"Print layerIndex and numberOfLayers followed by a carriage return."
+	printProgressByString('%s layer count %s of %s...' % (procedureName.capitalize(), layerIndex + 1, numberOfLayers))
 
 def printProgressByString(progressString):
 	"Print progress string."
 	sys.stdout.write(progressString)
 	sys.stdout.write(chr(27) + '\r')
 	sys.stdout.flush()
-
-def printProgressByNumber(layerIndex, numberOfLayers, procedureName):
-	"Print layerIndex and numberOfLayers followed by a carriage return."
-	printProgressByString('%s layer count %s of %s...' % (procedureName.capitalize(), layerIndex + 1, numberOfLayers))
 
 def quitWindow(root):
 	"Quit a window."
@@ -529,6 +557,10 @@ def setSpinColor( setting ):
 
 def startMainLoopFromConstructor(repository):
 	"Display the repository dialog and start the main loop."
+	try:
+		import Tkinter
+	except:
+		return
 	displayedDialogFromConstructor = getDisplayedDialogFromConstructor(repository)
 	if displayedDialogFromConstructor == None:
 		print('Warning, displayedDialogFromConstructor in settings is none, so the window will not be displayed.')
@@ -567,15 +599,6 @@ def temporaryApplyOverrides(repository):
 			else:
 				print('Override not applied for: %s, %s' % (name,value))
 
-def writeValueListToRepositoryWriter( repositoryWriter, setting ):
-	"Write tab separated name and list to the repository writer."
-	repositoryWriter.write( setting.name )
-	for item in setting.value:
-		if item != '[]':
-			repositoryWriter.write(globalSpreadsheetSeparator)
-			repositoryWriter.write( item )
-	repositoryWriter.write('\n')
-
 def writeSettings(repository):
 	"Write the settings to a file."
 	profilesDirectoryPath = archive.getProfilesPath(getProfileBaseName(repository))
@@ -588,6 +611,15 @@ def writeSettingsPrintMessage(repository):
 	"Set the settings to the dialog then write them."
 	writeSettings(repository)
 	print( repository.title.lower().capitalize() + ' have been saved.')
+
+def writeValueListToRepositoryWriter( repositoryWriter, setting ):
+	"Write tab separated name and list to the repository writer."
+	repositoryWriter.write( setting.name )
+	for item in setting.value:
+		if item != '[]':
+			repositoryWriter.write(globalSpreadsheetSeparator)
+			repositoryWriter.write( item )
+	repositoryWriter.write('\n')
 
 
 class StringSetting:
@@ -1314,16 +1346,16 @@ class LabelHelp:
 		widget.bind('<Button-2>', self.unpostPopupMenu )
 		widget.bind('<Button-3>', self.displayPopupMenu )
 
-	def unpostPopupMenu(self, event=None):
-		'Unpost the popup menu.'
-		self.popupMenu.unpost()
-
 	def displayPopupMenu(self, event=None):
 		'Display the popup menu when the button is right clicked.'
 		try:
 			self.popupMenu.tk_popup( event.x_root + 30, event.y_root, 0 )
 		finally:
 			self.popupMenu.grab_release()
+
+	def unpostPopupMenu(self, event=None):
+		'Unpost the popup menu.'
+		self.popupMenu.unpost()
 
 
 class LabelSeparator:
@@ -1357,15 +1389,15 @@ class LatentStringVar:
 		"Set the string var."
 		self.stringVar = None
 
+	def getString(self):
+		"Get the string."
+		return self.getVar().get()
+
 	def getVar(self):
 		"Get the string var."
 		if self.stringVar == None:
 			self.stringVar = Tkinter.StringVar()
 		return self.stringVar
-
-	def getString(self):
-		"Get the string."
-		return self.getVar().get()
 
 	def setString(self, word):
 		"Set the string."
@@ -1555,7 +1587,7 @@ class PluginFrame:
 		gridVertical.xScrollbar.grid( row = gridVertical.row + 1, column = gridVertical.column, columnspan = 11, sticky = Tkinter.E + Tkinter.W )
 		gridVertical.yScrollbar = HiddenScrollbar( gridVertical.master )
 		gridVertical.yScrollbar.grid( row = gridVertical.row, column = gridVertical.column + 12, sticky = Tkinter.N + Tkinter.S )
-		canvasHeight = min( 1000, gridPosition.master.winfo_screenheight() - 500 ) - 6 - int( gridVertical.xScrollbar['width'] )
+		canvasHeight = min( 1000, gridPosition.master.winfo_screenheight() - 540 ) - 6 - int( gridVertical.xScrollbar['width'] )
 		canvasWidth = min( 650, gridPosition.master.winfo_screenwidth() - 100 ) - 6 - int( gridVertical.yScrollbar['width'] )
 		gridVertical.canvas = Tkinter.Canvas( gridVertical.master, height = canvasHeight, highlightthickness = 0, width = canvasWidth )
 		gridVertical.frameGridVertical.master = Tkinter.Frame( gridVertical.canvas )
@@ -1699,10 +1731,6 @@ class Radio( BooleanSetting ):
 #		repository.menuEntities.append(self)
 		return self
 
-	def setToDisplay(self):
-		"Set the boolean to the checkbutton."
-		self.value = ( self.latentStringVar.getString() == self.radiobutton['value'] )
-
 	def setSelect(self):
 		"Set the int var and select the radio button."
 		oldLatentStringValue = self.latentStringVar.getString()
@@ -1718,6 +1746,10 @@ class Radio( BooleanSetting ):
 			if self.setSelect():
 				if self.updateFunction != None:
 					self.updateFunction()
+
+	def setToDisplay(self):
+		"Set the boolean to the checkbutton."
+		self.value = ( self.latentStringVar.getString() == self.radiobutton['value'] )
 
 
 class RadioCapitalized( Radio ):
@@ -1754,8 +1786,7 @@ class RadioPlugin( RadioCapitalized ):
 	def addToDialog( self, gridPosition ):
 		"Add this to the dialog."
 		self.createRadioButton( gridPosition )
-		self.radiobutton['activebackground'] = 'black'
-		self.radiobutton['activeforeground'] = 'white'
+		self.radiobutton['activeforeground'] = 'magenta'
 		self.radiobutton['selectcolor'] = 'white'
 		self.radiobutton['borderwidth'] = 3
 		self.radiobutton['indicatoron'] = 0
@@ -1806,11 +1837,6 @@ class TextSetting( StringSetting ):
 		repository.preferences.append(self)
 		return self
 
-	def setToDisplay(self):
-		"Set the string to the entry field."
-		valueString = self.entry.get( 1.0, Tkinter.END )
-		self.setValueToString( valueString )
-
 	def setStateToValue(self):
 		"Set the entry to the value."
 		try:
@@ -1818,6 +1844,11 @@ class TextSetting( StringSetting ):
 			self.entry.insert( Tkinter.INSERT, self.value )
 		except:
 			pass
+
+	def setToDisplay(self):
+		"Set the string to the entry field."
+		valueString = self.entry.get( 1.0, Tkinter.END )
+		self.setValueToString( valueString )
 
 	def setValueToSplitLine( self, lineIndex, lines, splitLine ):
 		"Set the value to the second word of a split line."

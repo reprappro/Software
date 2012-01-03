@@ -16,6 +16,5 @@
 	<dictionary roundPointSix='=math.round(0.6)'/>
 	<dictionary sinpoint1='=1+math.sin(0.1)'/>
 	<dictionary stringOne='=math.string($1)'/>
-	<!--
-	-->
+	<dictionary tau='=math.tau'/>
 </fabmetheus>

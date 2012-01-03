@@ -74,8 +74,7 @@ def removeZip():
 	if zipNameExtension in os.listdir(os.getcwd()):
 		os.remove(zipNameExtension)
 	shellCommand = 'zip -r %s * -x \*.pyc \*~' % zipName
-	commandResult = os.system(shellCommand)
-	if commandResult != 0:
+	if os.system(shellCommand) != 0:
 		print('Failed to execute the following command in removeZip in prepare.')
 		print(shellCommand)
 

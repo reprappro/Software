@@ -28,7 +28,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 def getCraftSequence():
 	"Get the milling craft sequence."
-	return 'chop preface outset mill multiply drill lift flow feed home lash fillet limit unpause export'.split()
+	return 'chop preface outset mill multiply drill lift flow feed home lash fillet limit unpause bookend export'.split()
 
 def getNewRepository():
 	'Get new repository.'
@@ -47,7 +47,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

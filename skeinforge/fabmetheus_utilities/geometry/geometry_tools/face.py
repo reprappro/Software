@@ -43,14 +43,14 @@ def addFaces(geometryOutput, faces):
 		else:
 			addFaces(geometryOutputValue, faces)
 
-def addGeometryList( faces, xmlElement ):
+def addGeometryList(elementNode, faces):
 	"Add vertex elements to an xml element."
 	for face in faces:
-		faceElement = xml_simple_reader.XMLElement()
-		face.addToAttributeDictionary( faceElement.attributeDictionary )
-		faceElement.className = 'face'
-		faceElement.parent = xmlElement
-		xmlElement.children.append( faceElement )
+		faceElement = xml_simple_reader.ElementNode()
+		face.addToAttributes( faceElement.attributes )
+		faceElement.localName = 'face'
+		faceElement.parentNode = elementNode
+		elementNode.childNodes.append( faceElement )
 
 def getCommonVertexIndex( edgeFirst, edgeSecond ):
 	"Get the vertex index that both edges have in common."
@@ -68,13 +68,13 @@ def getFaces(geometryOutput):
 	addFaces(geometryOutput, faces)
 	return faces
 
-def processXMLElement(xmlElement):
+def processElementNode(elementNode):
 	"Process the xml element."
 	face = Face()
-	face.index = len(xmlElement.parent.xmlObject.faces)
+	face.index = len(elementNode.parentNode.xmlObject.faces)
 	for vertexIndexIndex in xrange(3):
-		face.vertexIndexes.append(evaluate.getEvaluatedInt(None, 'vertex' + str(vertexIndexIndex), xmlElement))
-	xmlElement.parent.xmlObject.faces.append(face)
+		face.vertexIndexes.append(evaluate.getEvaluatedInt(None, elementNode, 'vertex' + str(vertexIndexIndex)))
+	elementNode.parentNode.xmlObject.faces.append(face)
 
 
 class Edge:
@@ -116,17 +116,17 @@ class Face:
 		self.addXML( 2, output )
 		return output.getvalue()
 
-	def addToAttributeDictionary(self, attributeDictionary):
+	def addToAttributes(self, attributes):
 		"Add to the attribute dictionary."
 		for vertexIndexIndex in xrange(len(self.vertexIndexes)):
 			vertexIndex = self.vertexIndexes[vertexIndexIndex]
-			attributeDictionary['vertex' + str(vertexIndexIndex)] = str(vertexIndex)
+			attributes['vertex' + str(vertexIndexIndex)] = str(vertexIndex)
 
 	def addXML(self, depth, output):
 		"Add the xml for this object."
-		attributeDictionary = {}
-		self.addToAttributeDictionary(attributeDictionary)
-		xml_simple_writer.addClosedXMLTag( attributeDictionary, 'face', depth, output )
+		attributes = {}
+		self.addToAttributes(attributes)
+		xml_simple_writer.addClosedXMLTag( attributes, depth, 'face', output )
 
 	def copy(self):
 		'Get the copy of this face.'

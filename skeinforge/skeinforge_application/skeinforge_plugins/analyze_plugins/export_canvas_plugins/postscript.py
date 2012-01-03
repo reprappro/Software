@@ -89,7 +89,7 @@ class PostscriptRepository:
 
 def main():
 	"Display the file or directory dialog."
-	settings.startMainLoopFromConstructor( getNewRepository() )
+	settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

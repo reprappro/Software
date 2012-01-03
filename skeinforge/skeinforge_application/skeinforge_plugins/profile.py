@@ -15,6 +15,7 @@ from __future__ import absolute_import
 #Init has to be imported first because it has code to workaround the python bug where relative imports don't work if the module is imported as a main module.
 import __init__
 
+from fabmetheus_utilities import archive
 from fabmetheus_utilities import euclidean
 from fabmetheus_utilities import settings
 from skeinforge_application.skeinforge_utilities import skeinforge_profile
@@ -39,9 +40,13 @@ def addSubmenus( craftTypeName, menu, pluginFileName, pluginPath, profileRadioVa
 		value = isSelected and profileName == profilePluginSettings.profileListbox.value
 		ProfileMenuRadio( pluginFileName, submenu, profileName, profileRadioVar, value )
 
+def addToMenu( master, menu, repository, window ):
+	"Add a tool plugin menu."
+	ProfileMenuSaveListener( menu, window )
+
 def addToProfileMenu( menu ):
 	"Add a profile menu."
-	settings.ToolDialog().addPluginToMenu( menu, __file__[ : __file__.rfind('.') ] )
+	settings.ToolDialog().addPluginToMenu(menu, archive.getUntilDot(archive.getSkeinforgePluginsPath('profile.py')))
 	menu.add_separator()
 	directoryPath = skeinforge_profile.getPluginsDirectoryPath()
 	pluginFileNames = skeinforge_profile.getPluginFileNames()
@@ -49,10 +54,6 @@ def addToProfileMenu( menu ):
 	profileRadioVar = settings.Tkinter.StringVar()
 	for pluginFileName in pluginFileNames:
 		addSubmenus( craftTypeName, menu, pluginFileName, os.path.join( directoryPath, pluginFileName ), profileRadioVar )
-
-def addToMenu( master, menu, repository, window ):
-	"Add a tool plugin menu."
-	ProfileMenuSaveListener( menu, window )
 
 def getNewRepository():
 	'Get new repository.'
@@ -109,7 +110,7 @@ class ProfileMenuSaveListener:
 
 def main():
 	"Display the profile dialog."
-	settings.startMainLoopFromConstructor( getNewRepository() )
+	settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

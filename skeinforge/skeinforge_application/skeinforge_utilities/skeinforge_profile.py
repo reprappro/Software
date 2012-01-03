@@ -14,7 +14,6 @@ from __future__ import absolute_import
 #Init has to be imported first because it has code to workaround the python bug where relative imports don't work if the module is imported as a main module.
 import __init__
 
-from fabmetheus_utilities.hidden_scrollbar import HiddenScrollbar
 from fabmetheus_utilities import archive
 from fabmetheus_utilities import euclidean
 from fabmetheus_utilities import gcodec
@@ -94,12 +93,12 @@ def getPluginsDirectoryPath():
 def getProfileDirectory():
 	"Get the profile directory."
 	craftTypeName = getCraftTypeName()
-	return os.path.join( craftTypeName, getProfileName( craftTypeName ) )
+	return os.path.join( craftTypeName, getProfileName(craftTypeName) )
 
-def getProfileName( craftTypeName ):
+def getProfileName(craftTypeName):
 	"Get the profile name from the craft type name."
-	craftTypeSettings = getCraftTypePluginModule( craftTypeName ).getNewRepository()
-	settings.getReadRepository( craftTypeSettings )
+	craftTypeSettings = getCraftTypePluginModule(craftTypeName).getNewRepository()
+	settings.getReadRepository(craftTypeSettings)
 	return craftTypeSettings.profileListbox.value
 
 def getReadProfileRepository():
@@ -115,15 +114,6 @@ def updateProfileSaveListeners():
 
 class AddProfile:
 	"A class to add a profile."
-	def addToDialog( self, gridPosition ):
-		"Add this to the dialog."
-		gridPosition.increment()
-		self.entry = settings.Tkinter.Entry( gridPosition.master )
-		self.entry.bind('<Return>', self.addSelectionWithEvent )
-		self.entry.grid( row = gridPosition.row, column = 1, columnspan = 3, sticky = settings.Tkinter.W )
-		self.addButton = settings.Tkinter.Button( gridPosition.master, activebackground = 'black', activeforeground = 'white', text = 'Add Profile', command = self.addSelection )
-		self.addButton.grid( row = gridPosition.row, column = 0 )
-
 	def addSelection(self):
 		"Add the selection of a listbox setting."
 		entryText = self.entry.get()
@@ -145,6 +135,15 @@ class AddProfile:
 	def addSelectionWithEvent(self, event):
 		"Add the selection of a listbox setting, given an event."
 		self.addSelection()
+
+	def addToDialog( self, gridPosition ):
+		"Add this to the dialog."
+		gridPosition.increment()
+		self.entry = settings.Tkinter.Entry( gridPosition.master )
+		self.entry.bind('<Return>', self.addSelectionWithEvent )
+		self.entry.grid( row = gridPosition.row, column = 1, columnspan = 3, sticky = settings.Tkinter.W )
+		self.addButton = settings.Tkinter.Button( gridPosition.master, activebackground = 'black', activeforeground = 'white', text = 'Add Profile', command = self.addSelection )
+		self.addButton.grid( row = gridPosition.row, column = 0 )
 
 	def getFromProfileListboxSettingRepository( self, profileListboxSetting, repository ):
 		"Initialize."
@@ -243,6 +242,7 @@ class ProfileListboxSetting( settings.StringSetting ):
 #http://www.pythonware.com/library/tkinter/introduction/x5453-patterns.htm
 		self.root = gridPosition.master
 		gridPosition.increment()
+		from fabmetheus_utilities.hidden_scrollbar import HiddenScrollbar
 		scrollbar = HiddenScrollbar( gridPosition.master )
 		self.listbox = settings.Tkinter.Listbox( gridPosition.master, selectmode = settings.Tkinter.SINGLE, yscrollcommand = scrollbar.set )
 		self.listbox.bind('<ButtonRelease-1>', self.buttonReleaseOne )
@@ -369,6 +369,7 @@ class ProfileSelectionMenuRadio:
 		"Workaround for Tkinter bug, invoke and set the value when clicked."
 		if not self.activate:
 			return
+		settings.saveAll()
 		self.menuButtonDisplay.radioVar.set( self.valueName )
 		pluginModule = getCraftTypePluginModule()
 		profilePluginSettings = settings.getReadRepository( pluginModule.getNewRepository() )
@@ -398,6 +399,7 @@ class ProfileTypeMenuRadio( ProfileSelectionMenuRadio ):
 		"Workaround for Tkinter bug, invoke and set the value when clicked."
 		if not self.activate:
 			return
+		settings.saveAll()
 		self.menuButtonDisplay.radioVar.set( self.valueName )
 		profileSettings = getReadProfileRepository()
 		plugins = profileSettings.craftRadios

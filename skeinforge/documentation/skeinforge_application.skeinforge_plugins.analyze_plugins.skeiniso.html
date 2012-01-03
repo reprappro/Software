@@ -1,5 +1,5 @@
 
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module skeinforge_application.skeinforge_plugins.analyze_plugins.skeiniso</title>
 </head><body bgcolor="#f0f0f8">
 
@@ -13,7 +13,7 @@
 <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.interpret.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.analyze_plugins.skeinlayer.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <p><tt><br>
-Skeiniso is an analysis script to display a gcode file in an isometric view.<br>
+Skeiniso is an analyze viewer to display a gcode file in an isometric view.<br>
  <br>
 The skeiniso manual page is at:<br>
 <a href="http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeiniso">http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeiniso</a><br>
@@ -72,7 +72,7 @@ The skeiniso manual page is at:<br>
 <a name="Operation" id="Operation"></a><h2>Operation</h2>
 <hr>
 
-The default 'Activate Skeiniso' checkbox is on.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Skeiniso' checkbox is on, when skeiniso is run directly.<br>
+The default 'Activate Skeiniso' checkbox is off.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Skeiniso' checkbox is on, when skeiniso is run directly.<br>
  <br>
 Skeiniso requires skeinforge comments in the gcode file to distinguish the loops and perimeters.  If the comments are deleted, all threads will be displayed as generic threads.  To get the penultimate file of the tool chain, just before export deletes the comments, select 'Save Penultimate Gcode' in export, and open the gcode file with the suffix '_penultimate.gcode' with skeiniso.<br>
  <br>
@@ -348,7 +348,7 @@ This brings up the skeiniso viewer to view the gcode file.</tt>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__init__.html">__init__</a><br>
@@ -671,7 +671,7 @@ Methods inherited from <a href="skeinforge_application.skeinforge_plugins.analyz
  <dl><dt><a name="-getWindowAnalyzeFileGivenText"><strong>getWindowAnalyzeFileGivenText</strong></a>(fileName, gcodeText, repository<font color="#909090">=None</font>)</dt><dd><tt>Display&nbsp;a&nbsp;skeiniso&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;gcode&nbsp;file.</tt></dd></dl>
  <dl><dt><a name="-getWindowGivenTextRepository"><strong>getWindowGivenTextRepository</strong></a>(fileName, gcodeText, repository)</dt><dd><tt>Display&nbsp;the&nbsp;gcode&nbsp;text&nbsp;in&nbsp;a&nbsp;skeiniso&nbsp;viewer.</tt></dd></dl>
  <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Display&nbsp;the&nbsp;skeiniso&nbsp;dialog.</tt></dd></dl>
- <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNameSuffix, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;a&nbsp;skeinisoed&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;'Activate&nbsp;Skeiniso'&nbsp;is&nbsp;selected.</tt></dd></dl>
+ <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;a&nbsp;skeinisoed&nbsp;gcode&nbsp;file&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;'Activate&nbsp;Skeiniso'&nbsp;is&nbsp;selected.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

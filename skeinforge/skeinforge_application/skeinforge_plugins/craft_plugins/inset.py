@@ -87,7 +87,7 @@ def addAlreadyFilledArounds( alreadyFilledArounds, loop, radius ):
 	"Add already filled loops around loop to alreadyFilledArounds."
 	radius = abs(radius)
 	alreadyFilledLoop = []
-	slightlyGreaterThanRadius = 1.01 * radius
+	slightlyGreaterThanRadius = intercircle.globalIntercircleMultiplier * radius
 	muchGreaterThanRadius = 2.5 * radius
 	centers = intercircle.getCentersFromLoop( loop, slightlyGreaterThanRadius )
 	for center in centers:
@@ -106,7 +106,7 @@ def addSegmentOutline( isThick, outlines, pointBegin, pointEnd, width ):
 		slope = 3.0
 		exclusionWidth = 0.8 * width
 	segment = pointEnd - pointBegin
-	segmentLength = abs( segment )
+	segmentLength = abs(segment)
 	if segmentLength == 0.0:
 		return
 	normalizedSegment = segment / segmentLength
@@ -147,7 +147,7 @@ def addSegmentOutline( isThick, outlines, pointBegin, pointEnd, width ):
 		outline.append( pointEndIntermediate )
 		outline.append( outsideEndCenterDown )
 		outline.append( outsideBeginCenterDown )
-	outlines.append( euclidean.getPointsRoundZAxis( normalizedSegment, outline ) )
+	outlines.append( euclidean.getRotatedComplexes( normalizedSegment, outline ) )
 
 def getCraftedText( fileName, text='', repository=None):
 	"Inset the preface file or text."
@@ -161,13 +161,22 @@ def getCraftedTextFromText(gcodeText, repository=None):
 		repository = settings.getReadRepository( InsetRepository() )
 	return InsetSkein().getCraftedGcode(gcodeText, repository)
 
-def getIsIntersectingWithinList( loop, loopList ):
+def getInteriorSegments(loops, segments):
+	'Get segments inside the loops.'
+	interiorSegments = []
+	for segment in segments:
+		center = 0.5 * (segment[0].point + segment[1].point)
+		if euclidean.getIsInFilledRegion(loops, center):
+			interiorSegments.append(segment)
+	return interiorSegments
+
+def getIsIntersectingWithinList(loop, loopList):
 	"Determine if the loop is intersecting or is within the loop list."
 	leftPoint = euclidean.getLeftPoint(loop)
 	for otherLoop in loopList:
-		if euclidean.getNumberOfIntersectionsToLeft( otherLoop, leftPoint ) % 2 == 1:
+		if euclidean.getNumberOfIntersectionsToLeft(otherLoop, leftPoint) % 2 == 1:
 			return True
-	return euclidean.isLoopIntersectingLoops( loop, loopList )
+	return euclidean.isLoopIntersectingLoops(loop, loopList)
 
 def getNewRepository():
 	'Get new repository.'
@@ -185,11 +194,7 @@ def getSegmentsFromLoopListsPoints( loopLists, pointBegin, pointEnd ):
 	pointEndRotated = segmentYMirror * pointEnd
 	rotatedLoopLists = []
 	for loopList in loopLists:
-		rotatedLoopList = []
-		rotatedLoopLists.append( rotatedLoopList )
-		for loop in loopList:
-			rotatedLoop = euclidean.getPointsRoundZAxis( segmentYMirror, loop )
-			rotatedLoopList.append( rotatedLoop )
+		rotatedLoopLists.append(euclidean.getRotatedComplexLists(segmentYMirror, loopList))
 	xIntersectionIndexList = []
 	xIntersectionIndexList.append( euclidean.XIntersectionIndex( - 1, pointBeginRotated.real ) )
 	xIntersectionIndexList.append( euclidean.XIntersectionIndex( - 1, pointEndRotated.real ) )
@@ -262,82 +267,83 @@ class InsetSkein:
 		self.lineIndex = 0
 		self.rotatedLoopLayer = None
 
-	def addGcodeFromPerimeterPaths( self, isIntersectingSelf, loop, loopLists, radius, z ):
+	def addGcodeFromPerimeterPaths(self, isIntersectingSelf, loop, loopLists, radius, rotatedLoopLayer):
 		"Add the perimeter paths to the output."
 		segments = []
 		outlines = []
 		thickOutlines = []
-		allLoopLists = loopLists[:] + [ thickOutlines ]
+		allLoopLists = loopLists[:] + [thickOutlines]
 		aroundLists = loopLists
 		for pointIndex in xrange(len(loop)):
 			pointBegin = loop[pointIndex]
 			pointEnd = loop[(pointIndex + 1) % len(loop)]
 			if isIntersectingSelf:
-				if euclidean.isLineIntersectingLoops( outlines, pointBegin, pointEnd ):
-					segments += getSegmentsFromLoopListsPoints( allLoopLists, pointBegin, pointEnd )
+				if euclidean.isLineIntersectingLoops(outlines, pointBegin, pointEnd):
+					segments += getSegmentsFromLoopListsPoints(allLoopLists, pointBegin, pointEnd)
 				else:
-					segments += getSegmentsFromLoopListsPoints( loopLists, pointBegin, pointEnd )
-				addSegmentOutline( False, outlines, pointBegin, pointEnd, self.overlapRemovalWidth )
-				addSegmentOutline( True, thickOutlines, pointBegin, pointEnd, self.overlapRemovalWidth )
+					segments += getSegmentsFromLoopListsPoints(loopLists, pointBegin, pointEnd)
+				addSegmentOutline(False, outlines, pointBegin, pointEnd, self.overlapRemovalWidth)
+				addSegmentOutline(True, thickOutlines, pointBegin, pointEnd, self.overlapRemovalWidth)
 			else:
-				segments += getSegmentsFromLoopListsPoints( loopLists, pointBegin, pointEnd )
+				segments += getSegmentsFromLoopListsPoints(loopLists, pointBegin, pointEnd)
 		perimeterPaths = []
 		path = []
 		muchSmallerThanRadius = 0.1 * radius
+		segments = getInteriorSegments(rotatedLoopLayer.loops, segments)
 		for segment in segments:
 			pointBegin = segment[0].point
-			if not isCloseToLast( perimeterPaths, pointBegin, muchSmallerThanRadius ):
-				path = [ pointBegin ]
+			if not isCloseToLast(perimeterPaths, pointBegin, muchSmallerThanRadius):
+				path = [pointBegin]
 				perimeterPaths.append(path)
-			path.append( segment[1].point )
-		if len( perimeterPaths ) > 1:
+			path.append(segment[1].point)
+		if len(perimeterPaths) > 1:
 			firstPath = perimeterPaths[0]
 			lastPath = perimeterPaths[-1]
-			if abs( lastPath[-1] - firstPath[0] ) < 0.1 * muchSmallerThanRadius:
-				connectedBeginning = lastPath[ : - 1 ] + firstPath
+			if abs(lastPath[-1] - firstPath[0]) < 0.1 * muchSmallerThanRadius:
+				connectedBeginning = lastPath[: -1] + firstPath
 				perimeterPaths[0] = connectedBeginning
-				perimeterPaths.remove( lastPath )
+				perimeterPaths.remove(lastPath)
 		muchGreaterThanRadius = 6.0 * radius
 		for perimeterPath in perimeterPaths:
-			if euclidean.getPathLength( perimeterPath ) > muchGreaterThanRadius:
-				self.distanceFeedRate.addGcodeFromThreadZ( perimeterPath, z )
+			if euclidean.getPathLength(perimeterPath) > muchGreaterThanRadius:
+				self.distanceFeedRate.addGcodeFromThreadZ(perimeterPath, rotatedLoopLayer.z)
 
-	def addGcodeFromRemainingLoop( self, loop, loopLists, radius, z ):
+	def addGcodeFromRemainingLoop(self, loop, loopLists, radius, rotatedLoopLayer):
 		"Add the remainder of the loop which does not overlap the alreadyFilledArounds loops."
-		centerOutset = intercircle.getLargestCenterOutsetLoopFromLoopRegardless( loop, radius )
-		euclidean.addSurroundingLoopBeginning( self.distanceFeedRate, centerOutset.outset, z )
-		self.addGcodePerimeterBlockFromRemainingLoop( centerOutset.center, loopLists, radius, z )
+		centerOutset = intercircle.getLargestCenterOutsetLoopFromLoopRegardless(loop, radius)
+		euclidean.addNestedRingBeginning(self.distanceFeedRate, centerOutset.outset, rotatedLoopLayer.z)
+		self.addGcodePerimeterBlockFromRemainingLoop(centerOutset.center, loopLists, radius, rotatedLoopLayer)
 		self.distanceFeedRate.addLine('(</boundaryPerimeter>)')
 		self.distanceFeedRate.addLine('(</nestedRing>)')
 
-	def addGcodePerimeterBlockFromRemainingLoop( self, loop, loopLists, radius, z ):
+	def addGcodePerimeterBlockFromRemainingLoop(self, loop, loopLists, radius, rotatedLoopLayer):
 		"Add the perimter block remainder of the loop which does not overlap the alreadyFilledArounds loops."
 		if self.repository.overlapRemovalWidthOverPerimeterWidth.value < 0.2:
-			self.distanceFeedRate.addPerimeterBlock(loop, z)
+			self.distanceFeedRate.addPerimeterBlock(loop, rotatedLoopLayer.z)
 			return
-		isIntersectingSelf = isIntersectingItself( loop, self.overlapRemovalWidth )
-		if isIntersectingWithinLists( loop, loopLists ) or isIntersectingSelf:
-			self.addGcodeFromPerimeterPaths( isIntersectingSelf, loop, loopLists, radius, z )
+		isIntersectingSelf = isIntersectingItself(loop, self.overlapRemovalWidth)
+		if isIntersectingWithinLists(loop, loopLists) or isIntersectingSelf:
+			self.addGcodeFromPerimeterPaths(isIntersectingSelf, loop, loopLists, radius, rotatedLoopLayer)
 		else:
-			self.distanceFeedRate.addPerimeterBlock(loop, z)
-		addAlreadyFilledArounds( loopLists, loop, self.overlapRemovalWidth )
+			self.distanceFeedRate.addPerimeterBlock(loop, rotatedLoopLayer.z)
+		addAlreadyFilledArounds(loopLists, loop, self.overlapRemovalWidth)
 
 	def addInitializationToOutput(self):
 		"Add initialization gcode to the output."
 		if self.repository.addCustomCodeForTemperatureReading.value:
 			self.distanceFeedRate.addLine('M105') # Custom code for temperature reading.
 
-	def addInset( self, rotatedLoopLayer ):
+	def addInset(self, rotatedLoopLayer):
 		"Add inset to the layer."
 		alreadyFilledArounds = []
 		halfWidth = self.halfPerimeterWidth
 		if rotatedLoopLayer.rotation != None:
 			halfWidth *= self.repository.bridgeWidthMultiplier.value
-			self.distanceFeedRate.addTagBracketedLine('bridgeRotation', rotatedLoopLayer.rotation )
-		extrudateLoops = intercircle.getInsetLoopsFromLoops( halfWidth, rotatedLoopLayer.loops )
+			self.distanceFeedRate.addTagBracketedLine('bridgeRotation', rotatedLoopLayer.rotation)
+		extrudateLoops = intercircle.getInsetLoopsFromLoops(halfWidth, rotatedLoopLayer.loops)
 		triangle_mesh.sortLoopsInOrderOfArea(not self.repository.loopOrderAscendingArea.value, extrudateLoops)
 		for extrudateLoop in extrudateLoops:
-			self.addGcodeFromRemainingLoop( extrudateLoop, alreadyFilledArounds, halfWidth, rotatedLoopLayer.z )
+			self.addGcodeFromRemainingLoop(extrudateLoop, alreadyFilledArounds, halfWidth, rotatedLoopLayer)
 
 	def getCraftedGcode(self, gcodeText, repository):
 		"Parse gcode text and store the bevel gcode."
@@ -360,7 +366,7 @@ class InsetSkein:
 				self.distanceFeedRate.addTagBracketedLine(
 					'bridgeWidthMultiplier', self.distanceFeedRate.getRounded( self.repository.bridgeWidthMultiplier.value ) )
 			elif firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addTagBracketedLine('procedureName', 'inset')
+				self.distanceFeedRate.addTagBracketedProcedure('inset')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.perimeterWidth = float(splitLine[1])
@@ -378,8 +384,7 @@ class InsetSkein:
 			location = gcodec.getLocationFromSplitLine(None, splitLine)
 			self.boundary.append(location.dropAxis())
 		elif firstWord == '(<bridgeRotation>':
-			secondWordWithoutBrackets = splitLine[1].replace('(', '').replace(')', '')
-			self.rotatedLoopLayer.rotation = complex(secondWordWithoutBrackets)
+			self.rotatedLoopLayer.rotation = gcodec.getRotationBySplitLine(splitLine)
 		elif firstWord == '(</crafting>)':
 				self.distanceFeedRate.addLine(line)
 				if self.repository.turnExtruderHeaterOffAtShutDown.value:
@@ -404,7 +409,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

@@ -11,4 +11,4 @@ First path press feed (mm/s):	8.0
 First layer path press dist (mm):	1.7
 Next path press XY (mm):	0.3
 Extruder early stop XY (mm):	0.5
-Bed T at layer, (Layer,Temp;Layer,Temp;...):	5,70
+Bed T at layer, (Layer,Temp;Layer,Temp;...):	999,10

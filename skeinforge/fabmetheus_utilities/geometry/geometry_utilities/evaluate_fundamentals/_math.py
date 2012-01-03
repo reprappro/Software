@@ -28,7 +28,7 @@ globalMathConstantDictionary = {
 	'golden' : euclidean.globalGoldenRatio,
 	'goldenAngle' : euclidean.globalGoldenAngle,
 	'goldenRatio' : euclidean.globalGoldenRatio,
-	'tau' : math.pi + math.pi}
+	'tau' : euclidean.globalTau}
 
 
 def _getAccessibleAttribute(attributeName):

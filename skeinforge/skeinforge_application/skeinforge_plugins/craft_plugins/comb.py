@@ -1,6 +1,6 @@
 """
 This page is in the table of contents.
-Comb is a script to comb the extrusion hair of a gcode file.
+Comb is a craft tool to comb the extrusion hair of a gcode file.
 
 The comb manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Comb
@@ -140,7 +140,6 @@ class CombSkein:
 	"A class to comb a skein of extrusions."
 	def __init__(self):
 		'Initialize'
-		self.isAlteration = False
 		self.betweenTable = {}
 		self.boundaryLoop = None
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
@@ -165,7 +164,7 @@ class CombSkein:
 	def addIfTravel( self, splitLine ):
 		"Add travel move around loops if the extruder is off."
 		location = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
-		if not self.isAlteration and not self.extruderActive and self.oldLocation != None:
+		if not self.extruderActive and self.oldLocation != None:
 			if len( self.getBoundaries() ) > 0:
 				highestZ = max( location.z, self.oldLocation.z )
 				self.addGcodePathZ( self.travelFeedRateMinute, self.getPathsBetween( self.oldLocation.dropAxis(), location.dropAxis() ), highestZ )
@@ -205,10 +204,10 @@ class CombSkein:
 		self.combRepository = combRepository
 		self.lines = archive.getTextLines(gcodeText)
 		self.parseInitialization( combRepository )
-		for lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[lineIndex]
 			self.parseBoundariesLayers( combRepository, line )
-		for lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -285,7 +284,7 @@ class CombSkein:
 		boundaries = self.getBoundaries()
 		for boundaryIndex in xrange(len(boundaries)):
 			boundary = boundaries[ boundaryIndex ]
-			boundaryRotated = euclidean.getPointsRoundZAxis(segmentYMirror, boundary)
+			boundaryRotated = euclidean.getRotatedComplexes(segmentYMirror, boundary)
 			euclidean.addXIntersectionIndexesFromLoopY(boundaryRotated, boundaryIndex, switchX, y)
 		switchX.sort()
 		maximumX = max(beginRotated.real, endRotated.real)
@@ -373,7 +372,7 @@ class CombSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> comb </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('comb')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				perimeterWidth = float(splitLine[1])
@@ -390,6 +389,8 @@ class CombSkein:
 		if len(splitLine) < 1:
 			return
 		firstWord = splitLine[0]
+		if self.distanceFeedRate.getIsAlteration(line):
+			return
 		if firstWord == 'G1':
 			self.addIfTravel(splitLine)
 			self.layerZ = self.nextLayerZ
@@ -397,16 +398,12 @@ class CombSkein:
 			self.extruderActive = True
 		elif firstWord == 'M103':
 			self.extruderActive = False
-		elif firstWord == '(<alteration>)':
-			self.isAlteration = True
-		elif firstWord == '(</alteration>)':
-			self.isAlteration = False
 		elif firstWord == '(<layer>':
 			self.layerCount.printProgressIncrement('comb')
 			self.nextLayerZ = float(splitLine[1])
 			if self.layerZ == None:
 				self.layerZ = self.nextLayerZ
-		self.distanceFeedRate.addLine(line)
+		self.distanceFeedRate.addLineCheckAlteration(line)
 
 
 def main():
@@ -414,7 +411,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

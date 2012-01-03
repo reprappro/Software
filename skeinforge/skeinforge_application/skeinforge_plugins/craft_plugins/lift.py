@@ -79,7 +79,7 @@ class LiftRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.lift.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File to be Lifted', self, '')
-		self.activateLift = settings.BooleanSetting().getFromValue('Activate Lift:', self, True )
+		self.activateLift = settings.BooleanSetting().getFromValue('Activate Lift', self, True )
 		self.cuttingLiftOverLayerStep = settings.FloatSpin().getFromValue( - 1.0, 'Cutting Lift over Layer Step (ratio):', self, 1.0, - 0.5 )
 		self.clearanceAboveTop = settings.FloatSpin().getFromValue( 0.0, 'Clearance above Top (mm):', self, 10.0, 5.0 )
 		self.executeTitle = 'Lift'
@@ -146,7 +146,7 @@ class LiftSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addTagBracketedLine('procedureName', 'lift')
+				self.distanceFeedRate.addTagBracketedProcedure('lift')
 				return
 			elif firstWord == '(<layerThickness>':
 				self.layerThickness = float(splitLine[1])
@@ -189,7 +189,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

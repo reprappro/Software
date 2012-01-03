@@ -183,7 +183,7 @@ class oozestepSkein:
 		self.nextPathPressDist = 0
 		self.extruderoozestepDist = 0
 		self.currLayer = -1
-		self.currPos = [0,0]
+		self.currPos = [0,0,0]
 		self.feed = 0
 		self.isFirstPath = True
 		self.M101Line = "M101"
@@ -191,6 +191,8 @@ class oozestepSkein:
 		self.isNewLayer = False
 		self.cTatL = 0
 		self.TatL_ = []
+		self.eAbsolute = False
+		self.retractAmount = 0
 
 	def getCraftedGcode( self, gcodeText, repository ):
 		"Parse gcode text and store the oozestep gcode."
@@ -220,6 +222,11 @@ class oozestepSkein:
 				return
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.feed = 60.0 * float(splitLine[1])
+			elif line.find('Absolute_Extrusion_Distance') > 0:
+				self.eAbsolute = True
+			elif line.find('Retraction_Distance_(millimeters):') > 0:
+				self.retractAmount = float(splitLine[3])
+			#endif
 			self.distanceFeedRate.addLine(line)
 	
 	def parseLine( self, line ):
@@ -255,6 +262,9 @@ class oozestepSkein:
 				self.feed = feedRateString
 				#print 'feed = ' + self.feed
 			self.lastFeedRateString = feedRateString
+			if firstWord == 'G92' and line.find( 'E' ) >= 0:
+				self.currPos[E] = float(getStringFromCharacterSplitLine('E', splitLine ))
+			#endif
 			if firstWord == 'G1':
 				#deal with a move line
 				if splitLine[1][0] == 'E':
@@ -264,7 +274,12 @@ class oozestepSkein:
 							if not self.isNewLayer:
 								self.nextPathPressDist = float(getStringFromCharacterSplitLine('E', splitLine ))
 							else:
-								self.nextPathPressDist = self.repository.firstLayerPathPressDist.value
+								if self.eAbsolute:
+									self.nextPathPressDist = float(getStringFromCharacterSplitLine('E', splitLine ))
+									self.distanceFeedRate.addLine("G92 E" + str(myformat(self.nextPathPressDist - self.repository.firstLayerPathPressDist.value,3)))
+								else:
+									self.nextPathPressDist = self.repository.firstLayerPathPressDist.value
+								#endif
 								self.isNewLayer = False
 							#endif
 						else:
@@ -272,6 +287,7 @@ class oozestepSkein:
 							#self.isFirstPath = False
 						#endif
 						#print 'nextPathPressDist=' + self.nextPathPressDist
+						self.currPos[E] = self.nextPathPressDist
 						self.extruderReverseFeed = self.feed
 					else:
 						#we see an E word but extruderActive = True, store value as oozestep dist
@@ -369,7 +385,11 @@ class oozestepSkein:
 						self.move_XY( [mX , mY , self.nextPathPressDist * mXY / self.repository.nextPathPressXY.value ] , feed )
 						feed = self.xyFeed
 						#print 'c'
-						self.move_XY( [Segment[X] , Segment[Y] , Segment[E] * (1 - dXY)] , feed )
+						if self.eAbsolute:
+							self.move_XY( [Segment[X] , Segment[Y] , Segment[E]] , feed )
+						else:
+							self.move_XY( [Segment[X] , Segment[Y] , Segment[E] * (1 - dXY)] , feed )
+						#endif
 						DonePressurise = True
 					else:
 						#print 'a'
@@ -400,7 +420,12 @@ class oozestepSkein:
 						#print "mX " + str(mX)
 						#print "mY " + str(mY)
 						#print 'B'
-						self.move_XY([mX , mY , Segment[E] * dXY] , feed)
+						#self.distanceFeedRate.addLine("DistToGo="+str(DistToGo)+", dXY="+str(dXY)+", Segment[E]="+str(Segment[E])+", self.currPos[E]="+str(self.currPos[E]))
+						if self.eAbsolute:
+							self.move_XY([mX, mY, self.currPos[E]+(Segment[E]-self.currPos[E])*dXY], feed)
+						else:
+							self.move_XY([mX , mY , Segment[E] * dXY] , feed)
+						#endif
 						#print 'C'
 						feed = self.extruderReverseFeed
 						self.move_XY( [Segment[X] , Segment[Y] , self.extruderoozestepDist * mXY / self.repository.extruderEarlyStopXY.value] , feed )
@@ -490,15 +515,19 @@ class oozestepSkein:
 		dY = (pos[Y] - self.currPos[Y])
 		dE = pos[E]
 		MoveDist = sqrt(dX**2 + dY**2 + dE**2)
+		if self.eAbsolute:
+			#dE += self.currPos[E]
+			self.currPos[E] = dE
+		#endif
 
 		#no move so return nothing
 		if MoveDist == 0:
 		    return ''
 		#endif
 
-		i = dX / MoveDist if MoveDist != 0 else 0
-		j = dY / MoveDist if MoveDist != 0 else 0
-		k = dE / MoveDist if MoveDist != 0 else 0
+		#i = dX / MoveDist if MoveDist != 0 else 0
+		#j = dY / MoveDist if MoveDist != 0 else 0
+		#k = dE / MoveDist if MoveDist != 0 else 0
 		
 		### only output initial feed if needed ###
 		if self.currFeed != feed:

@@ -19,13 +19,13 @@ __date__ = '$Date: 2008/21/04 $'
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 
 
-def convertXMLElement(geometryOutput, xmlElement):
+def convertElementNode(elementNode, geometryOutput):
 	"Convert the xml element to a difference xml element."
-	group.convertContainerXMLElement(geometryOutput, xmlElement, Difference())
+	group.convertContainerElementNode(elementNode, geometryOutput, Difference())
 
-def processXMLElement(xmlElement):
+def processElementNode(elementNode):
 	"Process the xml element."
-	evaluate.processArchivable(Difference, xmlElement)
+	evaluate.processArchivable(Difference, elementNode)
 
 
 class Difference( boolean_solid.BooleanSolid ):
@@ -34,6 +34,6 @@ class Difference( boolean_solid.BooleanSolid ):
 		"Get loops from visible object loops list."
 		return self.getDifference(importRadius, visibleObjectLoopsList)
 
-	def getXMLClassName(self):
+	def getXMLLocalName(self):
 		"Get xml class name."
 		return self.__class__.__name__.lower()

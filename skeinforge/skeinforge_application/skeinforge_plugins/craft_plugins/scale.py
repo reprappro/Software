@@ -47,7 +47,6 @@ from datetime import date
 from fabmetheus_utilities.fabmetheus_tools import fabmetheus_interpret
 from fabmetheus_utilities.svg_reader import SVGReader
 from fabmetheus_utilities.vector3 import Vector3
-from fabmetheus_utilities.xml_simple_reader import XMLSimpleReader
 from fabmetheus_utilities import archive
 from fabmetheus_utilities import euclidean
 from fabmetheus_utilities import gcodec
@@ -104,7 +103,7 @@ class ScaleRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.scale.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName(fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Scale', self, '')
-		self.activateScale = settings.BooleanSetting().getFromValue('Activate Scale:', self, False)
+		self.activateScale = settings.BooleanSetting().getFromValue('Activate Scale', self, False)
 		self.xyPlaneScale = settings.FloatSpin().getFromValue(0.99, 'XY Plane Scale (ratio):', self, 1.03, 1.01)
 		self.zAxisScale = settings.FloatSpin().getFromValue(0.99, 'Z Axis Scale (ratio):', self, 1.02, 1.0)
 		self.svgViewer = settings.StringSetting().getFromValue('SVG Viewer:', self, 'webbrowser')
@@ -144,7 +143,7 @@ class ScaleSkein:
 			decimalPlacesCarried,
 			layerThickness,
 			perimeterWidth)
-		commentElement = svg_writer.getCommentElement(svgReader.root)
+		commentElement = svg_writer.getCommentElement(svgReader.documentElement)
 		procedureNameString = svgReader.sliceDictionary['procedureName'] + ',scale'
 		return svgWriter.getReplacedSVGTemplate(fileName, procedureNameString, rotatedLoopLayers, commentElement)
 
@@ -154,7 +153,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

@@ -76,7 +76,7 @@ def getNewRepository():
 
 def main():
 	"Display the help dialog."
-	settings.startMainLoopFromConstructor( getNewRepository() )
+	settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

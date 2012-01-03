@@ -18,6 +18,11 @@ If your firmware limits the z feed rate, you do not need to set this setting.
 
 Defines the maximum feed that the tool head will move in the z direction while the tool is on.
 
+===Maximum Z Feed Rate===
+Default is one millimeter per second.
+
+Defines the maximum speed that the tool head will move in the z direction.
+
 ===Travel Feed Rate===
 Default is 16 millimeters/second.
 
@@ -89,9 +94,10 @@ class FeedRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.feed.html', self)
 		self.fileNameInput = settings.FileNameInput().getFromFileName(fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Feed', self, '')
-		self.activateFeed = settings.BooleanSetting().getFromValue('Activate Feed:', self, True)
+		self.activateFeed = settings.BooleanSetting().getFromValue('Activate Feed', self, True)
 		self.feedRatePerSecond = settings.FloatSpin().getFromValue(2.0, 'Feed Rate (mm/s):', self, 50.0, 16.0)
 		self.maximumZDrillFeedRatePerSecond = settings.FloatSpin().getFromValue(0.02, 'Maximum Z Drill Feed Rate (mm/s):', self, 0.5, 0.1)
+		self.maximumZFeedRatePerSecond = settings.FloatSpin().getFromValue(0.5, 'Maximum Z Feed Rate (mm/s):', self, 10.0, 1.0)
 		self.travelFeedRatePerSecond = settings.FloatSpin().getFromValue(2.0, 'Travel Feed Rate (mm/s):', self, 50.0, 16.0)
 		self.executeTitle = 'Feed'
 
@@ -141,11 +147,12 @@ class FeedSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> feed </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('feed')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.absolutePerimeterWidth = abs(float(splitLine[1]))
 				self.distanceFeedRate.addTagBracketedLine('maximumZDrillFeedRatePerSecond', self.repository.maximumZDrillFeedRatePerSecond.value)
+				self.distanceFeedRate.addTagBracketedLine('maximumZFeedRatePerSecond', self.repository.maximumZFeedRatePerSecond.value )
 				self.distanceFeedRate.addTagBracketedLine('operatingFeedRatePerSecond', self.feedRatePerSecond)
 				self.distanceFeedRate.addTagBracketedLine('travelFeedRatePerSecond', self.repository.travelFeedRatePerSecond.value)
 			self.distanceFeedRate.addLine(line)

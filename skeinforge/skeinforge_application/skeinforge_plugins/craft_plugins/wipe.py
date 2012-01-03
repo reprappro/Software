@@ -210,7 +210,7 @@ class WipeSkein:
 		self.locationArrival = Vector3( wipeRepository.locationArrivalX.value, wipeRepository.locationArrivalY.value, wipeRepository.locationArrivalZ.value )
 		self.locationDeparture = Vector3( wipeRepository.locationDepartureX.value, wipeRepository.locationDepartureY.value, wipeRepository.locationDepartureZ.value )
 		self.locationWipe = Vector3( wipeRepository.locationWipeX.value, wipeRepository.locationWipeY.value, wipeRepository.locationWipeZ.value )
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -227,7 +227,7 @@ class WipeSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> wipe </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('wipe')
 				return
 			elif firstWord == '(<perimeterWidth>':
 				self.absolutePerimeterWidth = abs(float(splitLine[1]))
@@ -261,7 +261,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

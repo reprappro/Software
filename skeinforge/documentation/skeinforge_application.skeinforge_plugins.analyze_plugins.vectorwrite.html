@@ -1,5 +1,5 @@
 
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module skeinforge_application.skeinforge_plugins.analyze_plugins.vectorwrite</title>
 </head><body bgcolor="#f0f0f8">
 
@@ -10,16 +10,16 @@
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/enrique/Desktop/backup/babbleold/script/reprap/fabmetheus/skeinforge_application/skeinforge_plugins/analyze_plugins/vectorwrite.py">/home/enrique/Desktop/backup/babbleold/script/reprap/fabmetheus/skeinforge_application/skeinforge_plugins/analyze_plugins/vectorwrite.py</a></font></td></tr></table>
     <p>
-<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.statistic.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.craft.html">Next</a> / <a href="contents.html">Contents</a>
+<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.synopsis.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.craft.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <p><tt><br>
-Vectorwrite is a script to write Scalable Vector Graphics for a gcode file.<br>
+Vectorwrite is a very interesting analyze plugin that will create an SVG vector image for each layer that you can then use in some other printing system. <br>
+ <br>
+The Scalable Vector Graphics file can be opened by an SVG viewer or an SVG capable browser like Mozilla:<br>
+<a href="http://www.mozilla.com/firefox/">http://www.mozilla.com/firefox/</a><br>
  <br>
 The vectorwrite manual page is at:<br>
 <a href="http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Vectorwrite">http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Vectorwrite</a><br>
- <br>
-Vectorwrite generates a Scalable Vector Graphics file which can be opened by an SVG viewer or an SVG capable browser like Mozilla:<br>
-<a href="http://www.mozilla.com/firefox/">http://www.mozilla.com/firefox/</a><br>
  <br>
 <br />
 <a href="#Operation">Operation</a><br />
@@ -36,7 +36,7 @@ Vectorwrite generates a Scalable Vector Graphics file which can be opened by an 
 <a name="Operation" id="Operation"></a><h2>Operation</h2>
 <hr>
 
-The default 'Activate Vectorwrite' checkbox is on.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Vectorwrite' checkbox is on, when vectorwrite is run directly.<br>
+The default 'Activate Vectorwrite' checkbox is off.  When it is on, the functions described below will work when called from the skeinforge toolchain, when it is off, the functions will not be called from the toolchain.  The functions will still be called, whether or not the 'Activate Vectorwrite' checkbox is on, when vectorwrite is run directly.<br>
  <br>
 <a name="Settings" id="Settings"></a><h2>Settings</h2>
 <hr>
@@ -92,7 +92,7 @@ The vectorwrite file is saved as Screw_Holder_penultimate_vectorwrite.svg</tt>
 <br />
 <br />
 <p>
-<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.statistic.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.craft.html">Next</a> / <a href="contents.html">Contents</a>
+<a href="skeinforge_application.skeinforge_plugins.analyze_plugins.synopsis.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.craft.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <hr>
 </p>
@@ -100,7 +100,7 @@ The vectorwrite file is saved as Screw_Holder_penultimate_vectorwrite.svg</tt>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__init__.html">__init__</a><br>
@@ -153,11 +153,11 @@ Methods inherited from <a href="fabmetheus_utilities.svg_writer.html#SVGWriter">
 
 <dl><dt><a name="SVGWriterVectorwrite-addLayerBegin"><strong>addLayerBegin</strong></a>(self, layerIndex, rotatedLoopLayer)</dt><dd><tt>Add&nbsp;the&nbsp;start&nbsp;lines&nbsp;for&nbsp;the&nbsp;layer.</tt></dd></dl>
 
-<dl><dt><a name="SVGWriterVectorwrite-addOriginalAsComment"><strong>addOriginalAsComment</strong></a>(self, xmlElement)</dt><dd><tt>Add&nbsp;original&nbsp;xmlElement&nbsp;as&nbsp;a&nbsp;comment.</tt></dd></dl>
+<dl><dt><a name="SVGWriterVectorwrite-addOriginalAsComment"><strong>addOriginalAsComment</strong></a>(self, elementNode)</dt><dd><tt>Add&nbsp;original&nbsp;elementNode&nbsp;as&nbsp;a&nbsp;comment.</tt></dd></dl>
 
 <dl><dt><a name="SVGWriterVectorwrite-addRotatedLoopLayersToOutput"><strong>addRotatedLoopLayersToOutput</strong></a>(self, rotatedLoopLayers)</dt><dd><tt>Add&nbsp;rotated&nbsp;boundary&nbsp;layers&nbsp;to&nbsp;the&nbsp;output.</tt></dd></dl>
 
-<dl><dt><a name="SVGWriterVectorwrite-getReplacedSVGTemplate"><strong>getReplacedSVGTemplate</strong></a>(self, fileName, procedureName, rotatedLoopLayers, xmlElement<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;the&nbsp;lines&nbsp;of&nbsp;text&nbsp;from&nbsp;the&nbsp;layer_template.svg&nbsp;file.</tt></dd></dl>
+<dl><dt><a name="SVGWriterVectorwrite-getReplacedSVGTemplate"><strong>getReplacedSVGTemplate</strong></a>(self, fileName, procedureName, rotatedLoopLayers, elementNode<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;the&nbsp;lines&nbsp;of&nbsp;text&nbsp;from&nbsp;the&nbsp;layer_template.svg&nbsp;file.</tt></dd></dl>
 
 <dl><dt><a name="SVGWriterVectorwrite-getRounded"><strong>getRounded</strong></a>(self, number)</dt><dd><tt>Get&nbsp;number&nbsp;rounded&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;carried&nbsp;decimal&nbsp;places&nbsp;as&nbsp;a&nbsp;string.</tt></dd></dl>
 
@@ -252,7 +252,7 @@ Methods inherited from <a href="fabmetheus_utilities.svg_writer.html#SVGWriter">
  <dl><dt><a name="-getWindowAnalyzeFile"><strong>getWindowAnalyzeFile</strong></a>(fileName)</dt><dd><tt>Write&nbsp;scalable&nbsp;vector&nbsp;graphics&nbsp;for&nbsp;a&nbsp;gcode&nbsp;file.</tt></dd></dl>
  <dl><dt><a name="-getWindowAnalyzeFileGivenText"><strong>getWindowAnalyzeFileGivenText</strong></a>(fileName, gcodeText, repository<font color="#909090">=None</font>)</dt><dd><tt>Write&nbsp;scalable&nbsp;vector&nbsp;graphics&nbsp;for&nbsp;a&nbsp;gcode&nbsp;file&nbsp;given&nbsp;the&nbsp;settings.</tt></dd></dl>
  <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Display&nbsp;the&nbsp;vectorwrite&nbsp;dialog.</tt></dd></dl>
- <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNameSuffix, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;scalable&nbsp;vector&nbsp;graphics&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;activate&nbsp;vectorwrite&nbsp;is&nbsp;selected.</tt></dd></dl>
+ <dl><dt><a name="-writeOutput"><strong>writeOutput</strong></a>(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText<font color="#909090">=''</font>)</dt><dd><tt>Write&nbsp;scalable&nbsp;vector&nbsp;graphics&nbsp;for&nbsp;a&nbsp;skeinforge&nbsp;gcode&nbsp;file,&nbsp;if&nbsp;activate&nbsp;vectorwrite&nbsp;is&nbsp;selected.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

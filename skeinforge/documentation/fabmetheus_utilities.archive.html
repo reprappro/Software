@@ -1,5 +1,5 @@
 
-<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: module fabmetheus_utilities.archive</title>
 </head><body bgcolor="#f0f0f8">
 
@@ -14,7 +14,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__init__.html">__init__</a><br>
@@ -31,10 +31,12 @@
 <td width="100%"><dl><dt><a name="-addToNamePathDictionary"><strong>addToNamePathDictionary</strong></a>(directoryPath, namePathDictionary)</dt><dd><tt>Add&nbsp;to&nbsp;the&nbsp;name&nbsp;path&nbsp;dictionary.</tt></dd></dl>
  <dl><dt><a name="-getAbsoluteFolderPath"><strong>getAbsoluteFolderPath</strong></a>(filePath, folderName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;absolute&nbsp;folder&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getAbsoluteFrozenFolderPath"><strong>getAbsoluteFrozenFolderPath</strong></a>(filePath, folderName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;absolute&nbsp;frozen&nbsp;folder&nbsp;path.</tt></dd></dl>
+ <dl><dt><a name="-getCraftPluginsDirectoryPath"><strong>getCraftPluginsDirectoryPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;craft&nbsp;plugins&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getDocumentationPath"><strong>getDocumentationPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;documentation&nbsp;file&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getElementsPath"><strong>getElementsPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;evaluate_elements&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getEndsWithList"><strong>getEndsWithList</strong></a>(word, wordEndings)</dt><dd><tt>Determine&nbsp;if&nbsp;the&nbsp;word&nbsp;ends&nbsp;with&nbsp;a&nbsp;list.</tt></dd></dl>
  <dl><dt><a name="-getFabmetheusPath"><strong>getFabmetheusPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;fabmetheus&nbsp;directory&nbsp;path.</tt></dd></dl>
+ <dl><dt><a name="-getFabmetheusToolsPath"><strong>getFabmetheusToolsPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;fabmetheus&nbsp;tools&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getFabmetheusUtilitiesPath"><strong>getFabmetheusUtilitiesPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;fabmetheus&nbsp;utilities&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getFileNamesByFilePaths"><strong>getFileNamesByFilePaths</strong></a>(pluginFilePaths)</dt><dd><tt>Get&nbsp;the&nbsp;file&nbsp;names&nbsp;of&nbsp;the&nbsp;plugins&nbsp;by&nbsp;the&nbsp;file&nbsp;paths.</tt></dd></dl>
  <dl><dt><a name="-getFilePathWithUnderscoredBasename"><strong>getFilePathWithUnderscoredBasename</strong></a>(fileName, suffix)</dt><dd><tt>Get&nbsp;the&nbsp;file&nbsp;path&nbsp;with&nbsp;all&nbsp;spaces&nbsp;in&nbsp;the&nbsp;basename&nbsp;replaced&nbsp;with&nbsp;underscores.</tt></dd></dl>
@@ -51,6 +53,7 @@
  <dl><dt><a name="-getGeometryPath"><strong>getGeometryPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;geometry&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getGeometryToolsPath"><strong>getGeometryToolsPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;geometry&nbsp;tools&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getGeometryUtilitiesPath"><strong>getGeometryUtilitiesPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;geometry_utilities&nbsp;directory&nbsp;path.</tt></dd></dl>
+ <dl><dt><a name="-getInterpretPluginsPath"><strong>getInterpretPluginsPath</strong></a>(subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;interpret&nbsp;plugins&nbsp;directory&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getJoinedPath"><strong>getJoinedPath</strong></a>(path, subName<font color="#909090">=''</font>)</dt><dd><tt>Get&nbsp;the&nbsp;joined&nbsp;file&nbsp;path.</tt></dd></dl>
  <dl><dt><a name="-getModuleWithDirectoryPath"><strong>getModuleWithDirectoryPath</strong></a>(directoryPath, fileName)</dt><dd><tt>Get&nbsp;the&nbsp;module&nbsp;from&nbsp;the&nbsp;fileName&nbsp;and&nbsp;folder&nbsp;name.</tt></dd></dl>
  <dl><dt><a name="-getModuleWithPath"><strong>getModuleWithPath</strong></a>(path)</dt><dd><tt>Get&nbsp;the&nbsp;module&nbsp;from&nbsp;the&nbsp;path.</tt></dd></dl>
@@ -70,7 +73,7 @@
  <dl><dt><a name="-getUntilDot"><strong>getUntilDot</strong></a>(text)</dt><dd><tt>Get&nbsp;the&nbsp;text&nbsp;until&nbsp;the&nbsp;last&nbsp;dot,&nbsp;if&nbsp;any.</tt></dd></dl>
  <dl><dt><a name="-getVersionFileName"><strong>getVersionFileName</strong></a>()</dt><dd><tt>Get&nbsp;the&nbsp;file&nbsp;name&nbsp;of&nbsp;the&nbsp;version&nbsp;date.<a href="#-getFabmetheusUtilitiesPath">getFabmetheusUtilitiesPath</a>(subName=)</tt></dd></dl>
  <dl><dt><a name="-isFileWithFileTypeWithoutWords"><strong>isFileWithFileTypeWithoutWords</strong></a>(fileType, fileName, words)</dt><dd><tt>Determine&nbsp;if&nbsp;file&nbsp;has&nbsp;a&nbsp;given&nbsp;file&nbsp;type,&nbsp;but&nbsp;with&nbsp;does&nbsp;not&nbsp;contain&nbsp;a&nbsp;word&nbsp;in&nbsp;a&nbsp;list.</tt></dd></dl>
- <dl><dt><a name="-makeDirectory"><strong>makeDirectory</strong></a>(directory)</dt><dd><tt>Make&nbsp;a&nbsp;directory&nbsp;if&nbsp;it&nbsp;does&nbsp;not&nbsp;already&nbsp;exist.</tt></dd></dl>
+ <dl><dt><a name="-makeDirectory"><strong>makeDirectory</strong></a>(directoryPath)</dt><dd><tt>Make&nbsp;a&nbsp;directory&nbsp;if&nbsp;it&nbsp;does&nbsp;not&nbsp;already&nbsp;exist.</tt></dd></dl>
  <dl><dt><a name="-removeBackupFilesByType"><strong>removeBackupFilesByType</strong></a>(fileType)</dt><dd><tt>Remove&nbsp;backup&nbsp;files&nbsp;by&nbsp;type.</tt></dd></dl>
  <dl><dt><a name="-removeBackupFilesByTypes"><strong>removeBackupFilesByTypes</strong></a>(fileTypes)</dt><dd><tt>Remove&nbsp;backup&nbsp;files&nbsp;by&nbsp;types.</tt></dd></dl>
  <dl><dt><a name="-writeFileMessageEnd"><strong>writeFileMessageEnd</strong></a>(end, fileName, fileText, message)</dt><dd><tt>Write&nbsp;to&nbsp;a&nbsp;fileName&nbsp;with&nbsp;a&nbsp;suffix&nbsp;and&nbsp;print&nbsp;a&nbsp;message.</tt></dd></dl>

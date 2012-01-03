@@ -73,7 +73,7 @@ def getPolygonCenter( polygon ):
 	pointSum = complex()
 	areaSum = 0.0
 	for pointIndex in xrange( len( polygon ) ):
-		pointBegin = polygon[ pointIndex ]
+		pointBegin = polygon[pointIndex]
 		pointEnd  = polygon[ (pointIndex + 1) % len( polygon ) ]
 		area = pointBegin.real * pointEnd.imag - pointBegin.imag * pointEnd.real
 		areaSum += area
@@ -163,7 +163,7 @@ class DrillSkein:
 		self.repository = repository
 		self.parseInitialization()
 		for line in self.lines[self.lineIndex :]:
-			self.parseSurroundingLoop(line)
+			self.parseNestedRing(line)
 		for line in self.lines[self.lineIndex :]:
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -200,7 +200,7 @@ class DrillSkein:
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> drill </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('drill')
 				return
 			elif firstWord == '(<layerThickness>':
 				self.halfLayerThickness = 0.5 * float(splitLine[1])
@@ -219,8 +219,8 @@ class DrillSkein:
 			if not self.isDrilled:
 				self.addDrillHoles()
 
-	def parseSurroundingLoop(self, line):
-		"Parse a surrounding loop."
+	def parseNestedRing(self, line):
+		"Parse a nested ring."
 		splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 		if len(splitLine) < 1:
 			return
@@ -252,7 +252,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

@@ -230,46 +230,67 @@ import os
 import sys
 
 
-# infill or inset bug
-# circle is average radius in drill
-# cutting ahmet
+# document after fillet, then fill and comb once they are updated, maybe later subplugins like export static and export canvas, maybe later mill cut and coil plugins
+# move more __file__ tableau
+# raftPerimeter outset by maximum thickness
+# check skin perimeter feed and flow
+# skin horizontal perimeter divisions
+# check last reported bug
+# fix arc model 'too large for getArcComplexes in svgReader'
+# scrollbar/width problem when starting with narrow view like help/meta/profile
+# document announce Surrounding Angle up to 80
+# announce bookend / alteration
+# interim release
+#
 # smooth http://hydraraptor.blogspot.com/2010/12/frequency-limit.html _extrusion
-# clairvoyance
-# think about changing getOverlapRatio(loop, pointDictionary) < 0.2 to 0.51
-# change topOverBottom in linearbearingexample to pegAngle
-# add links download manual svg_writer, add left right arrow keys to layer
-# change thickness to height in gear xml
-# base xmlelement off xmlatom
-# document announce covex
-# maybe in svgReader if loop intersection with previous union else add
-# think about http://code.google.com/p/skeinarchiver/ and/or undo
+# voronoi average location intersection looped inset intercircles
+# move dimension after unpause
+# replace alteration with file, move to bookend
+# command
 #
 # unimportant
 # minor outline problem when an end path goes through a path, like in the letter A
 # view profile 1 mm thickness
+# analyze doesn't save settings
 #
-# raftPerimeter outset by maximum thickness
-# scrollbar/width problem when starting with narrow view like help/meta/profile
+# announce analyzeGcode in export
+#
+# think about http://code.google.com/p/skeinarchiver/ and/or undo
+# skin layers without something over the infill
+# unpause slow flow rate instead of speeding feed rate
+# maybe in svgReader if loop intersection with previous union else add
+# set temperature in temperature
+# add links download manual svg_writer, add left right arrow keys to layer
+# infuse _extrusion
+# cutting ahmet
+#
+# comb -> maybe add back running jump look at outside loops only for jump, find closest points, find slightly away inside points, link
+# global simplify pathBetween
+# comb documentation
+#
+# When opening a file for craft I wondered if there is an option to set the file type to .stl as it currently defaults to .xml
+# check inset loop for intersection with rotatedLoopLayer.loops
+# add fill in penultimate loops
 # maybe make vectorwrite prominent, not skeiniso, probably not because it doesn't work on Mac
-# move more __file__
 # close, getPillarByLoopLists, addConcave, polymorph original graph section, loop, add step object, add continuous object
 # hollow top
 # chamber: heated bed off at a layer http://blog.makerbot.com/2011/03/17/if-you-cant-stand-the-heat/
 # packingDensity or density in grid - probably just density
 # derivations for shapes
 # think about rectangular getVector3RemoveByPre..
-# links in layerTemplate
 # del previous, add begin & end if far  get actual path
 # linearbearingexample 15 x 1 x 2, linearbearingcage
-# add date time 11.01.02|12:08
+# remember xy in skeiniso
 # polling
 # connectionfrom, to, connect, xaxis
 # lathe, transform normal in getRemaining, getConnection
+# add overview link to crnsdoo index and svg page
 # getConnection of some kind like getConnectionVertexes, getConnection
+# getElementsByLocalName which is the equivalent of # getElementsByTagName
 # xml_creation
-# voronoi average location intersection looped inset intercircles
 # 'fileName, text, repository' commandLineInterface
 # delete: text = text.replace(('\nName                          %sValue\n' % globalSpreadsheetSeparator), ('\n_Name                          %sValue\n' % globalSpreadsheetSeparator))
+# comment search from home panel when there is an input field
 #
 #
 # multiply to table + boundary bedBound bedWidth bedHeight bedFile.csv
@@ -281,8 +302,8 @@ import sys
 # probably not replace getOverlapRatio with getOverlap if getOverlapRatio is never small, always 0.0
 # mesh. for cube, then cyliner, then sphere after lathe
 # dimension extrude diameter, density
+# maybe get rid of testLoops once they are no longer needed
 # thermistor lookup table
-# add overview link to crnsdoo index and svg page
 # stretch add back addAlong
 # import, write, copy examples
 # maybe remove default warnings from scale, rotate, translate, transform
@@ -306,13 +327,8 @@ import sys
 # dovetail
 # maybe not getNewObject, getNew, addToBoolean
 # work out close and radius
-# maybe try to get rid of comment if possible
 # maybe have add function as well as append for list and string
 # maybe move and give geometryOutput to cube, cylinder, sphere
-#
-# comb -> maybe add back running jump look at outside loops only for jump, find closest points, find slightly away inside points, link
-# global simplify pathBetween
-# comb documentation
 #
 # maybe move widen before bottom
 # maybe add 1 to max layer input to iso in layer_template.svg
@@ -334,14 +350,12 @@ import sys
 # remove index from CircleIntersection remove ahead or behind from CircleIntersection _speed
 # cache surroundingCarves _speed
 # probably not speed up CircleIntersection by performing isWithinCircles before creation _speed
-# pixelSet instead of pixelTable for arounds _speed
+# don't remove brackets in early craft tools _speed
 #
 #
-# infuse _extrusion
 # add hook _extrusion
 # integral thin width _extrusion
 # layer color, for multilayer start http://reprap.org/pub/Main/MultipleMaterialsFiles/legend.xml _extrusion
-# maybe double height shells option _extrusion
 # maybe raft triple layer base, middle interface with hot loop or ties
 # somehow, add pattern to outside, http://blog.makerbot.com/2010/09/03/lampshades/
 # implement acceleration & collinear removal in penultimate viewers _extrusion
@@ -354,10 +368,9 @@ import sys
 # probably not set addedLocation in distanceFeedRate after arc move
 # maybe horizontal bridging and/or check to see if the ends are standing on anything
 # thin self? check when removing intersecting paths in inset
-# maybe later remove isPerimeterPathInSurroundLoops, once there are no weird fill bugs, also change getHorizontalSegmentListsFromLoopLists
+# maybe later remove isPerimeterPathInSurroundLoops, once there are no weird fill bugs
 # save all analyze viewers of the same name except itself, update help menu self.wikiManualPrimary.setUpdateFunction
 # check alterations folder first, if there is something copy it to the home directory, if not check the home directory
-# set temperature in temperature
 # add links to demozendium in help
 # maybe add hop only if long option
 #
@@ -385,7 +398,6 @@ import sys
 # maybe split into source code and documentation sections
 # transform plugins, start with sarrus http://www.thingiverse.com/thing:1425
 # maybe make setting backups
-# maybe settings in gcode or saved versions
 # move skeinforge_utilities to fabmetheus_utilities
 # maybe lathe cutting
 # maybe lathe extrusion
@@ -557,14 +569,6 @@ class SkeinforgeRepository:
 		self.profileType = settings.MenuButtonDisplay().getFromName('Profile Type: ', self )
 		self.profileSelection = settings.MenuButtonDisplay().getFromName('Profile Selection: ', self)
 		addToProfileMenu( self.profileSelection, self.profileType, self )
-		settings.LabelDisplay().getFromName('Search:', self )
-		reprapSearch = settings.HelpPage().getFromNameAfterHTTP('members.axion.net/~enrique/search_reprap.html', 'Reprap', self)
-		skeinforgeSearch = settings.HelpPage().getFromNameAfterHTTP('members.axion.net/~enrique/search_skeinforge.html', 'Skeinforge', self )
-		skeinforgeSearch.column += 2
-		webSearch = settings.HelpPage().getFromNameAfterHTTP('members.axion.net/~enrique/search_web.html', 'Web', self)
-		webSearch.column += 4
-		versionText = archive.getFileText( archive.getVersionFileName() )
-		self.version = settings.LabelDisplay().getFromName('Version: ' + versionText, self)
 		settings.LabelDisplay().getFromName('', self)
 		importantFileNames = ['craft', 'profile']
 		getRadioPluginsAddPluginGroupFrame(archive.getSkeinforgePluginsPath(), importantFileNames, getPluginFileNames(), self)

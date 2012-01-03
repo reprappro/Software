@@ -42,6 +42,10 @@ def getAbsoluteFrozenFolderPath(filePath, folderName=''):
 		filePath = os.path.join(filePath, 'skeinforge_application')
 	return getAbsoluteFolderPath(filePath, folderName)
 
+def getCraftPluginsDirectoryPath(subName=''):
+	'Get the craft plugins directory path.'
+	return getJoinedPath(getSkeinforgePluginsPath('craft_plugins'), subName)
+
 def getDocumentationPath(subName=''):
 	'Get the documentation file path.'
 	return getJoinedPath(getFabmetheusPath('documentation'), subName)
@@ -65,6 +69,10 @@ def getFabmetheusPath(subName=''):
 	else:
 		fabmetheusFile = os.path.dirname(os.path.abspath(__file__))
 	return getJoinedPath(os.path.dirname(fabmetheusFile), subName)
+
+def getFabmetheusToolsPath(subName=''):
+	'Get the fabmetheus tools directory path.'
+	return getJoinedPath(getFabmetheusUtilitiesPath('fabmetheus_tools'), subName)
 
 def getFabmetheusUtilitiesPath(subName=''):
 	'Get the fabmetheus utilities directory path.'
@@ -113,23 +121,6 @@ def getFilePathWithUnderscoredBasename(fileName, suffix):
 	suffixReplacedBaseName = os.path.basename(suffixFileName).replace(' ', '_')
 	return os.path.join(suffixDirectoryName, suffixReplacedBaseName)
 
-def getFileText(fileName, printWarning=True, readMode='r'):
-	'Get the entire text of a file.'
-	try:
-		file = open(fileName, readMode)
-		fileText = file.read()
-		file.close()
-		return fileText
-	except IOError:
-		if printWarning:
-			print('The file ' + fileName + ' does not exist.')
-	return ''
-
-def getFileTextInFileDirectory(fileInDirectory, fileName, readMode='r'):
-	'Get the entire text of a file in the directory of the file in directory.'
-	absoluteFilePathInFileDirectory = os.path.join(os.path.dirname(fileInDirectory), fileName)
-	return getFileText(absoluteFilePathInFileDirectory, True, readMode)
-
 def getFilesWithFileTypesWithoutWords(fileTypes, words = [], fileInDirectory=''):
 	'Get files which have a given file type, but with do not contain a word in a list.'
 	filesWithFileTypes = []
@@ -159,6 +150,23 @@ def getFilesWithFileTypeWithoutWords(fileType, words = [], fileInDirectory=''):
 	filesWithFileType.sort()
 	return filesWithFileType
 
+def getFileText(fileName, printWarning=True, readMode='r'):
+	'Get the entire text of a file.'
+	try:
+		file = open(fileName, readMode)
+		fileText = file.read()
+		file.close()
+		return fileText
+	except IOError:
+		if printWarning:
+			print('The file ' + fileName + ' does not exist.')
+	return ''
+
+def getFileTextInFileDirectory(fileInDirectory, fileName, readMode='r'):
+	'Get the entire text of a file in the directory of the file in directory.'
+	absoluteFilePathInFileDirectory = os.path.join(os.path.dirname(fileInDirectory), fileName)
+	return getFileText(absoluteFilePathInFileDirectory, True, readMode)
+
 def getFundamentalsPath(subName=''):
 	'Get the evaluate_fundamentals directory path.'
 	return getJoinedPath(getGeometryUtilitiesPath('evaluate_fundamentals'), subName)
@@ -183,6 +191,10 @@ def getGeometryToolsPath(subName=''):
 def getGeometryUtilitiesPath(subName=''):
 	'Get the geometry_utilities directory path.'
 	return getJoinedPath(getGeometryPath('geometry_utilities'), subName)
+
+def getInterpretPluginsPath(subName=''):
+	'Get the interpret plugins directory path.'
+	return getJoinedPath(getFabmetheusToolsPath('interpret_plugins'), subName)
 
 def getJoinedPath(path, subName=''):
 	'Get the joined file path.'
@@ -296,7 +308,9 @@ def getTextIfEmpty(fileName, text):
 
 def getTextLines(text):
 	'Get the all the lines of text of a text.'
-	textLines = text.replace('\r', '\n').replace('\n\n', '\n').split('\n')
+	if '\r' in text:
+		text = text.replace('\r', '\n').replace('\n\n', '\n')
+	textLines = text.split('\n')
 	if len(textLines) == 1:
 		if textLines[0] == '':
 			return []
@@ -324,16 +338,16 @@ def isFileWithFileTypeWithoutWords(fileType, fileName, words):
 			return False
 	return True
 
-def makeDirectory(directory):
+def makeDirectory(directoryPath):
 	'Make a directory if it does not already exist.'
-	if os.path.isdir(directory):
+	if os.path.isdir(directoryPath):
 		return
 	try:
 		print('The following directory was made:')
-		print(os.path.abspath(directory))
-		os.makedirs(directory)
+		print(os.path.abspath(directoryPath))
+		os.makedirs(directoryPath)
 	except OSError:
-		print('Skeinforge can not make the directory %s so give it read/write permission for that directory and the containing directory.' % directory)
+		print('Skeinforge can not make the directory %s so give it read/write permission for that directory and the containing directory.' % directoryPath)
 
 def removeBackupFilesByType(fileType):
 	'Remove backup files by type.'

@@ -101,7 +101,6 @@ class HopSkein:
 	"A class to hop a skein of extrusions."
 	def __init__(self):
 		'Initialize'
-		self.isAlteration = False
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.extruderActive = False
 		self.feedRateMinute = 961.0
@@ -117,7 +116,7 @@ class HopSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		self.minimumSlope = math.tan( math.radians( hopRepository.minimumHopAngle.value ) )
 		self.parseInitialization( hopRepository )
-		for self.lineIndex in xrange( self.lineIndex, len(self.lines) ):
+		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
@@ -126,7 +125,7 @@ class HopSkein:
 		"Get hopped gcode line."
 		splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 		self.feedRateMinute = gcodec.getFeedRateMinute( self.feedRateMinute, splitLine )
-		if self.extruderActive or self.isAlteration:
+		if self.extruderActive:
 			return line
 		location = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
 		highestZ = location.z
@@ -138,7 +137,7 @@ class HopSkein:
 			oldLocationComplex = self.oldLocation.dropAxis()
 			distance = abs( locationComplex - oldLocationComplex )
 			if distance < self.minimumDistance:
-				if self.isNextTravel():
+				if self.isNextTravel() or distance == 0.0:
 					return self.distanceFeedRate.getLineWithZ( line, splitLine, highestZHop )
 			alongRatio = min( 0.41666666, self.hopDistance / distance )
 			oneMinusAlong = 1.0 - alongRatio
@@ -158,9 +157,7 @@ class HopSkein:
 		for afterIndex in xrange( self.lineIndex + 1, len(self.lines) ):
 			line = self.lines[ afterIndex ]
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
-			firstWord = "";
-			if len(splitLine) > 0:
-				firstWord = splitLine[0]
+			firstWord = gcodec.getFirstWord(splitLine)
 			if firstWord == 'G1':
 				return True
 			if firstWord == 'M101':
@@ -180,7 +177,7 @@ class HopSkein:
 				self.hopDistance = self.hopHeight / self.minimumSlope
 				self.minimumDistance = 0.5 * layerThickness
 			elif firstWord == '(</extruderInitialization>)':
-				self.distanceFeedRate.addLine('(<procedureName> hop </procedureName>)')
+				self.distanceFeedRate.addTagBracketedProcedure('hop')
 				return
 			self.distanceFeedRate.addLine(line)
 
@@ -190,6 +187,8 @@ class HopSkein:
 		if len(splitLine) < 1:
 			return
 		firstWord = splitLine[0]
+		if self.distanceFeedRate.getIsAlteration(line):
+			return
 		if firstWord == 'G1':
 			line = self.getHopLine(line)
 			self.oldLocation = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
@@ -199,11 +198,7 @@ class HopSkein:
 		elif firstWord == 'M103':
 			self.extruderActive = False
 			self.justDeactivated = True
-		elif firstWord == '(<alteration>)':
-			self.isAlteration = True
-		elif firstWord == '(</alteration>)':
-			self.isAlteration = False
-		self.distanceFeedRate.addLine(line)
+		self.distanceFeedRate.addLineCheckAlteration(line)
 
 
 def main():
@@ -211,7 +206,7 @@ def main():
 	if len(sys.argv) > 1:
 		writeOutput(' '.join(sys.argv[1 :]))
 	else:
-		settings.startMainLoopFromConstructor( getNewRepository() )
+		settings.startMainLoopFromConstructor(getNewRepository())
 
 if __name__ == "__main__":
 	main()

@@ -34,7 +34,7 @@ def getPluginsDirectoryPath():
 	"Get the plugins directory path."
 	return archive.getSkeinforgePluginsPath('analyze_plugins')
 
-def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
+def writeOutput(fileName, fileNamePenultimate, fileNameSuffix, filePenultimateWritten, gcodeText=''):
 	"Analyze a gcode file."
 	gcodeText = archive.getTextIfEmpty(fileName, gcodeText)
 	pluginFileNames = getPluginFileNames()
@@ -44,7 +44,8 @@ def writeOutput( fileName, fileNameSuffix, gcodeText = ''):
 		pluginModule = archive.getModuleWithDirectoryPath( analyzePluginsDirectoryPath, pluginFileName )
 		if pluginModule != None:
 			try:
-				newWindow = pluginModule.writeOutput( fileName, fileNameSuffix, gcodeText )
+				newWindow = pluginModule.writeOutput(fileName, fileNamePenultimate, fileNameSuffix,
+					filePenultimateWritten, gcodeText )
 				if newWindow != None:
 					window = newWindow
 			except:

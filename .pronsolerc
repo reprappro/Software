@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path tempstl
+set last_file_path C:\Users\dro\Desktop
 set xy_feedrate 12000
 set z_feedrate 200
 set e_feedrate 200

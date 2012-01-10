@@ -1,7 +1,7 @@
 Format is tab separated skeiniso settings.
-Name                          	Value
+_Name                          	Value
 WindowPosition	700+0
-Open File for Skeiniso	/home/jeanmarc/mini Twist_300x145d (fixed)(rebuilt)_penultimate.gcode
+Open File for Skeiniso	
 Activate Skeiniso	False
 Frame List
 Animation Line Quickening (ratio):	1.0
@@ -14,20 +14,20 @@ From the Bottom	False
 From the Top	True
 Draw Arrows	False
 Go Around Extruder Off Travel	False
-Layer (index):	3
+Layer (index):	0
 Layer Extra Span (integer):	912345678
 Line (index):	0
-Display Line	False
-View Move	True
+Display Line	True
+View Move	False
 View Rotate	False
 Number of Fill Bottom Layers (integer):	1
 Number of Fill Top Layers (integer):	1
-Scale (pixels per millimeter):	10.0
+Scale (pixels per millimeter):	15.0
 Screen Horizontal Inset (pixels):	100
 Screen Vertical Inset (pixels):	220
 Show Gcode	True
-Viewpoint Latitude (degrees):	10.9
-Viewpoint Longitude (degrees):	110.1
+Viewpoint Latitude (degrees):	15.0
+Viewpoint Longitude (degrees):	210.0
 Width of Axis Negative Side (pixels):	2
 Width of Axis Positive Side (pixels):	6
 Width of Fill Bottom Thread (pixels):	2

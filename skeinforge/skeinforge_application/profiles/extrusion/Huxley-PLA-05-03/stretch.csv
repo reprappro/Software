@@ -4,9 +4,9 @@ WindowPosition	700+0
 Open File for Stretch	
 Activate Stretch	True
 Cross Limit Distance Over Perimeter Width (ratio):	5.0
-Loop Inside Stretch Over Perimeter Width (ratio):	2.5
+Loop Inside Stretch Over Perimeter Width (ratio):	1.8
 Loop OutSide Stretch Over Perimeter Width (ratio):	0.1
 Path Stretch Over Perimeter Width (ratio):	0.0
-Perimeter Inside Stretch Over Perimeter Width (ratio):	2.5
+Perimeter Inside Stretch Over Perimeter Width (ratio):	0.32
 Perimeter Outside Stretch Over Perimeter Width (ratio):	0.1
 Stretch From Distance Over Perimeter Width (ratio):	2.0

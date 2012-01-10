@@ -2,7 +2,7 @@ Format is tab separated carve settings.
 _Name                          	Value
 WindowPosition	700+0
 Open File for Carve	
-Add Layer Template to SVG	True
+Add Layer Template to SVG	False
 Extra Decimal Places (float):	2.0
 Import Coarseness (ratio):	1.0
 Infill in Direction of Bridge	False
@@ -11,5 +11,5 @@ Layers From (index):	0
 Layers To (index):	912345678
 Correct Mesh	True
 Unproven Mesh	False
-Perimeter Width over Thickness (ratio):	1.58
+Perimeter Width over Thickness (ratio):	1.6
 SVG Viewer:	webbrowser

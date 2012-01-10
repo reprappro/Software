@@ -3,5 +3,5 @@ _Name                          	Value
 WindowPosition	700+0
 Open File for Lash	
 Activate Lash	False
-X Backlash (mm):	0.0
-Y Backlash (mm):	0.07
+X Backlash (mm):	0.2
+Y Backlash (mm):	0.3

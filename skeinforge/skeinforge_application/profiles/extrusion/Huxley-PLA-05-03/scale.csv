@@ -2,7 +2,7 @@ Format is tab separated scale settings.
 _Name                          	Value
 WindowPosition	700+0
 Open File for Scale	
-Activate Scale:	True
+Activate Scale	False
 XY Plane Scale (ratio):	1.01
 Z Axis Scale (ratio):	1.0
 SVG Viewer:	webbrowser

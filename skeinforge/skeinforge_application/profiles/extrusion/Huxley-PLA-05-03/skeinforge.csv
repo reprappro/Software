@@ -1,7 +1,7 @@
 Format is tab separated skeinforge settings.
 _Name                          	Value
-WindowPosition	606+37
-Open File for Skeinforge	/home/jeanmarc/Documents/Models/eMAKER-Huxley-experimental/stl/sheet3.stl
+WindowPosition	682+24
+Open File for Skeinforge	/home/jeanmarc/Documents/Models/test parts/stl/20mm_slot.stl
 analyze	False
 craft	True
 help	False

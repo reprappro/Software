@@ -1,0 +1,7 @@
+# Compiled source #
+###################
+*.pyc
+
+# Back up of settings #
+#######################
+.pronsolerc~old

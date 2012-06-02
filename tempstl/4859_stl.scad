@@ -1,9 +1,0 @@
-translate([123, 136, -0.0]) rotate([0, 0, -90]) import_stl("y-bar-clamp.stl");
-translate([94, 89, 0]) rotate([0, 0, 90]) import_stl("y-bar-clamp.stl");
-translate([138, 105, 0]) rotate([0, 0, -90]) import_stl("y-bar-clamp.stl");
-translate([94, 115, -0.0]) rotate([0, 0, 0]) import_stl("nozzle-mounting.stl");
-translate([123, 89, 0]) rotate([0, 0, 90]) import_stl("y-bar-clamp.stl");
-translate([80, 106, 0]) rotate([0, 0, -90]) import_stl("y-bar-clamp.stl");
-translate([108, 106, 0]) rotate([0, 0, -90]) import_stl("y-bar-clamp.stl");
-translate([66, 85, 0]) rotate([0, 0, -90]) import_stl("y-endstop-holder.stl");
-translate([138, 119, 0]) rotate([0, 0, 90]) import_stl("y-bar-clamp.stl");

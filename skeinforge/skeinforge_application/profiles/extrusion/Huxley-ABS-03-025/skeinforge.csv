@@ -1,0 +1,9 @@
+Format is tab separated skeinforge settings.
+_Name                          	Value
+WindowPosition	448+42
+Open File for Skeinforge	/home/jeanmarc/Documents/Models/eMAKER-Huxley-experimental/stl/fan-duct.stl
+analyze	False
+craft	True
+help	False
+meta	False
+profile	False

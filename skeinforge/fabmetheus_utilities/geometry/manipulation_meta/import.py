@@ -97,7 +97,3 @@ class ImportDerivation:
 		self.elementNode = elementNode
 		self.fileName = evaluate.getEvaluatedString('', elementNode, 'file')
 		self.importName = evaluate.getEvaluatedString(None, elementNode, '_importName')
-
-	def __repr__(self):
-		"Get the string representation of this ImportDerivation."
-		return str(self.__dict__)

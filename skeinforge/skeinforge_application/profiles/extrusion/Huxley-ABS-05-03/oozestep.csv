@@ -6,9 +6,9 @@ Activate oozestep	True
 Z feed (mm/s):	3.3
 First layer feed (mm/s):	12.0
 Output G1 for linear feed moves	True
-First path press dist (mm):	2.0
+First path press dist (mm):	4.0
 First path press feed (mm/s):	8.0
-First layer path press dist (mm):	1.7
-Next path press XY (mm):	0.3
-Extruder early stop XY (mm):	0.5
+First layer path press dist (mm):	2.5
+Next path press XY (mm):	0.2
+Extruder early stop XY (mm):	0.3
 Bed T at layer, (Layer,Temp;Layer,Temp;...):	999,10

@@ -87,7 +87,7 @@ def getWindowAnalyzeFile(fileName):
 		return None
 	repository = settings.getReadRepository( InterpretRepository() )
 	if repository.printInterpretion.value:
-		print( interpretGcode )
+		print(interpretGcode)
 	suffixFileName = fileName[ : fileName.rfind('.') ] + '_interpret.' + carving.getInterpretationSuffix()
 	suffixDirectoryName = os.path.dirname(suffixFileName)
 	suffixReplacedBaseName = os.path.basename(suffixFileName).replace(' ', '_')

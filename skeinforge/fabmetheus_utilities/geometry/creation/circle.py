@@ -41,9 +41,8 @@ def getGeometryOutput(derivation, elementNode):
 		loop.append(vertex)
 	radiusMaximum = 0.000001 * max(derivation.radiusArealized.real, derivation.radiusArealized.imag)
 	loop = euclidean.getLoopWithoutCloseEnds(radiusMaximum, loop)
-	sideLength = sideAngle * lineation.getRadiusAverage(derivation.radiusArealized)
 	lineation.setClosedAttribute(elementNode, derivation.revolutions)
-	return lineation.getGeometryOutputByLoop(elementNode, lineation.SideLoop(loop, sideAngle, sideLength))
+	return lineation.getGeometryOutputByLoop(elementNode, lineation.SideLoop(loop, sideAngle))
 
 def getGeometryOutputByArguments(arguments, elementNode):
 	"Get vector3 vertexes from attribute dictionary by arguments."
@@ -75,7 +74,3 @@ class CircleDerivation:
 		self.extent = evaluate.getEvaluatedFloat(end - self.start, elementNode, 'extent')
 		self.extent += 360.0 * (self.revolutions - 1.0)
 		self.spiral = evaluate.getVector3ByPrefix(None, elementNode, 'spiral')
-
-	def __repr__(self):
-		"Get the string representation of this CircleDerivation."
-		return str(self.__dict__)

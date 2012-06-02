@@ -194,8 +194,8 @@ class CoolSkein:
 		if len(self.boundaryLayer.loops) < 1:
 			return
 		insetBoundaryLoops = self.boundaryLayer.loops
-		if abs(self.repository.orbitalOutset.value) > 0.1 * abs(self.perimeterWidth):
-			insetBoundaryLoops = intercircle.getInsetLoopsFromLoops(-self.repository.orbitalOutset.value, self.boundaryLayer.loops)
+		if abs(self.repository.orbitalOutset.value) > 0.1 * abs(self.edgeWidth):
+			insetBoundaryLoops = intercircle.getInsetLoopsFromLoops(self.boundaryLayer.loops, -self.repository.orbitalOutset.value)
 		if len(insetBoundaryLoops) < 1:
 			insetBoundaryLoops = self.boundaryLayer.loops
 		largestLoop = euclidean.getLargestLoop(insetBoundaryLoops)
@@ -212,7 +212,7 @@ class CoolSkein:
 			largestLoop = euclidean.getSquareLoopWiddershins(minimumCorner, maximumCorner)
 		pointComplex = euclidean.getXYComplexFromVector3(self.oldLocation)
 		if pointComplex != None:
-			largestLoop = euclidean.getLoopStartingNearest(self.perimeterWidth, pointComplex, largestLoop)
+			largestLoop = euclidean.getLoopStartingClosest(self.edgeWidth, pointComplex, largestLoop)
 		intercircle.addOrbitsIfLarge(
 			self.distanceFeedRate, largestLoop, self.orbitalFeedRatePerSecond, remainingOrbitTime, self.highestZ)
 
@@ -227,7 +227,8 @@ class CoolSkein:
 
 	def addFlowRate(self, flowRate):
 		'Add a multipled line of flow rate if different.'
-		self.distanceFeedRate.addLine('M108 S' + euclidean.getFourSignificantFigures(flowRate))
+		if flowRate != None:
+			self.distanceFeedRate.addLine('M108 S' + euclidean.getFourSignificantFigures(flowRate))
 
 	def addGcodeFromFeedRateMovementZ(self, feedRateMinute, point, z):
 		'Add a movement to the output.'
@@ -245,7 +246,6 @@ class CoolSkein:
 	def getCoolMove(self, line, location, splitLine):
 		'Get cool line according to time spent on layer.'
 		self.feedRateMinute = gcodec.getFeedRateMinute(self.feedRateMinute, splitLine)
-		self.addFlowRate(self.multiplier * self.oldFlowRate)
 		return self.distanceFeedRate.getLineWithFeedRate(self.multiplier * self.feedRateMinute, line, splitLine)
 
 	def getCraftedGcode(self, gcodeText, repository):
@@ -257,9 +257,8 @@ class CoolSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		self.minimumArea = 4.0 * repository.minimumOrbitalRadius.value * repository.minimumOrbitalRadius.value
 		self.parseInitialization()
-		self.boundingRectangle = gcodec.BoundingRectangle().getFromGcodeLines(
-			self.lines[self.lineIndex :], 0.5 * self.perimeterWidth)
-		margin = 0.2 * self.perimeterWidth
+		self.boundingRectangle = gcodec.BoundingRectangle().getFromGcodeLines(self.lines[self.lineIndex :], 0.5 * self.edgeWidth)
+		margin = 0.2 * self.edgeWidth
 		halfCornerMargin = self.halfCorner + complex(margin, margin)
 		self.boundingRectangle.cornerMaximum -= halfCornerMargin
 		self.boundingRectangle.cornerMinimum += halfCornerMargin
@@ -328,8 +327,8 @@ class CoolSkein:
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
 			if firstWord == 'M108':
 				self.oldFlowRate = float(splitLine[1][1 :])
-			elif firstWord == '(<perimeterWidth>':
-				self.perimeterWidth = float(splitLine[1])
+			elif firstWord == '(<edgeWidth>':
+				self.edgeWidth = float(splitLine[1])
 				if self.repository.turnFanOnAtBeginning.value:
 					self.distanceFeedRate.addLine('M106')
 			elif firstWord == '(</extruderInitialization>)':
@@ -361,6 +360,8 @@ class CoolSkein:
 			self.oldTemperature = gcodec.getDoubleAfterFirstLetter(splitLine[1])
 		elif firstWord == 'M108':
 			self.oldFlowRate = float(splitLine[1][1 :])
+			self.addFlowRate(self.multiplier * self.oldFlowRate)
+			return
 		elif firstWord == '(<boundaryPoint>':
 			self.boundaryLoop.append(gcodec.getLocationFromSplitLine(None, splitLine).dropAxis())
 		elif firstWord == '(<layer>':
@@ -374,6 +375,7 @@ class CoolSkein:
 				self.addOrbitsIfNecessary(remainingOrbitTime)
 			else:
 				self.setMultiplier(remainingOrbitTime)
+				self.addFlowRate(self.multiplier * self.oldFlowRate)
 			z = float(splitLine[1])
 			self.boundaryLayer = euclidean.LoopLayer(z)
 			self.highestZ = max(z, self.highestZ)

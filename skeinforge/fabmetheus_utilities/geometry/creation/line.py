@@ -102,7 +102,3 @@ class LineDerivation:
 		self.steps = evaluate.getEvaluatedFloat(None, elementNode, 'steps')
 		self.typeMenuRadioStrings = 'average maximum minimum'.split()
 		self.typeString = evaluate.getEvaluatedString('minimum', elementNode, 'type')
-
-	def __repr__(self):
-		"Get the string representation of this LineDerivation."
-		return str(self.__dict__)

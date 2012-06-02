@@ -68,6 +68,7 @@ class GcodeSmallSkein:
 		self.lastFeedRateString = None
 		self.lastZString = None
 		self.output = cStringIO.StringIO()
+		self.layerNr = 0
 
 	def getCraftedGcode( self, gcodeText ):
 		"Parse gcode text and store the gcode."
@@ -78,6 +79,11 @@ class GcodeSmallSkein:
 
 	def parseLine(self, line):
 		"Parse a gcode line."
+		if len(line) < 1:
+			return
+		if line[0] == '(':
+			self.parseComment(line)
+			return
 		splitLine = getSplitLineBeforeBracketSemicolon(line)
 		if len(splitLine) < 1:
 			return

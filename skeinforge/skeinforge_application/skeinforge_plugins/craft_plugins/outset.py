@@ -1,6 +1,6 @@
 """
 This page is in the table of contents.
-Outset outsets the perimeters of the slices of a gcode file.  The outside perimeters will be outset by half the perimeter width, and the inside perimeters will be inset by half the perimeter width.  Outset is needed for subtractive machining, like cutting or milling.
+Outset outsets the edges of the slices of a gcode file.  The outside edges will be outset by half the edge width, and the inside edges will be inset by half the edge width.  Outset is needed for subtractive machining, like cutting or milling.
 
 ==Operation==
 The default 'Activate Outset' checkbox is on.  When it is on, the gcode will be outset, when it is off, the gcode will not be changed.
@@ -93,7 +93,7 @@ class OutsetSkein:
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.layerCount = settings.LayerCount()
 		self.lineIndex = 0
-		self.rotatedLoopLayer = None
+		self.loopLayer = None
 
 	def addGcodeFromRemainingLoop( self, loop, radius, z ):
 		'Add the remainder of the loop.'
@@ -103,12 +103,12 @@ class OutsetSkein:
 		self.distanceFeedRate.addLine('(</boundaryPerimeter>)')
 		self.distanceFeedRate.addLine('(</nestedRing>)')
 
-	def addOutset(self, rotatedLoopLayer):
+	def addOutset(self, loopLayer):
 		'Add outset to the layer.'
-		extrudateLoops = intercircle.getInsetLoopsFromLoops(-self.absoluteHalfPerimeterWidth, rotatedLoopLayer.loops)
+		extrudateLoops = intercircle.getInsetLoopsFromLoops(loopLayer.loops, -self.absoluteHalfEdgeWidth)
 		triangle_mesh.sortLoopsInOrderOfArea(False, extrudateLoops)
 		for extrudateLoop in extrudateLoops:
-			self.addGcodeFromRemainingLoop(extrudateLoop, self.absoluteHalfPerimeterWidth, rotatedLoopLayer.z)
+			self.addGcodeFromRemainingLoop(extrudateLoop, self.absoluteHalfEdgeWidth, loopLayer.z)
 
 	def getCraftedGcode(self, gcodeText, repository):
 		'Parse gcode text and store the bevel gcode.'
@@ -129,8 +129,8 @@ class OutsetSkein:
 			if firstWord == '(</extruderInitialization>)':
 				self.distanceFeedRate.addTagBracketedProcedure('outset')
 				return
-			elif firstWord == '(<perimeterWidth>':
-				self.absoluteHalfPerimeterWidth = 0.5 * abs(float(splitLine[1]))
+			elif firstWord == '(<edgeWidth>':
+				self.absoluteHalfEdgeWidth = 0.5 * abs(float(splitLine[1]))
 			self.distanceFeedRate.addLine(line)
 
 	def parseLine( self, lineIndex ):
@@ -145,15 +145,15 @@ class OutsetSkein:
 			self.boundary.append(location.dropAxis())
 		elif firstWord == '(<layer>':
 			self.layerCount.printProgressIncrement('outset')
-			self.rotatedLoopLayer = euclidean.RotatedLoopLayer(float(splitLine[1]))
+			self.loopLayer = euclidean.LoopLayer(float(splitLine[1]))
 			self.distanceFeedRate.addLine(line)
 		elif firstWord == '(</layer>)':
-			self.addOutset( self.rotatedLoopLayer )
-			self.rotatedLoopLayer = None
+			self.addOutset( self.loopLayer )
+			self.loopLayer = None
 		elif firstWord == '(<nestedRing>)':
 			self.boundary = []
-			self.rotatedLoopLayer.loops.append( self.boundary )
-		if self.rotatedLoopLayer == None:
+			self.loopLayer.loops.append( self.boundary )
+		if self.loopLayer == None:
 			self.distanceFeedRate.addLine(line)
 
 

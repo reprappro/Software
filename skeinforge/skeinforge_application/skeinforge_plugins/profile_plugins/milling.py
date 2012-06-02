@@ -28,7 +28,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 def getCraftSequence():
 	"Get the milling craft sequence."
-	return 'chop preface outset mill multiply drill lift flow feed home lash fillet limit unpause bookend export'.split()
+	return 'chop preface outset mill multiply drill lift flow feed home lash fillet limit unpause alteration export'.split()
 
 def getNewRepository():
 	'Get new repository.'
@@ -39,7 +39,7 @@ class MillingRepository:
 	"A class to handle the milling settings."
 	def __init__(self):
 		"Set the default settings, execute title & settings fileName."
-		skeinforge_profile.addListsSetCraftProfile( getCraftSequence(), 'end_mill', self, 'skeinforge_plugins.profile_plugins.milling.html')
+		skeinforge_profile.addListsSetCraftProfile( getCraftSequence(), 'end_mill', self, 'skeinforge_application.skeinforge_plugins.profile_plugins.milling.html')
 
 
 def main():

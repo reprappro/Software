@@ -57,7 +57,3 @@ class DrillDerivation:
 		size = evaluate.getEvaluatedFloat(None, elementNode, 'size')
 		if size != None:
 			self.radius = 0.5 * size
-
-	def __repr__(self):
-		"Get the string representation of this DrillDerivation."
-		return str(self.__dict__)

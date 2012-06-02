@@ -121,7 +121,7 @@ def getLoopsDifference(importRadius, loopLists):
 	'Get difference loops.'
 	halfImportRadius = 0.5 * importRadius # so that there are no misses on shallow angles
 	radiusSide = 0.01 * importRadius
-	negativeLoops = getLoopsUnified(importRadius, loopLists[1 :])
+	negativeLoops = getLoopsUnion(importRadius, loopLists[1 :])
 	intercircle.directLoops(False, negativeLoops)
 	positiveLoops = loopLists[0]
 	intercircle.directLoops(True, positiveLoops)
@@ -134,7 +134,7 @@ def getLoopsDifference(importRadius, loopLists):
 
 def getLoopsIntersection(importRadius, loopLists):
 	'Get intersection loops.'
-	intercircle.directLoopLists( True, loopLists )
+	intercircle.directLoopLists(True, loopLists)
 	if len(loopLists) < 1:
 		return []
 	if len(loopLists) < 2:
@@ -142,7 +142,7 @@ def getLoopsIntersection(importRadius, loopLists):
 	intercircle.directLoopLists(True, loopLists)
 	loopsIntersection = loopLists[0]
 	for loopList in loopLists[1 :]:
-		loopsIntersection = getLoopsIntersectionByPair( importRadius, loopsIntersection, loopList )
+		loopsIntersection = getLoopsIntersectionByPair(importRadius, loopsIntersection, loopList)
 	return loopsIntersection
 
 def getLoopsIntersectionByPair(importRadius, loopsFirst, loopsLast):
@@ -173,18 +173,17 @@ def getLoopsLoopsIntersections( loops, otherLoops ):
 		addLoopLoopsIntersections( loop, loopsLoopsIntersections, otherLoops )
 	return loopsLoopsIntersections
 
-def getLoopsUnified(importRadius, loopLists):
+def getLoopsUnion(importRadius, loopLists):
 	'Get joined loops sliced through shape.'
 	allPoints = []
 	corners = getLoopsListsIntersections(loopLists)
-	radiusSide = 0.01 * importRadius
-	radiusSideNegative = -radiusSide
+	radiusSideNegative = -0.01 * importRadius
 	intercircle.directLoopLists(True, loopLists)
 	for loopListIndex in xrange(len(loopLists)):
 		insetLoops = loopLists[ loopListIndex ]
 		inBetweenInsetLoops = getInBetweenLoopsFromLoops(insetLoops, importRadius)
 		otherLoops = euclidean.getConcatenatedList(loopLists[: loopListIndex] + loopLists[loopListIndex + 1 :])
-		corners += getInsetPointsByInsetLoops(insetLoops, False, otherLoops, radiusSide)
+		corners += getInsetPointsByInsetLoops(insetLoops, False, otherLoops, radiusSideNegative)
 		allPoints += getInsetPointsByInsetLoops(inBetweenInsetLoops, False, otherLoops, radiusSideNegative)
 	allPoints += corners[:]
 	return triangle_mesh.getDescendingAreaOrientedLoops(allPoints, corners, importRadius)
@@ -229,7 +228,7 @@ class BooleanSolid( group.Group ):
 
 	def getUnion(self, importRadius, visibleObjectLoopsList):
 		'Get joined loops sliced through shape.'
-		return getLoopsUnified(importRadius, visibleObjectLoopsList)
+		return getLoopsUnion(importRadius, visibleObjectLoopsList)
 
 	def getXMLLocalName(self):
 		'Get xml class name.'

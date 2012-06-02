@@ -13,7 +13,7 @@
 <a href="skeinforge_application.skeinforge_plugins.craft_plugins.oozebane.html">Previous</a> / <a href="skeinforge_application.skeinforge_plugins.craft_plugins.preface.html">Next</a> / <a href="contents.html">Contents</a>
 </p>
 <p><tt><br>
-Outset outsets the perimeters of the slices of a gcode file.  The outside perimeters will be outset by half the perimeter width, and the inside perimeters will be inset by half the perimeter width.  Outset is needed for subtractive machining, like cutting or milling.<br>
+Outset outsets the edges of the slices of a gcode file.  The outside edges will be outset by half the edge width, and the inside edges will be inset by half the edge width.  Outset is needed for subtractive machining, like cutting or milling.<br>
  <br>
 <br />
 <a href="#Operation">Operation</a><br />
@@ -103,7 +103,7 @@ The outset tool has created the file:<br>
 
 <dl><dt><a name="OutsetSkein-addGcodeFromRemainingLoop"><strong>addGcodeFromRemainingLoop</strong></a>(self, loop, radius, z)</dt><dd><tt>Add&nbsp;the&nbsp;remainder&nbsp;of&nbsp;the&nbsp;loop.</tt></dd></dl>
 
-<dl><dt><a name="OutsetSkein-addOutset"><strong>addOutset</strong></a>(self, rotatedLoopLayer)</dt><dd><tt>Add&nbsp;outset&nbsp;to&nbsp;the&nbsp;layer.</tt></dd></dl>
+<dl><dt><a name="OutsetSkein-addOutset"><strong>addOutset</strong></a>(self, loopLayer)</dt><dd><tt>Add&nbsp;outset&nbsp;to&nbsp;the&nbsp;layer.</tt></dd></dl>
 
 <dl><dt><a name="OutsetSkein-getCraftedGcode"><strong>getCraftedGcode</strong></a>(self, gcodeText, repository)</dt><dd><tt>Parse&nbsp;gcode&nbsp;text&nbsp;and&nbsp;store&nbsp;the&nbsp;bevel&nbsp;gcode.</tt></dd></dl>
 

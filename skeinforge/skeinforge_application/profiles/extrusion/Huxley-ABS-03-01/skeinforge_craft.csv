@@ -2,7 +2,7 @@ Format is tab separated skeinforge craft settings.
 _Name                          	Value
 WindowPosition	600+0
 Open File for Craft	
-bookend	False
+alteration	False
 bottom	False
 carve	False
 chamber	False
@@ -14,6 +14,7 @@ comb	False
 cool	False
 dimension	False
 drill	False
+dwindle	False
 export	False
 feed	False
 fill	False
@@ -23,6 +24,7 @@ home	False
 hop	False
 inset	False
 jitter	False
+joris	False
 lash	False
 lift	False
 limit	False
@@ -36,9 +38,10 @@ raft	False
 scale	False
 skin	False
 skirt	False
-speed	False
+smooth	False
+speed	True
 splodge	False
-stretch	True
+stretch	False
 temperature	False
 tower	False
 unpause	False

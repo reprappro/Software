@@ -387,4 +387,4 @@ class extrudeSkein( displaySkein ):
 
 print('Extrude has been imported.')
 print('The gcode files in this directory that are not log files are the following:')
-print( getGCodeFilesWhichAreNotLogFiles() )
+print(getGCodeFilesWhichAreNotLogFiles())

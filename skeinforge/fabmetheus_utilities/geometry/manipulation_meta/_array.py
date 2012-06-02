@@ -127,7 +127,3 @@ class ArrayDerivation:
 		self.target = evaluate.getElementNodeByKey(elementNode, 'target')
 		self.track = evaluate.getEvaluatedBoolean(True, elementNode, 'track')
 		self.visible = evaluate.getEvaluatedBoolean(True, elementNode, 'visible')
-
-	def __repr__(self):
-		"Get the string representation of this ArrayDerivation."
-		return str(self.__dict__)

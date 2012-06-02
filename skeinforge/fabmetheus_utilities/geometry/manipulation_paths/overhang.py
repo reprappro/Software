@@ -108,14 +108,13 @@ def getManipulatedPaths(close, elementNode, loop, prefix, sideLength):
 		print('Warning, loop has less than three sides in getManipulatedPaths in overhang for:')
 		print(elementNode)
 		return [loop]
-	overhangRadians = setting.getOverhangRadians(elementNode)
-	overhangPlaneAngle = euclidean.getWiddershinsUnitPolar(0.5 * math.pi - overhangRadians)
-	overhangVerticalRadians = math.radians(evaluate.getEvaluatedFloat(0.0, elementNode,  prefix + 'inclination'))
-	if overhangVerticalRadians != 0.0:
-		overhangVerticalCosine = abs(math.cos(overhangVerticalRadians))
-		if overhangVerticalCosine == 0.0:
+	derivation = OverhangDerivation(elementNode, prefix)
+	overhangPlaneAngle = euclidean.getWiddershinsUnitPolar(0.5 * math.pi - derivation.overhangRadians)
+	if derivation.overhangInclinationRadians != 0.0:
+		overhangInclinationCosine = abs(math.cos(derivation.overhangInclinationRadians))
+		if overhangInclinationCosine == 0.0:
 			return [loop]
-		imaginaryTimesCosine = overhangPlaneAngle.imag * overhangVerticalCosine
+		imaginaryTimesCosine = overhangPlaneAngle.imag * overhangInclinationCosine
 		overhangPlaneAngle = euclidean.getNormalized(complex(overhangPlaneAngle.real, imaginaryTimesCosine))
 	alongAway = AlongAway(loop, overhangPlaneAngle)
 	if euclidean.getIsWiddershinsByVector3(loop):
@@ -130,6 +129,10 @@ def getMinimumYByPath(path):
 	for point in path:
 		minimumYByPath = min( minimumYByPath, point.y )
 	return minimumYByPath
+
+def getNewDerivation(elementNode, prefix, sideLength):
+	'Get new derivation.'
+	return OverhangDerivation(elementNode, prefix)
 
 def processElementNode(elementNode):
 	"Process the xml element."
@@ -268,6 +271,14 @@ class OverhangClockwise:
 		self.alongAway.loop[ unsupportedBeginIndex : endIndex ] = supportPoints
 
 
+class OverhangDerivation:
+	"Class to hold overhang variables."
+	def __init__(self, elementNode, prefix):
+		'Set defaults.'
+		self.overhangRadians = setting.getOverhangRadians(elementNode)
+		self.overhangInclinationRadians = math.radians(evaluate.getEvaluatedFloat(0.0, elementNode,  prefix + 'inclination'))
+
+
 class OverhangWiddershinsLeft:
 	"Class to get the intersection from the point down to the left."
 	def __init__( self, alongAway ):
@@ -305,7 +316,7 @@ class OverhangWiddershinsLeft:
 		return euclidean.getAroundLoop( self.alongAway.pointIndex, endIndex, self.alongAway.loop )
 
 	def getDistance(self):
-		"Get distance between point and nearest intersection or bottom point along line."
+		"Get distance between point and closest intersection or bottom point along line."
 		self.pointMinusBottomY = self.alongAway.point.y - self.alongAway.minimumY
 		self.diagonalDistance = self.pointMinusBottomY * self.diagonalRatio
 		if self.alongAway.pointIndex == None:
@@ -334,7 +345,7 @@ class OverhangWiddershinsLeft:
 		return self.getDistanceToBottom()
 
 	def getDistanceToBottom(self):
-		"Get distance between point and nearest bottom point along line."
+		"Get distance between point and closest bottom point along line."
 		self.bottomX = self.alongAway.point.x + self.pointMinusBottomY * self.xRatio
 		self.closestBottomPoint = None
 		closestDistanceX = 987654321.0

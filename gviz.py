@@ -1,9 +1,26 @@
+# This file is part of the Printrun suite.
+# 
+# Printrun is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Printrun is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Printrun.  If not, see <http://www.gnu.org/licenses/>.
+
 import wx,time
 
-class window(wx.Frame):
-    def __init__(self,f,size=(600,600),build_dimensions=[140,140,100,0,0,0],grid=(10,50),extrusion_width=0.5):
+class viewer(wx.Frame):
+    def __init__(self,f,size=(800,800),build_dimensions=[140,140,100,0,0,0],grid=(10,50),extrusion_width=0.5):
         wx.Frame.__init__(self,None,title="Gcode view, shift to move view, mousewheel to set layer",size=(size[0],size[1]))
-        self.p=gviz(self,size=size,build_dimensions=build_dimensions,grid=grid,extrusion_width=extrusion_width)
+        self.panel=wx.Panel(self,-1,size=size)
+        self.panel.SetBackgroundColour("white")
+        self.p=gviz(self,size=(700,700),build_dimensions=build_dimensions,grid=grid,extrusion_width=extrusion_width)
         s=time.time()
         #print time.time()-s
         self.initpos=[0,0]
@@ -13,7 +30,99 @@ class window(wx.Frame):
         self.Bind(wx.EVT_MOUSEWHEEL,self.zoom)
         self.p.Bind(wx.EVT_MOUSE_EVENTS,self.mouse)
         self.Bind(wx.EVT_MOUSE_EVENTS,self.mouse)
+        self.logbox=wx.TextCtrl(self.panel,style = wx.TE_MULTILINE,size=(350,-1))
+        self.logbox.SetEditable(0)
+
+        self.prevlnbtn=wx.Button(self.panel,-1,_("<"))
+        self.prevlnbtn.Bind(wx.EVT_BUTTON,self.prevline)
+        self.nextlnbtn=wx.Button(self.panel,-1,_(">"))
+        self.nextlnbtn.Bind(wx.EVT_BUTTON,self.nextline)
+        self.prevlrbtn=wx.Button(self.panel,-1,_("<<"))
+        self.prevlrbtn.Bind(wx.EVT_BUTTON,self.prevlayer)
+        self.nextlrbtn=wx.Button(self.panel,-1,_(">>"))
+        self.nextlrbtn.Bind(wx.EVT_BUTTON,self.nextlayer)
+
+        self.mFrame=wx.BoxSizer(wx.VERTICAL)
+	self.tFrame=wx.BoxSizer(wx.HORIZONTAL)
+	self.bFrame=wx.BoxSizer(wx.HORIZONTAL)
+	self.tFrame.Add(self.p)
+        self.tFrame.Add(self.logbox,1,wx.EXPAND)
+	self.bFrame.Add(self.prevlnbtn)
+	self.bFrame.Add(self.nextlnbtn)
+	self.bFrame.Add(self.prevlrbtn)
+	self.bFrame.Add(self.nextlrbtn)
+	self.mFrame.Add(self.tFrame)
+	self.mFrame.Add(self.bFrame)
+        self.panel.SetSizer(self.mFrame)
+        self.status=self.CreateStatusBar()
+        self.status.SetStatusText(_("GCode viewer."))
+
+	self.currlayer=0
+	self.line_i=0
+	self.linesbefore=0
+	self.logline=""
+
+    def logscroll(self,step):
+        if step < 1:
+            self.logbox.SetInsertionPoint(0)
+            self.logbox.WriteText(self.p.gcodes[self.linesbefore+self.line_i-3]+"\n")
+            chars=self.logbox.GetLastPosition()
+            self.logbox.Remove(chars-len(self.logbox.GetLineText(self.logbox.GetNumberOfLines())),chars)
+        else:
+            self.logbox.SetInsertionPoint(self.logbox.GetLastPosition())
+            self.logbox.WriteText(self.p.gcodes[self.linesbefore+self.line_i+2]+"\n")
+            self.logbox.Remove(0,self.logbox.GetLineLength(0)+1)
+	    	
+
+    def logreset(self,line):
+    	self.logbox.Clear()
+    	for offset in xrange(-3,2):
+	    	self.logbox.WriteText(self.p.gcodes[line + offset]+"\n")
+
+    def prevline(self,e):
+	if self.line_i > 1:
+		self.p.addgcode(self.p.gcodes[self.linesbefore+self.line_i-1],0,1)
+	        self.p.repaint(self.line_i)
+		self.p.Refresh()
+		self.line_i-=1
+		self.logscroll(-1)
+	#print self.linesbefore+self.line_i-1
+	wx.CallAfter(self.status.SetStatusText,"Line "+str(self.line_i)+" in layer "+str(self.currlayer)+" of "+str(len(self.p.layers))+" "+self.p.gcodes[self.linesbefore+self.line_i-1])
+
+    def nextline(self,e):
+	if self.line_i - self.linesbefore < len(self.p.lines[self.p.layers[self.currlayer]]):
+		self.p.addgcode(self.p.gcodes[self.linesbefore+self.line_i+1],1,1)
+	        self.p.repaint(self.line_i)
+		self.p.Refresh()
+		self.line_i+=1
+		self.logscroll(1)
+	#print self.linesbefore+self.line_i+1
+	wx.CallAfter(self.status.SetStatusText,"Line "+str(self.line_i)+" in layer "+str(self.currlayer)+" of "+str(len(self.p.layers))+" "+self.p.gcodes[self.linesbefore+self.line_i+1])
         
+    def prevlayer(self,e):
+        self.p.layerdown()
+        if self.currlayer > 1:
+            self.currlayer-=1
+            self.p.hilight=[]
+            self.linesbefore-=len(self.p.lines[self.p.layers[self.currlayer]])
+            self.line_i=0
+            self.logreset(self.linesbefore)
+            self.p.repaint(1)
+            self.p.Refresh()
+            wx.CallAfter(self.status.SetStatusText,"Line "+str(self.line_i)+" in layer "+str(self.currlayer)+" of "+str(len(self.p.layers)))
+
+    def nextlayer(self,e):
+        #print self.p.layers
+        self.p.layerup()
+        self.linesbefore+=len(self.p.lines[self.p.layers[self.currlayer]])
+        self.currlayer+=1
+        self.line_i=0
+        self.logreset(self.linesbefore)
+        self.p.hilight=[]
+        self.p.repaint(1)
+        self.p.Refresh()
+        wx.CallAfter(self.status.SetStatusText,"Line "+str(self.line_i)+" in layer "+str(self.currlayer)+" of "+str(len(self.p.layers)))
+
     def mouse(self,event):
         if event.ButtonUp(wx.MOUSE_BTN_LEFT):
             if(self.initpos is not None):
@@ -35,20 +144,84 @@ class window(wx.Frame):
     def key(self, event):
         x=event.GetKeyCode()
         #print x
-        if x==wx.WXK_UP:
-            self.p.layerup()
-        if x==wx.WXK_DOWN:
-            self.p.layerdown()
+	if event.ShiftDown():
+	        if x==wx.WXK_UP:
+	            self.nextline()
+	        if x==wx.WXK_DOWN:
+	            self.prevline()
+	else:
+	        if x==wx.WXK_UP:
+	            self.nextlayer()
+	        if x==wx.WXK_DOWN:
+	            self.prevlayer()
     
         #print p.lines.keys()
     def zoom(self, event):
     	z=event.GetWheelRotation()
     	if event.ShiftDown():
-    		if z > 0:   self.p.layerdown()
-    		elif z < 0: self.p.layerup()
+    		if z > 0:   self.prevlayer(event)
+    		elif z < 0: self.nextlayer(event)
     	else:
     		if z > 0:   self.p.zoom(event.GetX(),event.GetY(),1.2)
     		elif z < 0: self.p.zoom(event.GetX(),event.GetY(),1/1.2)
+        
+class window(wx.Frame):
+    def __init__(self,f,size=(600,600),build_dimensions=[140,140,100,0,0,0],grid=(10,50),extrusion_width=0.5):
+        wx.Frame.__init__(self,None,title="Gcode view, shift to move view, mousewheel to set layer",size=(size[0],size[1]))
+        self.p=gviz(self,size=size,build_dimensions=build_dimensions,grid=grid,extrusion_width=extrusion_width)
+        s=time.time()
+        #print time.time()-s
+        self.initpos=[0,0]
+        self.p.Bind(wx.EVT_KEY_DOWN,self.key)
+        self.Bind(wx.EVT_KEY_DOWN,self.key)
+        self.p.Bind(wx.EVT_MOUSEWHEEL,self.zoom)
+        self.Bind(wx.EVT_MOUSEWHEEL,self.zoom)
+        self.p.Bind(wx.EVT_MOUSE_EVENTS,self.mouse)
+        self.Bind(wx.EVT_MOUSE_EVENTS,self.mouse)
+    
+    def mouse(self,event):
+        if event.ButtonUp(wx.MOUSE_BTN_LEFT):
+            if(self.initpos is not None):
+                self.initpos=None
+        elif event.Dragging():
+            e=event.GetPositionTuple()
+            if self.initpos is None or not hasattr(self,"basetrans"):
+                self.initpos=e
+                self.basetrans=self.p.translate
+            #print self.p.translate,e,self.initpos
+            self.p.translate = [ self.basetrans[0]+(e[0]-self.initpos[0]),
+                            self.basetrans[1]+(e[1]-self.initpos[1]) ]
+            self.p.repaint()
+            self.p.Refresh()
+        
+        else:
+            event.Skip()
+    
+
+    def key(self, event):
+        x=event.GetKeyCode()
+        if event.ShiftDown():
+            cx,cy=self.p.translate
+            if x==wx.WXK_UP:
+                self.p.zoom(cx,cy,1.2)
+            if x==wx.WXK_DOWN:
+                self.p.zoom(cx,cy,1/1.2)
+        else:
+            if x==wx.WXK_UP:
+                self.p.layerup()
+            if x==wx.WXK_DOWN:  
+                self.p.layerdown()
+        #print x
+    
+        #print p.lines.keys()
+    def zoom(self, event):
+        z=event.GetWheelRotation()
+        if event.ShiftDown():
+            if z > 0:   self.p.layerdown()
+            elif z < 0: self.p.layerup()
+        else:
+            if z > 0:   self.p.zoom(event.GetX(),event.GetY(),1.2)
+            elif z < 0: self.p.zoom(event.GetX(),event.GetY(),1/1.2)
         
 class gviz(wx.Panel):
     def __init__(self,parent,size=(200,200),build_dimensions=[140,140,100,0,0,0],grid=(10,50),extrusion_width=0.5):
@@ -70,7 +243,7 @@ class gviz(wx.Panel):
         self.basescale=[min(float(size[0])/build_dimensions[0],float(size[1])/build_dimensions[1])]*2
         self.scale=self.basescale
         penwidth = max(1.0,self.filament_width*((self.scale[0]+self.scale[1])/2.0))
-        self.translate=[0.0, 0.0]
+        self.translate=[0.0,0.0]
         self.mainpen=wx.Pen(wx.Colour(0,0,0),penwidth)
         self.arcpen=wx.Pen(wx.Colour(255,0,0),penwidth)
         self.travelpen=wx.Pen(wx.Colour(10,80,80),penwidth)
@@ -82,6 +255,8 @@ class gviz(wx.Panel):
         self.hilightarcs=[]
         self.dirty=1
         self.blitmap=wx.EmptyBitmap(self.GetClientSize()[0],self.GetClientSize()[1],-1)
+        self.gcodes=[]
+        self.line_i=-1
         
     def clear(self):
         self.lastpos=[0,0,0,0,0,0,0]
@@ -107,7 +282,7 @@ class gviz(wx.Panel):
             self.layerindex-=1
             self.repaint()
             self.Refresh()
-        
+    
     def setlayer(self,layer):
         try:
             self.layerindex=self.layers.index(layer)
@@ -116,7 +291,7 @@ class gviz(wx.Panel):
             self.showall=0
         except:
             pass
-
+    
     def resize(self,event):
         size=self.GetClientSize()
         newsize=min(float(size[0])/self.size[0],float(size[1])/self.size[1])
@@ -125,19 +300,21 @@ class gviz(wx.Panel):
         
 
     def zoom(self,x,y,factor):
-    	self.scale = [s * factor for s in self.scale]
+        self.scale = [s * factor for s in self.scale]
         
-    	self.translate = [ x - (x-self.translate[0]) * factor,
-    	                   y - (y-self.translate[1]) * factor]
+        self.translate = [ x - (x-self.translate[0]) * factor,
+                            y - (y-self.translate[1]) * factor]
         penwidth = max(1.0,self.filament_width*((self.scale[0]+self.scale[1])/2.0))
         for pen in self.penslist:
             pen.SetWidth(penwidth)
         #self.dirty=1
         self.repaint()
-    	self.Refresh()
+        self.Refresh()
         
         
-    def repaint(self):
+    def repaint(self,line_i=-1):
+        if line_i > -1:
+            self.line_i=line_i
         self.blitmap=wx.EmptyBitmap(self.GetClientSize()[0],self.GetClientSize()[1],-1)
         dc=wx.MemoryDC()
         dc.SelectObject(self.blitmap)
@@ -162,9 +339,9 @@ class gviz(wx.Panel):
         def _drawlines(lines,pens):
             def _scaler(x):
                 return (self.scale[0]*x[0]+self.translate[0],
-                    self.scale[1]*x[1]+self.translate[1],
-                    self.scale[0]*x[2]+self.translate[0],
-                    self.scale[1]*x[3]+self.translate[1],)
+                        self.scale[1]*x[1]+self.translate[1],
+                        self.scale[0]*x[2]+self.translate[0],
+                        self.scale[1]*x[3]+self.translate[1],)
             scaled_lines = map(_scaler,lines)
             dc.DrawLineList(scaled_lines, pens)
         
@@ -189,6 +366,7 @@ class gviz(wx.Panel):
                 _drawlines(self.lines[i], self.pens[i])
                 _drawarcs(self.arcs[i], self.arcpens[i])
             return
+        #print line_i
         if self.layerindex<len(self.layers) and self.layers[self.layerindex] in self.lines.keys():
             for layer_i in xrange(max(0,self.layerindex-6),self.layerindex):
                 #print i, self.layerindex, self.layerindex-i
@@ -210,13 +388,18 @@ class gviz(wx.Panel):
         sz=self.GetClientSize()
         dc.DrawBitmap(self.blitmap,0,0)
         del dc
-                
-    def addfile(self,gcodes=[]):
-        self.clear()
-        for i in gcodes:
-            self.addgcode(i)
         
-    def addgcode(self,gcode="M105",hilight=0):
+    def addfile(self,gcodes=[]):
+        self.gcodes=[]
+    	gcode=""
+    	for gcode in gcodes:
+            if gcode<>"" and gcode[0]<>";":
+    			self.gcodes.append(gcode)
+        self.clear()
+        for i in self.gcodes:
+            self.addgcode(i)
+
+    def addgcode(self,gcode="M105",hilight=0,reverse=0):
         gcode=gcode.split("*")[0]
         gcode=gcode.split(";")[0]
         gcode = gcode.lower().strip().split()
@@ -267,9 +450,17 @@ class gviz(wx.Panel):
                 self.lines[ target[2] ] += [line]
                 self.pens[ target[2] ]  += [self.mainpen if target[3] != self.lastpos[3] else self.travelpen]
                 self.lastpos=target
+		if reverse:
+			self.hilightpos=target
+			try:
+				self.hilight.pop()
+			except:
+				pass
             else:
                 self.hilight += [line]
                 self.hilightpos=target
+		if reverse:
+			self.lastpos=target
             self.dirty=1
             
         if gcode[0] in [ "g2", "g3" ]:

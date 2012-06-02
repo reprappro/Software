@@ -1,9 +1,12 @@
 """
 This page is in the table of contents.
-Temperature is a script to set the temperature for the object and raft.
+Temperature is a plugin to set the temperature for the entire extrusion.
+
+The temperature manual page is at:
+http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Temperature
 
 ==Operation==
-The default 'Activate Temperature' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Temperature' checkbox is on.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===Rate===
@@ -39,7 +42,7 @@ Defines the infill temperature of the first layer of the object.
 ====Object First Layer Perimeter Temperature====
 Default for ABS is two hundred and twenty degrees Celcius.
 
-Defines the perimeter temperature of the first layer of the object.
+Defines the edge temperature of the first layer of the object.
 
 ====Object Next Layers Temperature====
 Default for ABS is two hundred and thirty degrees Celcius.
@@ -122,6 +125,7 @@ class TemperatureRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.temperature.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Temperature', self, '')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Temperature')
 		self.activateTemperature = settings.BooleanSetting().getFromValue('Activate Temperature', self, True )
 		settings.LabelSeparator().getFromRepository(self)
 		settings.LabelDisplay().getFromName('- Rate -', self )
@@ -176,7 +180,7 @@ class TemperatureSkein:
 			if firstWord == '(</extruderInitialization>)':
 				self.distanceFeedRate.addTagBracketedProcedure('temperature')
 				return
-			elif firstWord == '(<perimeterWidth>':
+			elif firstWord == '(<edgeWidth>':
 				self.distanceFeedRate.addTagBracketedLine('coolingRate', self.repository.coolingRate.value )
 				self.distanceFeedRate.addTagBracketedLine('heatingRate', self.repository.heatingRate.value )
 				self.distanceFeedRate.addTagBracketedLine('baseTemperature', self.repository.baseTemperature.value )

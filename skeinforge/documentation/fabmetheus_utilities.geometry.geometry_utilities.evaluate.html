@@ -43,6 +43,7 @@
 </font></dt></dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="fabmetheus_utilities.geometry.geometry_utilities.evaluate.html#ClassObject">ClassObject</a>
+</font></dt><dt><font face="helvetica, arial"><a href="fabmetheus_utilities.geometry.geometry_utilities.evaluate.html#EmptyObject">EmptyObject</a>
 </font></dt><dt><font face="helvetica, arial"><a href="fabmetheus_utilities.geometry.geometry_utilities.evaluate.html#Evaluator">Evaluator</a>
 </font></dt><dd>
 <dl>
@@ -164,6 +165,18 @@ Methods inherited from <a href="fabmetheus_utilities.geometry.geometry_utilities
 <dl><dt><a name="ClassObject-__init__"><strong>__init__</strong></a>(self, elementNode)</dt><dd><tt>Initialize.</tt></dd></dl>
 
 <dl><dt><a name="ClassObject-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;string&nbsp;representation&nbsp;of&nbsp;this&nbsp;Class.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EmptyObject">class <strong>EmptyObject</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;empty&nbsp;object.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="EmptyObject-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Do&nbsp;nothing.</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -1868,7 +1881,6 @@ Methods inherited from <a href="fabmetheus_utilities.geometry.geometry_utilities
  <dl><dt><a name="-getEvaluatedExpressionValueBySplitLine"><strong>getEvaluatedExpressionValueBySplitLine</strong></a>(elementNode, words)</dt><dd><tt>Evaluate&nbsp;the&nbsp;expression&nbsp;value.</tt></dd></dl>
  <dl><dt><a name="-getEvaluatedExpressionValueEvaluators"><strong>getEvaluatedExpressionValueEvaluators</strong></a>(evaluators)</dt><dd><tt>Evaluate&nbsp;the&nbsp;expression&nbsp;value&nbsp;from&nbsp;the&nbsp;numeric&nbsp;and&nbsp;operation&nbsp;evaluators.</tt></dd></dl>
  <dl><dt><a name="-getEvaluatedFloat"><strong>getEvaluatedFloat</strong></a>(defaultValue, elementNode, key)</dt><dd><tt>Get&nbsp;the&nbsp;evaluated&nbsp;float.</tt></dd></dl>
- <dl><dt><a name="-getEvaluatedFloatByKeys"><strong>getEvaluatedFloatByKeys</strong></a>(defaultValue, elementNode, keys)</dt><dd><tt>Get&nbsp;the&nbsp;evaluated&nbsp;float&nbsp;by&nbsp;keys.</tt></dd></dl>
  <dl><dt><a name="-getEvaluatedInt"><strong>getEvaluatedInt</strong></a>(defaultValue, elementNode, key)</dt><dd><tt>Get&nbsp;the&nbsp;evaluated&nbsp;int.</tt></dd></dl>
  <dl><dt><a name="-getEvaluatedIntByKeys"><strong>getEvaluatedIntByKeys</strong></a>(defaultValue, elementNode, keys)</dt><dd><tt>Get&nbsp;the&nbsp;evaluated&nbsp;int&nbsp;by&nbsp;keys.</tt></dd></dl>
  <dl><dt><a name="-getEvaluatedLinkValue"><strong>getEvaluatedLinkValue</strong></a>(elementNode, word)</dt><dd><tt>Get&nbsp;the&nbsp;evaluated&nbsp;link&nbsp;value.</tt></dd></dl>
@@ -1935,8 +1947,8 @@ Methods inherited from <a href="fabmetheus_utilities.geometry.geometry_utilities
 <strong>globalCreationDictionary</strong> = {'circle': '/home/enrique/Desktop/backup/babbleold/script/re...eus/fabmetheus_utilities/geometry/creation/circle', 'concatenate': '/home/enrique/Desktop/backup/babbleold/script/re...abmetheus_utilities/geometry/creation/concatenate', 'drill': '/home/enrique/Desktop/backup/babbleold/script/re...eus/fabmetheus_utilities/geometry/creation/_drill', 'extrude': '/home/enrique/Desktop/backup/babbleold/script/re...us/fabmetheus_utilities/geometry/creation/extrude', 'gear': '/home/enrique/Desktop/backup/babbleold/script/re...theus/fabmetheus_utilities/geometry/creation/gear', 'grid': '/home/enrique/Desktop/backup/babbleold/script/re...theus/fabmetheus_utilities/geometry/creation/grid', 'heightmap': '/home/enrique/Desktop/backup/babbleold/script/re.../fabmetheus_utilities/geometry/creation/heightmap', 'lathe': '/home/enrique/Desktop/backup/babbleold/script/re...heus/fabmetheus_utilities/geometry/creation/lathe', 'line': '/home/enrique/Desktop/backup/babbleold/script/re...theus/fabmetheus_utilities/geometry/creation/line', 'linearbearingcage': '/home/enrique/Desktop/backup/babbleold/script/re...s_utilities/geometry/creation/linear_bearing_cage', ...}<br>
 <strong>globalDictionaryOperatorBegin</strong> = {'!=': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorNotEqual&gt;, '**': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorPower&gt;, '&lt;=': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorLessEqual&gt;, '==': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorEqual&gt;, '&gt;=': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorGreaterEqual&gt;, '||': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorConcatenate&gt;}<br>
 <strong>globalElementNameSet</strong> = set(['creation', 'document', 'setting'])<br>
-<strong>globalFundamentalNameSet</strong> = set(['_math', 'euclid', 'print'])<br>
-<strong>globalModuleEvaluatorDictionary</strong> = {'creation': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;, 'document': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;, 'euclid': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'math': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'print': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'self': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorSelf&gt;, 'setting': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;}<br>
+<strong>globalFundamentalNameSet</strong> = set(['_math', 'euclid', 'measure', 'print'])<br>
+<strong>globalModuleEvaluatorDictionary</strong> = {'creation': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;, 'document': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;, 'euclid': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'math': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'measure': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'print': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorFundamental&gt;, 'self': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorSelf&gt;, 'setting': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorElement&gt;}<br>
 <strong>globalModuleFunctionsDictionary</strong> = {}<br>
 <strong>globalSplitDictionary</strong> = {'!=': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorNotEqual&gt;, '%': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorModulo&gt;, '(': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorBracketRound&gt;, ')': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.Evaluator&gt;, '*': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorMultiplication&gt;, '**': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorPower&gt;, '+': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorAddition&gt;, ',': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorComma&gt;, '-': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorSubtraction&gt;, '/': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorDivision&gt;, ...}<br>
 <strong>globalSplitDictionaryOperator</strong> = {'%': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorModulo&gt;, '(': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorBracketRound&gt;, ')': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.Evaluator&gt;, '*': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorMultiplication&gt;, '+': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorAddition&gt;, ',': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorComma&gt;, '-': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorSubtraction&gt;, '/': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorDivision&gt;, ':': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorDictionary&gt;, '&lt;': &lt;class fabmetheus_utilities.geometry.geometry_utilities.evaluate.EvaluatorLess&gt;, ...}</td></tr></table><p>

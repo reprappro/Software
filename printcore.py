@@ -1,7 +1,21 @@
 #!/usr/bin/env python
-# Licensed under GPLv3
 
-from serial import Serial
+# This file is part of the Printrun suite.
+# 
+# Printrun is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Printrun is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Printrun.  If not, see <http://www.gnu.org/licenses/>.
+
+from serial import Serial, SerialException
 from threading import Thread
 from select import error as SelectError
 import time, getopt, sys
@@ -33,6 +47,7 @@ class printcore():
         self.endcb=None#impl ()
         self.onlinecb=None#impl ()
         self.loud=False#emit sent and received lines to terminal
+        self.greetings=['start','Grbl ']
         if port is not None and baud is not None:
             #print port, baud
             self.connect(port, baud)
@@ -86,6 +101,12 @@ class printcore():
                     break
                 else:
                     raise
+            except SerialException, e:
+                print "Can't read from printer (disconnected?)."
+                break
+            except OSError, e:
+                print "Can't read from printer (disconnected?)."
+                break
 
             if(len(line)>1):
                 self.log+=[line]
@@ -98,10 +119,10 @@ class printcore():
                     print "RECV: ",line.rstrip()
             if(line.startswith('DEBUG_')):
                 continue
-            if(line.startswith('start') or line.startswith('ok')):
+            if(line.startswith(tuple(self.greetings)) or line.startswith('ok')):
                 self.clear=True
-            if(line.startswith('start') or line.startswith('ok') or "T:" in line):
-                if (not self.online or line.startswith('start')) and self.onlinecb is not None:
+            if(line.startswith(tuple(self.greetings)) or line.startswith('ok') or "T:" in line):
+                if (not self.online or line.startswith(tuple(self.greetings))) and self.onlinecb is not None:
                     try:
                         self.onlinecb()
                     except:
@@ -265,7 +286,10 @@ class printcore():
                     self.sendcb(command)
                 except:
                     pass
-            self.printer.write(str(command+"\n"))
+            try:
+                self.printer.write(str(command+"\n"))
+            except SerialException, e:
+                print "Can't write to printer (disconnected?)."
 
 if __name__ == '__main__':
     baud = 115200

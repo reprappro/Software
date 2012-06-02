@@ -3,9 +3,9 @@ _Name                          	Value
 WindowPosition	700+0
 Open File for Multiply	
 Activate Multiply	True
-Center X (mm):	72.0
-Center Y (mm):	72.0
-Number of Columns (integer):	1
+Center X (mm):	70.0
+Center Y (mm):	70.0
+Number of Columns (integer):	2
 Number of Rows (integer):	1
 Reverse Sequence every Odd Layer	False
 Separation over Perimeter Width (ratio):	8.0

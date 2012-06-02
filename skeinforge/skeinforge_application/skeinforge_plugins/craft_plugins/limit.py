@@ -1,13 +1,15 @@
 #! /usr/bin/env python
 """
 This page is in the table of contents.
+This plugin limits the feed rate of the tool head, so that the stepper motors are not driven too fast and skip steps.
 
-Limit limts the feed rate of the tool head, so that the stepper motors are not driven too fast and skip steps.
+The limit manual page is at:
+http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Limit
 
 The maximum z feed rate is defined in speed.
 
 ==Operation==
-The default 'Activate Limit' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Limit' checkbox is on.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===Maximum Initial Feed Rate===
@@ -83,6 +85,7 @@ class LimitRepository:
 		'Set the default settings, execute title & settings fileName.'
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.limit.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Limit', self, '')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Limit')
 		self.activateLimit = settings.BooleanSetting().getFromValue('Activate Limit', self, True)
 		self.maximumInitialFeedRate = settings.FloatSpin().getFromValue(0.5, 'Maximum Initial Feed Rate (mm/s):', self, 10.0, 1.0)
 		self.executeTitle = 'Limit'
@@ -108,8 +111,8 @@ class LimitSkein:
 		self.repository = repository
 		self.lines = archive.getTextLines(gcodeText)
 		self.parseInitialization()
-		self.maximumZDrillFeedRatePerSecond = min(self.maximumZDrillFeedRatePerSecond, self.maximumZTravelFeedRatePerSecond)
-		self.maximumZFeedRatePerSecond = self.maximumZTravelFeedRatePerSecond
+		self.maximumZDrillFeedRatePerSecond = min(self.maximumZDrillFeedRatePerSecond, self.maximumZFeedRatePerSecond)
+		self.maximumZCurrentFeedRatePerSecond = self.maximumZFeedRatePerSecond
 		for lineIndex in xrange(self.lineIndex, len(self.lines)):
 			self.parseLine( lineIndex )
 		return self.distanceFeedRate.output.getvalue()
@@ -123,9 +126,9 @@ class LimitSkein:
 	def getZLimitedLine(self, deltaZ, distance, line, splitLine):
 		'Get a replaced z limited gcode movement line.'
 		zFeedRateSecond = self.feedRateMinute * deltaZ / distance / 60.0
-		if zFeedRateSecond <= self.maximumZFeedRatePerSecond:
+		if zFeedRateSecond <= self.maximumZCurrentFeedRatePerSecond:
 			return line
-		limitedFeedRateMinute = self.feedRateMinute * self.maximumZFeedRatePerSecond / zFeedRateSecond
+		limitedFeedRateMinute = self.feedRateMinute * self.maximumZCurrentFeedRatePerSecond / zFeedRateSecond
 		return self.distanceFeedRate.getLineWithFeedRate(limitedFeedRateMinute, line, splitLine)
 
 	def getZLimitedLineArc(self, line, splitLine):
@@ -162,8 +165,8 @@ class LimitSkein:
 				return
 			elif firstWord == '(<maximumZDrillFeedRatePerSecond>':
 				self.maximumZDrillFeedRatePerSecond = float(splitLine[1])
-			elif firstWord == '(<maximumZTravelFeedRatePerSecond>':
-				self.maximumZTravelFeedRatePerSecond = float(splitLine[1])
+			elif firstWord == '(<maximumZFeedRatePerSecond>':
+				self.maximumZFeedRatePerSecond = float(splitLine[1])
 			self.distanceFeedRate.addLine(line)
 
 	def parseLine( self, lineIndex ):
@@ -181,9 +184,9 @@ class LimitSkein:
 		elif firstWord == 'G2' or firstWord == 'G3':
 			line = self.getZLimitedLineArc(line, splitLine)
 		elif firstWord == 'M101':
-			self.maximumZFeedRatePerSecond = self.maximumZDrillFeedRatePerSecond
+			self.maximumZCurrentFeedRatePerSecond = self.maximumZDrillFeedRatePerSecond
 		elif firstWord == 'M103':
-			self.maximumZFeedRatePerSecond = self.maximumZTravelFeedRatePerSecond
+			self.maximumZCurrentFeedRatePerSecond = self.maximumZFeedRatePerSecond
 		self.distanceFeedRate.addLine(line)
 
 

@@ -28,7 +28,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 def getCraftSequence():
 	'Get the extrusion craft sequence.'
-	return 'carve scale bottom preface widen inset fill multiply speed temperature raft skirt chamber tower jitter clip stretch skin comb cool hop wipe oozebane splodge home lash fillet limit dimension unpause oozestep bookend export'.split()
+	return 'carve scale bottom preface widen inset fill multiply speed temperature raft skirt chamber tower jitter clip smooth stretch skin joris comb cool hop wipe oozebane dwindle splodge home lash fillet limit unpause dimension oozestep alteration export'.split()
 
 def getNewRepository():
 	'Get new repository.'
@@ -39,7 +39,7 @@ class ExtrusionRepository:
 	'A class to handle the export settings.'
 	def __init__(self):
 		'Set the default settings, execute title & settings fileName.'
-		skeinforge_profile.addListsSetCraftProfile( getCraftSequence(), 'ABS', self, 'skeinforge_plugins.profile_plugins.extrusion.html')
+		skeinforge_profile.addListsSetCraftProfile( getCraftSequence(), 'ABS', self, 'skeinforge_application.skeinforge_plugins.profile_plugins.extrusion.html')
 
 
 def main():

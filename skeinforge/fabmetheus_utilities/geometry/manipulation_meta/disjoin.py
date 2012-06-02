@@ -62,6 +62,7 @@ def processElementNodeByDerivation(derivation, elementNode):
 		print(targetElementNode)
 		print(derivation.elementNode)
 		return
+	matrix.getBranchMatrixSetElementNode(targetElementNode)
 	transformedVertexes = xmlObject.getTransformedVertexes()
 	if len(transformedVertexes) < 1:
 		print('Warning, transformedVertexes is zero in processElementNodeByDerivation in disjoin for:')
@@ -71,11 +72,10 @@ def processElementNodeByDerivation(derivation, elementNode):
 		return
 	elementNode.localName = 'group'
 	elementNode.getXMLProcessor().processElementNode(elementNode)
-	matrix.getBranchMatrixSetElementNode(targetElementNode)
 	targetChainMatrix = matrix.Matrix(xmlObject.getMatrixChainTetragrid())
 	minimumZ = boolean_geometry.getMinimumZ(xmlObject)
 	z = minimumZ + 0.5 * derivation.sheetThickness
-	zoneArrangement = triangle_mesh.ZoneArrangement(derivation.layerThickness, transformedVertexes)
+	zoneArrangement = triangle_mesh.ZoneArrangement(derivation.layerHeight, transformedVertexes)
 	oldVisibleString = targetElementNode.attributes['visible']
 	targetElementNode.attributes['visible'] = True
 	loops = boolean_geometry.getEmptyZLoops([xmlObject], derivation.importRadius, False, z, zoneArrangement)
@@ -109,10 +109,6 @@ class DisjoinDerivation:
 		'Set defaults.'
 		self.elementNode = elementNode
 		self.importRadius = setting.getImportRadius(elementNode)
-		self.layerThickness = setting.getLayerThickness(elementNode)
+		self.layerHeight = setting.getLayerHeight(elementNode)
 		self.sheetThickness = setting.getSheetThickness(elementNode)
 		self.targetElementNode = evaluate.getElementNodeByKey(elementNode, 'target')
-
-	def __repr__(self):
-		"Get the string representation of this DisjoinDerivation."
-		return str(self.__dict__)

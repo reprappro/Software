@@ -12,14 +12,14 @@ The default 'Activate Clip' checkbox is on.  When it is on, the functions descri
 ===Clip Over Perimeter Width===
 Default is 0.2.
 
-Defines the ratio of the amount each end of the loop is clipped over the perimeter width.  The total gap will therefore be twice the clip.  If the ratio is too high loops will have a gap, if the ratio is too low there will be a bulge at the loop ends.
+Defines the ratio of the amount each end of the loop is clipped over the edge width.  The total gap will therefore be twice the clip.  If the ratio is too high loops will have a gap, if the ratio is too low there will be a bulge at the loop ends.
 
-This setting will affect the output of clip, and the output of the skin.  In skin the half width perimeters will be clipped by according to this setting.
+This setting will affect the output of clip, and the output of the skin.  In skin the half width edges will be clipped by according to this setting.
 
 ===Maximum Connection Distance Over Perimeter Width===
 Default is ten.
 
-Defines the ratio of the maximum connection distance between loops over the perimeter width.
+Defines the ratio of the maximum connection distance between loops over the edge width.
 
 Clip will attempt to connect loops that end close to each other, combining them into a spiral, so that the extruder does not stop and restart.  This setting sets the maximum gap size to connect.  This feature can reduce the amount of extra material or gaps formed at the loop end.
 
@@ -62,19 +62,19 @@ __date__ = '$Date: 2008/21/04 $'
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 
 
-def getCraftedText( fileName, text, clipRepository = None ):
+def getCraftedText(fileName, text, repository=None):
 	"Clip a gcode linear move file or text."
-	return getCraftedTextFromText( archive.getTextIfEmpty(fileName, text), clipRepository )
+	return getCraftedTextFromText(archive.getTextIfEmpty(fileName, text), repository)
 
-def getCraftedTextFromText( gcodeText, clipRepository = None ):
+def getCraftedTextFromText(gcodeText, repository=None):
 	"Clip a gcode linear move text."
-	if gcodec.isProcedureDoneOrFileIsEmpty( gcodeText, 'clip'):
+	if gcodec.isProcedureDoneOrFileIsEmpty(gcodeText, 'clip'):
 		return gcodeText
-	if clipRepository == None:
-		clipRepository = settings.getReadRepository( ClipRepository() )
-	if not clipRepository.activateClip.value:
+	if repository == None:
+		repository = settings.getReadRepository(ClipRepository())
+	if not repository.activateClip.value:
 		return gcodeText
-	return ClipSkein().getCraftedGcode( clipRepository, gcodeText )
+	return ClipSkein().getCraftedGcode(gcodeText, repository)
 
 def getNewRepository():
 	'Get new repository.'
@@ -89,12 +89,12 @@ class ClipRepository:
 	"A class to handle the clip settings."
 	def __init__(self):
 		"Set the default settings, execute title & settings fileName."
-		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.clip.html', self )
-		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Clip', self, '')
+		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.clip.html', self)
+		self.fileNameInput = settings.FileNameInput().getFromFileName(fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Clip', self, '')
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Clip')
-		self.activateClip = settings.BooleanSetting().getFromValue('Activate Clip', self, True )
-		self.clipOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.1, 'Clip Over Perimeter Width (ratio):', self, 0.8, 0.5 )
-		self.maximumConnectionDistanceOverPerimeterWidth = settings.FloatSpin().getFromValue( 1.0, 'Maximum Connection Distance Over Perimeter Width (ratio):', self, 20.0, 10.0 )
+		self.activateClip = settings.BooleanSetting().getFromValue('Activate Clip', self, True)
+		self.clipOverEdgeWidth = settings.FloatSpin().getFromValue(0.1, 'Clip Over Perimeter Width (ratio):', self, 0.8, 0.5)
+		self.maximumConnectionDistanceOverEdgeWidth = settings.FloatSpin().getFromValue(1.0, 'Maximum Connection Distance Over Perimeter Width (ratio):', self, 20.0, 10.0)
 		self.executeTitle = 'Clip'
 
 	def execute(self):
@@ -110,10 +110,12 @@ class ClipSkein:
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.extruderActive = False
 		self.feedRateMinute = None
-		self.isLoopPerimeter = False
+		self.isEdge = False
+		self.isLoop = False
 		self.layerCount = settings.LayerCount()
 		self.loopPath = None
 		self.lineIndex = 0
+		self.oldConnectionPoint = None
 		self.oldLocation = None
 		self.oldWiddershins = None
 		self.travelFeedRateMinute = None
@@ -123,44 +125,39 @@ class ClipSkein:
 		if len(thread) > 0:
 			self.distanceFeedRate.addGcodeMovementZWithFeedRate( self.travelFeedRateMinute, thread[0], z )
 		else:
-			print( "zero length vertex positions array which was skipped over, this should never happen" )
+			print("zero length vertex positions array which was skipped over, this should never happen")
 		if len(thread) < 2:
-			print( "thread of only one point in clip, this should never happen" )
+			print("thread of only one point in clip, this should never happen")
 			print(thread)
 			return
 		self.distanceFeedRate.addLine('M101')
 		for point in thread[1 :]:
 			self.distanceFeedRate.addGcodeMovementZWithFeedRate( self.feedRateMinute, point, z )
 
-	def addSegmentToPixelTables( self, location, maskPixelTable, oldLocation ):
+	def addSegmentToPixelTables(self, location, oldLocation):
 		"Add the segment to the layer and mask table."
-#		segmentTable = {}
-		euclidean.addValueSegmentToPixelTable( oldLocation.dropAxis(), location.dropAxis(), self.layerPixelTable, None, self.layerPixelWidth )
-#		euclidean.addValueSegmentToPixelTable( oldLocation.dropAxis(), location.dropAxis(), segmentTable, None, self.layerPixelWidth )
-#		euclidean.addPixelTableToPixelTable( segmentTable, self.layerPixelTable )
-#		euclidean.addPixelTableToPixelTable( segmentTable, maskPixelTable )
-#		self.maskPixelTableTable[ location ] = maskPixelTable
-#		self.maskPixelTableTable[ oldLocation ] = maskPixelTable
+		euclidean.addValueSegmentToPixelTable(oldLocation, location, self.layerPixelTable, None, self.layerPixelWidth)
 
 	def addTailoredLoopPath(self, line):
 		"Add a clipped loop path."
 		if self.clipLength > 0.0:
 			removeTable = {}
-			euclidean.addLoopToPixelTable( self.loopPath.path, removeTable, self.layerPixelWidth )
+			euclidean.addLoopToPixelTable(self.loopPath.path, removeTable, self.layerPixelWidth)
 			euclidean.removePixelTableFromPixelTable( removeTable, self.layerPixelTable )
-			self.loopPath.path = euclidean.getClippedSimplifiedLoopPath(self.clipLength, self.loopPath.path, self.perimeterWidth)
+			self.loopPath.path = euclidean.getClippedSimplifiedLoopPath(self.clipLength, self.loopPath.path, self.edgeWidth)
 			euclidean.addLoopToPixelTable( self.loopPath.path, self.layerPixelTable, self.layerPixelWidth )
 		if self.oldWiddershins == None:
 			self.addGcodeFromThreadZ( self.loopPath.path, self.loopPath.z )
 		else:
 			if self.oldWiddershins != euclidean.isWiddershins( self.loopPath.path ):
 				self.loopPath.path.reverse()
-#			self.addGcodeFromThreadZ( self.loopPath.path, self.loopPath.z )
 			for point in self.loopPath.path:
 				self.distanceFeedRate.addGcodeMovementZWithFeedRate( self.feedRateMinute, point, self.loopPath.z )
-		if self.getNextThreadIsACloseLoop( self.loopPath.path ) and self.maximumConnectionDistance > 0.0:
-			self.oldWiddershins = euclidean.isWiddershins( self.loopPath.path )
+		if self.getNextThreadIsACloseLoop(self.loopPath.path):
+			self.oldConnectionPoint = self.loopPath.path[-1]
+			self.oldWiddershins = euclidean.isWiddershins(self.loopPath.path)
 		else:
+			self.oldConnectionPoint = None
 			self.oldWiddershins = None
 			self.distanceFeedRate.addLine(line)
 		self.loopPath = None
@@ -176,67 +173,52 @@ class ClipSkein:
 			return True
 		if segmentLength > self.maximumConnectionDistance:
 			return False
-		segment /= segmentLength
-		distance = self.connectingStepLength
-		segmentEndLength = segmentLength - self.connectingStepLength
-		while distance < segmentEndLength:
-			alongPoint = distance * segment + path[-1]
-			if not euclidean.getIsInFilledRegion( self.boundaryLoops, alongPoint ):
-				return False
-			distance += self.connectingStepLength
-#		removedLayerPixelTable = self.layerPixelTable.copy()
-#		if self.oldLocation in self.maskPixelTableTable:
-#			euclidean.removePixelTableFromPixelTable( self.maskPixelTableTable[ self.oldLocation ], removedLayerPixelTable )
-#		euclidean.addPathToPixelTable( path[ : - 2 ], removedLayerPixelTable, None, self.layerPixelWidth )
 		segmentTable = {}
 		euclidean.addSegmentToPixelTable( path[-1], locationComplex, segmentTable, 2.0, 2.0, self.layerPixelWidth )
-#		euclidean.addValueSegmentToPixelTable( path[-1], locationComplex, segmentTable, None, self.layerPixelWidth )
-#		euclidean.addValueSegmentToPixelTable( path[-1], locationComplex, segmentTable, None, self.layerPixelWidth )
-#		maskPixelTable = {}
-#		if location in self.maskPixelTableTable:
-#			maskPixelTable = self.maskPixelTableTable[ location ]
 		if euclidean.isPixelTableIntersecting( self.layerPixelTable, segmentTable, {} ):
-#		if euclidean.isPixelTableIntersecting( removedLayerPixelTable, segmentTable, {} ):
 			return False
 		euclidean.addValueSegmentToPixelTable( path[-1], locationComplex, self.layerPixelTable, None, self.layerPixelWidth )
-#		euclidean.addPixelTableToPixelTable( segmentTable, self.layerPixelTable )
 		return True
 
-	def getCraftedGcode( self, clipRepository, gcodeText ):
+	def getCraftedGcode(self, gcodeText, repository):
 		"Parse gcode text and store the clip gcode."
 		self.lines = archive.getTextLines(gcodeText)
-		self.parseInitialization( clipRepository )
+		self.repository = repository
+		self.parseInitialization()
 		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.parseLine(line)
 		return self.distanceFeedRate.output.getvalue()
 
-	def getNextThreadIsACloseLoop( self, path ):
+	def getNextThreadIsACloseLoop(self, path):
 		"Determine if the next thread is a loop."
-		if self.oldLocation == None:
+		if self.oldLocation == None or self.maximumConnectionDistance <= 0.0:
 			return False
+		isEdge = False
 		isLoop = False
 		location = self.oldLocation
-		for afterIndex in xrange( self.lineIndex + 1, len(self.lines) ):
-			line = self.lines[ afterIndex ]
+		for afterIndex in xrange(self.lineIndex + 1, len(self.lines)):
+			line = self.lines[afterIndex]
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
-			if firstWord == '(<loop>' or firstWord == '(<perimeter>':
-				isLoop = True
-			elif firstWord == 'G1':
+			if firstWord == 'G1':
 				location = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
+			elif firstWord == '(<loop>':
+				isLoop = True
+			elif firstWord == '(<edge>':
+				isEdge = True
 			elif firstWord == 'M101':
-				if not isLoop:
+				if isLoop != self.isLoop or isEdge != self.isEdge:
 					return False
-				return self.getConnectionIsCloseWithoutOverlap( location, path )
+				return self.getConnectionIsCloseWithoutOverlap(location, path)
 			elif firstWord == '(<layer>':
 				return False
 		return False
 
 	def isNextExtruderOn(self):
 		"Determine if there is an extruder on command before a move command."
-		for afterIndex in xrange( self.lineIndex + 1, len(self.lines) ):
-			line = self.lines[ afterIndex ]
+		for afterIndex in xrange(self.lineIndex + 1, len(self.lines)):
+			line = self.lines[afterIndex]
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
 			if firstWord == 'G1' or firstWord == 'M103':
@@ -245,21 +227,24 @@ class ClipSkein:
 				return True
 		return False
 
-	def linearMove( self, splitLine ):
+	def linearMove(self, splitLine):
 		"Add to loop path if this is a loop or path."
 		location = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
-		self.feedRateMinute = gcodec.getFeedRateMinute( self.feedRateMinute, splitLine )
-		if self.isLoopPerimeter:
+		self.feedRateMinute = gcodec.getFeedRateMinute(self.feedRateMinute, splitLine)
+		if self.isLoop or self.isEdge:
 			if self.isNextExtruderOn():
 				self.loopPath = euclidean.PathZ(location.z)
 		if self.loopPath == None:
 			if self.extruderActive:
 				self.oldWiddershins = None
 		else:
+			if self.oldConnectionPoint != None:
+				self.addSegmentToPixelTables(self.oldConnectionPoint, location.dropAxis())
+				self.oldConnectionPoint = None
 			self.loopPath.path.append(location.dropAxis())
 		self.oldLocation = location
 
-	def parseInitialization( self, clipRepository ):
+	def parseInitialization(self):
 		'Parse gcode initialization and store the parameters.'
 		for self.lineIndex in xrange(len(self.lines)):
 			line = self.lines[self.lineIndex]
@@ -269,14 +254,14 @@ class ClipSkein:
 			if firstWord == '(</extruderInitialization>)':
 				self.distanceFeedRate.addTagBracketedProcedure('clip')
 				return
-			elif firstWord == '(<perimeterWidth>':
-				self.distanceFeedRate.addTagBracketedLine('clipOverPerimeterWidth', clipRepository.clipOverPerimeterWidth.value)
-				self.perimeterWidth = float(splitLine[1])
-				absolutePerimeterWidth = abs( self.perimeterWidth )
-				self.clipLength = clipRepository.clipOverPerimeterWidth.value * self.perimeterWidth
-				self.connectingStepLength = 0.5 * absolutePerimeterWidth
-				self.layerPixelWidth = 0.1 * absolutePerimeterWidth
-				self.maximumConnectionDistance = clipRepository.maximumConnectionDistanceOverPerimeterWidth.value * absolutePerimeterWidth
+			elif firstWord == '(<edgeWidth>':
+				self.distanceFeedRate.addTagBracketedLine('clipOverEdgeWidth', self.repository.clipOverEdgeWidth.value)
+				self.edgeWidth = float(splitLine[1])
+				absoluteEdgeWidth = abs(self.edgeWidth)
+				self.clipLength = self.repository.clipOverEdgeWidth.value * self.edgeWidth
+				self.connectingStepLength = 0.5 * absoluteEdgeWidth
+				self.layerPixelWidth = 0.34321 * absoluteEdgeWidth
+				self.maximumConnectionDistance = self.repository.maximumConnectionDistanceOverEdgeWidth.value * absoluteEdgeWidth
 			elif firstWord == '(<travelFeedRatePerSecond>':
 				self.travelFeedRateMinute = 60.0 * float(splitLine[1])
 			self.distanceFeedRate.addLine(line)
@@ -289,18 +274,23 @@ class ClipSkein:
 		firstWord = splitLine[0]
 		if firstWord == 'G1':
 			self.linearMove(splitLine)
+		elif firstWord == '(<layer>':
+			self.setLayerPixelTable()
+		elif firstWord == '(<loop>':
+			self.isLoop = True
+		elif firstWord == '(</loop>)':
+			self.isLoop = False
 		elif firstWord == 'M101':
 			self.extruderActive = True
 		elif firstWord == 'M103':
 			self.extruderActive = False
-			self.isLoopPerimeter = False
 			if self.loopPath != None:
 				self.addTailoredLoopPath(line)
 				return
-		elif firstWord == '(<layer>':
-			self.setLayerPixelTable()
-		if firstWord == '(<loop>' or firstWord == '(<perimeter>':
-			self.isLoopPerimeter = True
+		elif firstWord == '(<edge>':
+			self.isEdge = True
+		elif firstWord == '(</edge>)':
+			self.isEdge = False
 		if self.loopPath == None:
 			self.distanceFeedRate.addLine(line)
 
@@ -309,36 +299,34 @@ class ClipSkein:
 		self.layerCount.printProgressIncrement('clip')
 		boundaryLoop = None
 		extruderActive = False
-		maskPixelTable = {}
-		self.boundaryLoops = []
-		self.maskPixelTableTable = {}
 		self.lastInactiveLocation = None
 		self.layerPixelTable = {}
 		oldLocation = self.oldLocation
-		for afterIndex in xrange( self.lineIndex + 1, len(self.lines) ):
+		for afterIndex in xrange(self.lineIndex + 1, len(self.lines)):
 			line = self.lines[ afterIndex ]
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
 			if firstWord == 'G1':
 				location = gcodec.getLocationFromSplitLine(oldLocation, splitLine)
 				if extruderActive and oldLocation != None:
-					self.addSegmentToPixelTables( location, maskPixelTable, oldLocation )
-				if not extruderActive:
+					self.addSegmentToPixelTables(location.dropAxis(), oldLocation.dropAxis())
+				if extruderActive:
+					if self.lastInactiveLocation != None:
+						self.addSegmentToPixelTables(self.lastInactiveLocation.dropAxis(), location.dropAxis())
+						self.lastInactiveLocation = None
+				else:
 					self.lastInactiveLocation = location
 				oldLocation = location
 			elif firstWord == 'M101':
 				extruderActive = True
 			elif firstWord == 'M103':
-				if extruderActive and self.lastInactiveLocation != None:
-					self.addSegmentToPixelTables( self.lastInactiveLocation, maskPixelTable, oldLocation )
 				extruderActive = False
-				maskPixelTable = {}
 			elif firstWord == '(</boundaryPerimeter>)':
+				euclidean.addLoopToPixelTable(boundaryLoop, self.layerPixelTable, self.layerPixelWidth)
 				boundaryLoop = None
 			elif firstWord == '(<boundaryPoint>':
 				if boundaryLoop == None:
 					boundaryLoop = []
-					self.boundaryLoops.append(boundaryLoop)
 				location = gcodec.getLocationFromSplitLine(None, splitLine)
 				boundaryLoop.append(location.dropAxis())
 			elif firstWord == '(</layer>)':

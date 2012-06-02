@@ -117,7 +117,7 @@ def getCarving(fileName=''):
 
 def getPluginsDirectoryPath():
 	"Get the plugins directory path."
-	return archive.archive.getInterpretPluginsPath('xml_plugins')
+	return archive.getInterpretPluginsPath('xml_plugins')
 
 def main():
 	"Display the inset dialog."

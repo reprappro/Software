@@ -1,7 +1,7 @@
 Format is tab separated skeinforge settings.
 _Name                          	Value
-WindowPosition	397+62
-Open File for Skeinforge	/home/jeanmarc/Documents/Models/eMAKER-Huxley/stl/nozzle-mounting.stl
+WindowPosition	606+37
+Open File for Skeinforge	/home/jeanmarc/Documents/Models/eMAKER-Huxley-experimental/stl/frame-vertex.stl
 analyze	False
 craft	True
 help	False

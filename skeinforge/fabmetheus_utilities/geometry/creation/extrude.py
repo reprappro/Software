@@ -305,10 +305,6 @@ class ExtrudeDerivation:
 		self.twistPathDefault = [Vector3(), Vector3(1.0, self.twist) ]
 		insertTwistPortions(self, elementNode)
 
-	def __repr__(self):
-		'Get the string representation of this ExtrudeDerivation.'
-		return str(self.__dict__)
-
 
 class Interpolation:
 	'Class to interpolate a path.'

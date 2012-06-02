@@ -101,7 +101,3 @@ class PegDerivation:
 		# Set derived variables.
 		self.bevel = evaluate.getEvaluatedFloat(self.bevelOverRadius * self.radiusArealized, elementNode, 'bevel')
 		self.clearance = evaluate.getEvaluatedFloat(self.clearanceOverRadius * self.radiusArealized, elementNode, 'clearance')
-
-	def __repr__(self):
-		'Get the string representation of this PegDerivation.'
-		return str(self.__dict__)

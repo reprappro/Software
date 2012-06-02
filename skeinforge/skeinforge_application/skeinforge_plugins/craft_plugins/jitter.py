@@ -1,18 +1,21 @@
 """
 This page is in the table of contents.
-Jitter jitters the loop end position to a different place on each layer to prevent the a ridge from forming.
+This craft tool jitters the loop end position to a different place on each layer to prevent a ridge from being created on the side of the object.
 
 The jitter manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Jitter
 
 ==Operation==
-The default 'Activate Jitter' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Jitter' checkbox is on.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===Jitter Over Perimeter Width===
-Default is two.
+Default: 2
 
-Defines the amount the loop ends will be jittered over the perimeter width.  A high value means the loops will start all over the place and a low value means loops will start at roughly the same place on each layer.
+Defines the amount the loop ends will be jittered over the edge width.  A high value means the loops will start all over the place and a low value means loops will start at roughly the same place on each layer.
+
+For example if you turn jitter off and print a cube every outside shell on the cube will start from exactly the same point so you will have a visible "mark/line/seam" on the side of the cube.  Using the jitter tool you move that start point around hence you avoid that visible seam. 
+
 
 ==Examples==
 The following examples jitter the file Screw Holder Bottom.stl.  The examples are run in a terminal in the folder which contains Screw Holder Bottom.stl and jitter.py.
@@ -114,7 +117,7 @@ class JitterRepository:
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Jitter', self, '')
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Jitter')
 		self.activateJitter = settings.BooleanSetting().getFromValue('Activate Jitter', self, True)
-		self.jitterOverPerimeterWidth = settings.FloatSpin().getFromValue(1.0, 'Jitter Over Perimeter Width (ratio):', self, 3.0, 2.0)
+		self.jitterOverEdgeWidth = settings.FloatSpin().getFromValue(1.0, 'Jitter Over Perimeter Width (ratio):', self, 3.0, 2.0)
 		self.executeTitle = 'Jitter'
 
 	def execute(self):
@@ -165,13 +168,13 @@ class JitterSkein:
 	def addTailoredLoopPath(self):
 		'Add a clipped and jittered loop path.'
 		loop = getJitteredLoop(self.layerJitter, self.loopPath.path[: -1])
-		loop = euclidean.getAwayPoints(loop, 0.2 * self.perimeterWidth)
+		loop = euclidean.getAwayPoints(loop, 0.2 * self.edgeWidth)
 		self.addGcodeFromThreadZ(loop + [loop[0]], self.loopPath.z)
 		self.loopPath = None
 
 	def getCraftedGcode(self, jitterRepository, gcodeText):
 		'Parse gcode text and store the jitter gcode.'
-		if jitterRepository.jitterOverPerimeterWidth.value == 0.0:
+		if jitterRepository.jitterOverEdgeWidth.value == 0.0:
 			print('Warning, Jitter Over Perimeter Width is zero so thing will be done.')
 			return gcodeText
 		self.lines = archive.getTextLines(gcodeText)
@@ -192,9 +195,9 @@ class JitterSkein:
 				return
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.operatingFeedRatePerMinute = 60.0 * float(splitLine[1])
-			elif firstWord == '(<perimeterWidth>':
-				self.perimeterWidth = float(splitLine[1])
-				self.jitter = jitterRepository.jitterOverPerimeterWidth.value * self.perimeterWidth
+			elif firstWord == '(<edgeWidth>':
+				self.edgeWidth = float(splitLine[1])
+				self.jitter = jitterRepository.jitterOverEdgeWidth.value * self.edgeWidth
 			elif firstWord == '(<travelFeedRatePerSecond>':
 				self.travelFeedRateMinute = 60.0 * float(splitLine[1])
 			self.distanceFeedRate.addLine(line)
@@ -221,7 +224,7 @@ class JitterSkein:
 			self.layerCount.printProgressIncrement('jitter')
 			self.layerGolden = math.fmod(self.layerGolden + 0.61803398874989479, 1.0)
 			self.layerJitter = self.jitter * self.layerGolden - 0.5
-		elif firstWord == '(<loop>' or firstWord == '(<perimeter>':
+		elif firstWord == '(<loop>' or firstWord == '(<edge>':
 			self.isLoopPerimeter = True
 		self.distanceFeedRate.addLine(line)
 

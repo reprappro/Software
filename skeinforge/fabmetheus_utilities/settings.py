@@ -31,7 +31,20 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 globalRepositoryDialogListTable = {}
 globalProfileSaveListenerListTable = {}
-globalCloseListTables = [ globalRepositoryDialogListTable, globalProfileSaveListenerListTable ]
+globalCloseListTables = [globalRepositoryDialogListTable, globalProfileSaveListenerListTable]
+globalSettingReplacements = {
+	'Perimeter Width over Thickness (ratio):' : 'Edge Width over Height (ratio):',
+	'Layer Thickness (mm):' : 'Layer Height (mm):',
+	'Location Arrival X (mm):' : 'Arrival X (mm):',
+	'Location Arrival Y (mm):' : 'Arrival Y (mm):',
+	'Location Arrival Z (mm):' : 'Arrival Z (mm):',
+	'Location Departure X (mm):' : 'Departure X (mm):',
+	'Location Departure Y (mm):' : 'Departure Y (mm):',
+	'Location Departure Z (mm):' : 'Departure Z (mm):',
+	'Location Wipe X (mm):' : 'Wipe X (mm):',
+	'Location Wipe Y (mm):' : 'Wipe Y (mm):',
+	'Location Wipe Z (mm):' : 'Wipe Z (mm):'
+	}
 globalSpreadsheetSeparator = '\t'
 globalTemporaryOverrides = {}
 
@@ -67,6 +80,7 @@ def addListsToRepositoryByFunction(fileNameHelp, getProfileDirectory, repository
 	repository.lowerName = fileNameHelp.split('.')[-2]
 	repository.baseName = repository.lowerName + '.csv'
 	repository.baseNameSynonym = None
+	repository.baseNameSynonymDictionary = None
 	repository.capitalizedName = getEachWordCapitalized( repository.lowerName )
 	repository.getProfileDirectory = getProfileDirectory
 	repository.openLocalHelpPage = HelpPage().getOpenFromDocumentationSubName( repository.fileNameHelp )
@@ -253,15 +267,7 @@ def getPathInFabmetheusFromFileNameHelp( fileNameHelp ):
 
 def getProfileBaseName(repository):
 	"Get the profile base file name."
-	if repository.getProfileDirectory == None:
-		return repository.baseName
-	return os.path.join(repository.getProfileDirectory(), repository.baseName)
-
-def getProfileBaseNameSynonym(repository):
-	"Get the profile base file name synonym."
-	if repository.getProfileDirectory == None:
-		return repository.baseNameSynonym
-	return os.path.join(repository.getProfileDirectory(), repository.baseNameSynonym)
+	return getProfileName(repository.baseName, repository)
 
 def getProfilesDirectoryInAboveDirectory(subName=''):
 	"Get the profiles directory path in the above directory."
@@ -269,6 +275,12 @@ def getProfilesDirectoryInAboveDirectory(subName=''):
 	if subName == '':
 		return aboveProfilesDirectory
 	return os.path.join( aboveProfilesDirectory, subName )
+
+def getProfileName(name, repository):
+	"Get the name, joined with the profile directory if there is one."
+	if repository.getProfileDirectory == None:
+		return name
+	return os.path.join(repository.getProfileDirectory(), name)
 
 def getRadioPluginsAddPluginFrame( directoryPath, importantFileNames, names, repository ):
 	"Get the radio plugins and add the plugin frame."
@@ -287,7 +299,7 @@ def getReadRepository(repository):
 	text = archive.getFileText(archive.getProfilesPath(getProfileBaseName(repository)), False)
 	if text == '':
 		if repository.baseNameSynonym != None:
-			text = archive.getFileText(archive.getProfilesPath(getProfileBaseNameSynonym(repository)), False)
+			text = archive.getFileText(archive.getProfilesPath(getProfileName(repository.baseNameSynonym, repository)), False)
 	if text == '':
 		print('The default %s will be written in the .skeinforge folder in the home directory.' % repository.title.lower() )
 		text = archive.getFileText(getProfilesDirectoryInAboveDirectory(getProfileBaseName(repository)), False)
@@ -339,7 +351,7 @@ def getSelectedRadioPlugin( names, radioPlugins ):
 				radioPlugin.value = True
 				return radioPlugin
 	print('this should never happen, no getSelectedRadioPlugin in settings')
-	print( names )
+	print(names)
 	return radioPlugin[0]
 
 def getShortestUniqueSettingName(settingName, settings):
@@ -430,7 +442,7 @@ def openWebPage( webPagePath ):
 		except:
 			pass
 		print('Skeinforge was not able to open the file in a web browser.  To see the documentation, open the following file in a web browser:')
-		print( webPagePath )
+		print(webPagePath)
 		return
 	else:
 		os.system(webbrowserName + ' ' + webPagePath)#used this instead of webbrowser.open() to workaround webbrowser open() bug
@@ -470,6 +482,21 @@ def readSettingsFromText(repository, text):
 	shortDictionary = {}
 	for setting in repository.preferences:
 		shortDictionary[getShortestUniqueSettingName(setting.name, repository.preferences)] = setting
+	if repository.baseNameSynonymDictionary != None:
+		synonymDictionaryCopy = repository.baseNameSynonymDictionary.copy()
+		for line in lines:
+			splitLine = line.split(globalSpreadsheetSeparator)
+			if len(splitLine) > 1:
+				if splitLine[0] in synonymDictionaryCopy:
+					del synonymDictionaryCopy[splitLine[0]]
+		for synonymDictionaryCopyKey in synonymDictionaryCopy.keys():
+			text = archive.getFileText(archive.getProfilesPath(getProfileName(synonymDictionaryCopy[synonymDictionaryCopyKey], repository)), False)
+			synonymLines = archive.getTextLines(text)
+			for synonymLine in synonymLines:
+				splitLine = synonymLine.split(globalSpreadsheetSeparator)
+				if len(splitLine) > 1:
+					if splitLine[0] == synonymDictionaryCopyKey:
+						lines.append(synonymLine)
 	for lineIndex in xrange(len(lines)):
 		setRepositoryToLine(lineIndex, lines, shortDictionary)
 
@@ -497,12 +524,12 @@ def setButtonFontWeightString( button, isBold ):
 	except:
 		pass
 
-def setEntryText( entry, value ):
+def setEntryText(entry, value):
 	"Set the entry text."
 	if entry == None:
 		return
-	entry.delete( 0, Tkinter.END )
-	entry.insert( 0, str(value) )
+	entry.delete(0, Tkinter.END)
+	entry.insert(0, str(value))
 
 def setIntegerValueToString( integerSetting, valueString ):
 	"Set the integer to the string."
@@ -520,12 +547,14 @@ def setIntegerValueToString( integerSetting, valueString ):
 		integerSetting.value = 1
 
 def setRepositoryToLine(lineIndex, lines, shortDictionary):
-	"Set setting dictionary to a setting line."
+	"Set setting dictionary to a setting line.globalSettingReplacements"
 	line = lines[lineIndex]
 	splitLine = line.split(globalSpreadsheetSeparator)
 	if len(splitLine) < 2:
 		return
 	fileSettingName = splitLine[0]
+	if fileSettingName in globalSettingReplacements:
+		fileSettingName = globalSettingReplacements[fileSettingName]
 	shortDictionaryKeys = shortDictionary.keys()
 	shortDictionaryKeys.sort(key=len, reverse=True) # so that a short word like fill is not overidden by a longer word like fillet
 	for shortDictionaryKey in shortDictionaryKeys:
@@ -610,7 +639,7 @@ def writeSettings(repository):
 def writeSettingsPrintMessage(repository):
 	"Set the settings to the dialog then write them."
 	writeSettings(repository)
-	print( repository.title.lower().capitalize() + ' have been saved.')
+	print(repository.title.lower().capitalize() + ' have been saved.')
 
 def writeValueListToRepositoryWriter( repositoryWriter, setting ):
 	"Write tab separated name and list to the repository writer."
@@ -698,7 +727,7 @@ class StringSetting:
 
 	def setStateToValue(self):
 		"Set the entry to the value."
-		setEntryText( self.entry, self.value )
+		setEntryText(self.entry, self.value)
 
 	def setToDisplay(self):
 		"Set the string to the entry field."
@@ -1322,11 +1351,12 @@ class LabelDisplay:
 		"Add this to the dialog."
 		gridPosition.increment()
 		self.label = Tkinter.Label( gridPosition.master, text = self.name )
-		self.label.grid( row = gridPosition.row, column = 0, columnspan = 3, sticky = Tkinter.W )
+		self.label.grid( row = gridPosition.row, column = 0, columnspan = self.columnspan, sticky = Tkinter.W )
 		LabelHelp( self.repository.fileNameHelp, gridPosition.master, self.name, self.label )
 
 	def getFromName( self, name, repository ):
 		"Initialize."
+		self.columnspan = 3
 		self.name = name
 		self.repository = repository
 		repository.displayEntities.append(self)
@@ -1408,7 +1438,7 @@ class LayerCount:
 	'A class to handle the layerIndex.'
 	def __init__(self):
 		'Initialize.'
-		self.layerIndex = 0
+		self.layerIndex = -1
 
 	def __repr__(self):
 		'Get the string representation of this LayerCount.'
@@ -1416,8 +1446,8 @@ class LayerCount:
 
 	def printProgressIncrement(self, procedureName):
 		'Print progress then increment layerIndex.'
-		printProgress(self.layerIndex, procedureName)
 		self.layerIndex += 1
+		printProgress(self.layerIndex, procedureName)
 
 
 class MenuButtonDisplay:
@@ -1431,7 +1461,7 @@ class MenuButtonDisplay:
 		"Add this to the repository menu."
 		if len( self.menuRadios ) < 1:
 			print('The MenuButtonDisplay in settings should have menu items.')
-			print( self.name )
+			print(self.name)
 			return
 		self.menu = Tkinter.Menu( repositoryMenu, tearoff = 0 )
 		repositoryMenu.add_cascade( label = getTitleFromName( self.name ), menu = self.menu )
@@ -1446,6 +1476,7 @@ class MenuButtonDisplay:
 
 	def getFromName( self, name, repository ):
 		"Initialize."
+		self.columnspan = 2
 		self.menuRadios = []
 		self.name = name
 		self.radioVar = None
@@ -1473,10 +1504,10 @@ class MenuButtonDisplay:
 		self.label = Tkinter.Label( gridPosition.master, text = self.name )
 		self.label.grid( row = gridPosition.row, column = 0, columnspan = 3, sticky = Tkinter.W )
 		self.menuButton = Tkinter.OptionMenu( gridPosition.master, self.radioVar, self.optionList )
-		self.menuButton.grid( row = gridPosition.row, column = 3, columnspan = 2, sticky = Tkinter.W )
+		self.menuButton.grid( row = gridPosition.row, column = 3, columnspan = self.columnspan, sticky = Tkinter.W )
 		self.menuButton.menu = Tkinter.Menu( self.menuButton, tearoff = 0 )
 		self.menu = self.menuButton.menu
-		self.menuButton['menu']  =  self.menu
+		self.menuButton['menu'] = self.menu
 		LabelHelp( self.repository.fileNameHelp, gridPosition.master, self.name, self.label )
 
 
@@ -1601,7 +1632,7 @@ class PluginFrame:
 		gridVertical.canvas['yscrollcommand'] = gridVertical.yScrollbar.set
 		gridVertical.canvas.create_window( 0, 0, anchor = Tkinter.NW, window = gridVertical.frameGridVertical.master )
 		gridVertical.canvas['scrollregion'] = gridVertical.frameGridVertical.master.grid_bbox()
-		gridVertical.canvas.grid( row = gridVertical.row, column = gridVertical.column, columnspan = 11, sticky = Tkinter.E + Tkinter.W + Tkinter.N + Tkinter.S )
+		gridVertical.canvas.grid( row = gridVertical.row, column = gridVertical.column, columnspan = 12, sticky = Tkinter.E + Tkinter.W + Tkinter.N + Tkinter.S )
 		gridVertical.master.grid_rowconfigure( gridVertical.row, weight = 1 )
 		gridVertical.master.grid_columnconfigure( gridVertical.column + 11, weight = 1 )
 		gridVertical.frameGridVertical.master.lift()

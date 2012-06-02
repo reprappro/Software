@@ -6,21 +6,21 @@ The tower manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Tower
 
 ==Operation==
-The default 'Activate Tower' checkbox is off.  The default is off because tower could result in the extruder colliding with an already extruded part of the shape and because extruding in one region for more than one layer could result in the shape melting.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Tower' checkbox is off.  The default is off because tower could result in the extruder colliding with an already extruded part of the shape and because extruding in one region for more than one layer could result in the shape melting.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===Maximum Tower Height===
-Default is five.
+Default: 5
 
 Defines the maximum number of layers that the extruder will extrude in one region before going to another.  This is the most important value for tower.
 
 ===Extruder Possible Collision Cone Angle===
-Default is sixty degrees.
+Default: 60 degrees
 
 Tower works by looking for islands in each layer and if it finds another island in the layer above, it goes to the next layer above instead of going across to other regions on the original layer.  It checks for collision with shapes already extruded within a cone from the nozzle tip.  The 'Extruder Possible Collision Cone Angle' setting is the angle of that cone.  Realistic values for the cone angle range between zero and ninety.  The higher the angle, the less likely a collision with the rest of the shape is, generally the extruder will stay in the region for only a few layers before a collision is detected with the wide cone.
 
 ===Tower Start Layer===
-Default is one.
+Default: 1
 
 Defines the layer index which the script starts extruding towers, after the last raft layer which does not have support material.  It is best to not tower at least the first layer because the temperature of the first layer is sometimes different than that of the other layers.
 
@@ -143,6 +143,7 @@ class TowerSkein:
 		self.afterExtrusionLines = []
 		self.beforeExtrusionLines = []
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
+		self.edgeWidth = 0.6
 		self.highestZ = - 987654321.0
 		self.island = None
 		self.layerIndex = 0
@@ -152,7 +153,6 @@ class TowerSkein:
 		self.oldLayerIndex = None
 		self.oldLocation = None
 		self.oldOrderedLocation = Vector3()
-		self.perimeterWidth = 0.6
 		self.shutdownLineIndex = sys.maxint
 		self.nestedRingCount = 0
 		self.threadLayer = None
@@ -198,7 +198,7 @@ class TowerSkein:
 
 	def climbTower( self, removedIsland ):
 		"Climb up the island to any islands directly above."
-		outsetDistance = 1.5 * self.perimeterWidth
+		outsetDistance = 1.5 * self.edgeWidth
 		for step in xrange( self.towerRepository.maximumTowerHeight.value ):
 			aboveIndex = self.oldLayerIndex + 1
 			if aboveIndex >= len( self.threadLayers ):
@@ -256,7 +256,7 @@ class TowerSkein:
 		closestDistance = 999999999987654321.0
 		closestNestedRing = None
 		for remainingNestedRing in remainingNestedRings:
-			distance = euclidean.getNearestDistanceIndex(oldOrderedLocation.dropAxis(), remainingNestedRing.boundary).distance
+			distance = euclidean.getClosestDistanceIndexToLine(oldOrderedLocation.dropAxis(), remainingNestedRing.boundary).distance
 			if distance < closestDistance:
 				closestDistance = distance
 				closestNestedRing = remainingNestedRing
@@ -284,7 +284,7 @@ class TowerSkein:
 		coneAngleTangent = math.tan( math.radians( self.towerRepository.extruderPossibleCollisionConeAngle.value ) )
 		for layerIndex in xrange( bottomLayerIndex, untilLayerIndex ):
 			islands = self.threadLayers[layerIndex].islands
-			outsetDistance = self.perimeterWidth * ( untilLayerIndex - layerIndex ) * coneAngleTangent + 0.5 * self.perimeterWidth
+			outsetDistance = self.edgeWidth * ( untilLayerIndex - layerIndex ) * coneAngleTangent + 0.5 * self.edgeWidth
 			for belowIsland in self.threadLayers[layerIndex].islands:
 				outsetIslandLoop = belowIsland.boundingLoop.getOutsetBoundingLoop( outsetDistance )
 				if island.boundingLoop.isOverlappingAnother( outsetIslandLoop ):
@@ -314,10 +314,10 @@ class TowerSkein:
 				self.distanceFeedRate.addTagBracketedProcedure('tower')
 			elif firstWord == '(<layer>':
 				return
-			elif firstWord == '(<layerThickness>':
+			elif firstWord == '(<layerHeight>':
 				self.minimumBelow = 0.1 * float(splitLine[1])
-			elif firstWord == '(<perimeterWidth>':
-				self.perimeterWidth = float(splitLine[1])
+			elif firstWord == '(<edgeWidth>':
+				self.edgeWidth = float(splitLine[1])
 			elif firstWord == '(<travelFeedRatePerSecond>':
 				self.travelFeedRateMinute = 60.0 * float(splitLine[1])
 			self.distanceFeedRate.addLine(line)
@@ -356,7 +356,7 @@ class TowerSkein:
 				self.island = Island()
 				self.addThreadLayerIfNone()
 				self.threadLayer.islands.append( self.island )
-		elif firstWord == '(</perimeter>)':
+		elif firstWord == '(</edge>)':
 			self.afterExtrusionLines = []
 		if self.island != None:
 			self.island.lines.append(line)

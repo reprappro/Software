@@ -2,17 +2,25 @@
 This page is in the table of contents.
 Hop is a script to raise the extruder when it is not extruding.
 
+Note: 
+
+Note: In some cases where you have thin overhang this plugin can help solve the problem object being knocked off by the head
+
 The hop manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Hop
 
 ==Operation==
-The default 'Activate Hop' checkbox is off.  It is off because Vik and Nophead found better results without hopping.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Hop' checkbox is off.
+
+It is off because Vik and Nophead found better results without hopping.  Numerous users reported better output without this plugin hence it is off by default.  
+
+When activated the extruder will hop when traveling.  When it is off, nothing will be done.
 
 ==Settings==
 ===Hop Over Layer Thickness===
 Default is one.
 
-Defines the ratio of the hop height over the layer thickness, this is the most important hop setting.
+Defines the ratio of the hop height over the layer height, this is the most important hop setting.
 
 ===Minimum Hop Angle===
 Default is 20 degrees.
@@ -107,6 +115,7 @@ class HopSkein:
 		self.hopHeight = 0.4
 		self.hopDistance = self.hopHeight
 		self.justDeactivated = False
+		self.layerCount = settings.LayerCount()
 		self.lineIndex = 0
 		self.lines = None
 		self.oldLocation = None
@@ -171,11 +180,11 @@ class HopSkein:
 			splitLine = gcodec.getSplitLineBeforeBracketSemicolon(line)
 			firstWord = gcodec.getFirstWord(splitLine)
 			self.distanceFeedRate.parseSplitLine(firstWord, splitLine)
-			if firstWord == '(<layerThickness>':
-				layerThickness = float(splitLine[1])
-				self.hopHeight = hopRepository.hopOverLayerThickness.value * layerThickness
+			if firstWord == '(<layerHeight>':
+				layerHeight = float(splitLine[1])
+				self.hopHeight = hopRepository.hopOverLayerThickness.value * layerHeight
 				self.hopDistance = self.hopHeight / self.minimumSlope
-				self.minimumDistance = 0.5 * layerThickness
+				self.minimumDistance = 0.5 * layerHeight
 			elif firstWord == '(</extruderInitialization>)':
 				self.distanceFeedRate.addTagBracketedProcedure('hop')
 				return
@@ -193,6 +202,8 @@ class HopSkein:
 			line = self.getHopLine(line)
 			self.oldLocation = gcodec.getLocationFromSplitLine(self.oldLocation, splitLine)
 			self.justDeactivated = False
+		elif firstWord == '(<layer>':
+			self.layerCount.printProgressIncrement('hop')
 		elif firstWord == 'M101':
 			self.extruderActive = True
 		elif firstWord == 'M103':

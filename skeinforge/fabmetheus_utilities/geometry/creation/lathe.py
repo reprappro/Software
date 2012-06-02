@@ -174,7 +174,3 @@ class LatheDerivation:
 		if len(self.loop) < 1:
 			self.loop = euclidean.getComplexPolygonByStartEnd(endRadian, 1.0, self.sides, startRadian)
 		self.normal = euclidean.getNormalByPath(firstPath)
-
-	def __repr__(self):
-		"Get the string representation of this LatheDerivation."
-		return str(self.__dict__)

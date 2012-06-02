@@ -222,7 +222,7 @@ class oozestepSkein:
 				return
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.feed = 60.0 * float(splitLine[1])
-			elif line.find('Absolute_Extrusion_Distance') > 0:
+			elif line.find('Absolute_Extrusion_Distance True') > 0:
 				self.eAbsolute = True
 			elif line.find('Retraction_Distance_(millimeters):') > 0:
 				self.retractAmount = float(splitLine[3])
@@ -382,6 +382,7 @@ class oozestepSkein:
 						#print 'b'
 						mX = self.currPos[X] + ((Segment[X] - self.currPos[X]) * dXY)
 						mY = self.currPos[Y] + ((Segment[Y] - self.currPos[Y]) * dXY)
+						#sometimes breaks when retract within islands is off?!
 						self.move_XY( [mX , mY , self.nextPathPressDist * mXY / self.repository.nextPathPressXY.value ] , feed )
 						feed = self.xyFeed
 						#print 'c'

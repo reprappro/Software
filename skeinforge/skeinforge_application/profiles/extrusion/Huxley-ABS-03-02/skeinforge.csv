@@ -1,0 +1,9 @@
+Format is tab separated skeinforge settings.
+_Name                          	Value
+WindowPosition	462+42
+Open File for Skeinforge	/home/jeanmarc/Documents/Models/things/whistle two tone thing 16286/two-whistles.stl
+analyze	False
+craft	True
+help	False
+meta	False
+profile	False

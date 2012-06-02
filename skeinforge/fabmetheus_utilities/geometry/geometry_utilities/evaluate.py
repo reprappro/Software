@@ -217,6 +217,7 @@ def getElementNodeObject(evaluatedLinkValue):
 	'Get ElementNodeObject.'
 	if evaluatedLinkValue.__class__.__name__ != 'ElementNode':
 		print('Warning, could not get ElementNode in getElementNodeObject in evaluate for:')
+		print(evaluatedLinkValue.__class__.__name__)
 		print(evaluatedLinkValue)
 		return None
 	if evaluatedLinkValue.xmlObject == None:
@@ -344,12 +345,6 @@ def getEvaluatedFloat(defaultValue, elementNode, key):
 		return defaultValue
 	if key in elementNode.attributes:
 		return euclidean.getFloatFromValue(getEvaluatedValueObliviously(elementNode, key))
-	return defaultValue
-
-def getEvaluatedFloatByKeys(defaultValue, elementNode, keys):
-	'Get the evaluated float by keys.'
-	for key in keys:
-		defaultValue = getEvaluatedFloat(defaultValue, elementNode, key)
 	return defaultValue
 
 def getEvaluatedInt(defaultValue, elementNode, key):
@@ -644,7 +639,7 @@ def getRadiusArealizedBasedOnAreaRadius(elementNode, radius, sides):
 
 def getSidesBasedOnPrecision(elementNode, radius):
 	'Get the number of polygon sides.'
-	return int(math.ceil(math.sqrt(0.5 * radius * math.pi * math.pi / setting.getPrecision(elementNode))))
+	return int(math.ceil(math.sqrt(0.5 * radius / setting.getPrecision(elementNode)) * math.pi))
 
 def getSidesMinimumThreeBasedOnPrecision(elementNode, radius):
 	'Get the number of polygon sides, with a minimum of three.'
@@ -927,13 +922,13 @@ def setFunctionLocalDictionary(arguments, function):
 				print(strippedWord)
 				print(parameterWords)
 				print(arguments)
-				print( function.elementNode.attributes )
+				print(function.elementNode.attributes)
 			else:
 				strippedValue = strippedValue.strip()
 			function.localDictionary[keyValue.key.strip()] = strippedValue
 	if len(arguments) > len(parameterWords):
 		print('Warning there are too many initializeFunction parameters for:')
-		print( function.elementNode.attributes )
+		print(function.elementNode.attributes)
 		print(parameterWords)
 		print(arguments)
 
@@ -1018,6 +1013,13 @@ class ClassObject:
 		'Set the accessible attribute.'
 		if attributeName in self.selfDictionary:
 			self.selfDictionary[attributeName] = value
+
+
+class EmptyObject:
+	'An empty object.'
+	def __init__(self):
+		'Do nothing.'
+		pass
 
 
 class Evaluator:
@@ -1273,7 +1275,7 @@ class EvaluatorSubtraction(EvaluatorAddition):
 		rightValue = evaluators[rightIndex].value
 		if rightValue == None:
 			print('Warning, can not minus.')
-			print( evaluators[rightIndex].word )
+			print(evaluators[rightIndex].word)
 		else:
 			evaluators[rightIndex].value = self.getNegativeValue(rightValue)
 		del evaluators[evaluatorIndex]

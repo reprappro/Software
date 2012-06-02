@@ -114,7 +114,3 @@ class TeardropDerivation:
 		if self.sides == None:
 			self.sides = evaluate.getSidesMinimumThreeBasedOnPrecisionSides(elementNode, self.radius)
 		self.radiusArealized = evaluate.getRadiusArealizedBasedOnAreaRadius(elementNode, self.radius, self.sides)
-
-	def __repr__(self):
-		"Get the string representation of this TeardropDerivation."
-		return str(self.__dict__)

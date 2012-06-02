@@ -1,7 +1,7 @@
 Format is tab separated skeinforge settings.
 _Name                          	Value
-WindowPosition	95+24
-Open File for Skeinforge	/home/jeanmarc/Documents/Models/test parts/stl/r10sphere.stl
+WindowPosition	469+42
+Open File for Skeinforge	/home/jeanmarc/Documents/Models/RepRapPro/Barry McCaul/test-ring-1_flat.stl
 analyze	False
 craft	True
 help	False

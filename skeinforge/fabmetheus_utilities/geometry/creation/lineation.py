@@ -106,10 +106,15 @@ def getFloatByPrefixBeginEnd(elementNode, prefixBegin, prefixEnd, valueFloat):
 		return 0.5 * evaluate.getEvaluatedFloat(valueFloat + valueFloat, elementNode, prefixEnd)
 	return valueFloat
 
-def getFloatByPrefixSide(elementNode, prefix, side):
+def getFloatByPrefixSide(defaultValue, elementNode, prefix, side):
 	'Get float by prefix and side.'
-	floatByDenominatorPrefix = evaluate.getEvaluatedFloat(0.0, elementNode, prefix)
-	return floatByDenominatorPrefix + evaluate.getEvaluatedFloat(0.0, elementNode,  prefix + 'OverSide') * side
+	if elementNode == None:
+		return defaultValue
+	if side != None:
+		key = prefix + 'OverSide'
+		if key in elementNode.attributes:
+			defaultValue = euclidean.getFloatFromValue(evaluate.getEvaluatedValueObliviously(elementNode, key)) * side
+	return evaluate.getEvaluatedFloat(defaultValue, elementNode, prefix)
 
 def getGeometryOutput(derivation, elementNode):
 	'Get geometry output from paths.'
@@ -135,9 +140,14 @@ def getGeometryOutputByManipulation(elementNode, sideLoop):
 	sideLoop.loop = euclidean.getLoopWithoutCloseSequentialPoints( sideLoop.close, sideLoop.loop )
 	return sideLoop.getManipulationPluginLoops(elementNode)
 
-def getMinimumRadius( beginComplexSegmentLength, endComplexSegmentLength, radius ):
+def getInradius(defaultInradius, elementNode):
+	'Get inradius.'
+	defaultInradius = getComplexByPrefixes(elementNode, ['demisize', 'inradius'], defaultInradius)
+	return getComplexByMultiplierPrefix(elementNode, 2.0, 'size', defaultInradius)
+
+def getMinimumRadius(beginComplexSegmentLength, endComplexSegmentLength, radius):
 	'Get minimum radius.'
-	return min( abs(radius), 0.5 * min( beginComplexSegmentLength, endComplexSegmentLength ) )
+	return min(abs(radius), 0.5 * min(beginComplexSegmentLength, endComplexSegmentLength))
 
 def getNewDerivation(elementNode):
 	'Get new derivation.'
@@ -157,12 +167,6 @@ def getRadiusAverage(radiusComplex):
 	'Get average radius from radiusComplex.'
 	return math.sqrt(radiusComplex.real * radiusComplex.imag)
 
-def getRadiusByPrefix(elementNode, prefix, sideLength):
-	'Get radius by prefix.'
-	radius = getFloatByPrefixSide(elementNode, prefix + 'radius', sideLength)
-	radius += 0.5 * getFloatByPrefixSide(elementNode, prefix + 'diameter', sideLength)
-	return radius + 0.5 * getFloatByPrefixSide(elementNode, prefix + 'size', sideLength)
-
 def getRadiusComplex(elementNode, radius):
 	'Get radius complex for elementNode.'
 	radius = getComplexByPrefixes(elementNode, ['demisize', 'radius'], radius)
@@ -179,9 +183,13 @@ def processElementNode(elementNode):
 
 def processElementNodeByFunction(elementNode, manipulationFunction):
 	'Process the xml element by the manipulationFunction.'
+	elementAttributesCopy = elementNode.attributes.copy()
 	targets = evaluate.getElementNodesByKey(elementNode, 'target')
 	for target in targets:
+		targetAttributesCopy = target.attributes.copy()
+		target.attributes = elementAttributesCopy
 		processTargetByFunction(manipulationFunction, target)
+		target.attributes = targetAttributesCopy
 
 def processTargetByFunction(manipulationFunction, target):
 	'Process the target by the manipulationFunction.'
@@ -222,10 +230,6 @@ class LineationDerivation:
 	def __init__(self, elementNode):
 		'Set defaults.'
 		self.target = evaluate.getTransformedPathsByKey([], elementNode, 'target')
-
-	def __repr__(self):
-		'Get the string representation of this LineationDerivation.'
-		return str(self.__dict__)
 
 
 class SideLoop:

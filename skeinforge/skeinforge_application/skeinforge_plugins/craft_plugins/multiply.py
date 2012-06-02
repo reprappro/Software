@@ -1,6 +1,8 @@
 """
 This page is in the table of contents.
-Multiply is a script to multiply the shape into an array of copies arranged in a table.
+The multiply plugin will take a single object and create an array of objects.  It is used when you want to print single object multiple times in a single pass.
+
+You can also position any object using this plugin by setting the center X and center Y to the desired coordinates (0,0 for the center of the print_bed) and setting the number of rows and columns to 1 (effectively setting a 1x1 matrix - printing only a single object).
 
 The multiply manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Multiply
@@ -8,7 +10,7 @@ http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Multiply
 Besides using the multiply tool, another way of printing many copies of the model is to duplicate the model in Art of Illusion, however many times you want, with the appropriate offsets.  Then you can either use the Join Objects script in the scripts submenu to create a combined shape or you can export the whole scene as an xml file, which skeinforge can then slice.
 
 ==Operation==
-The default 'Activate Multiply' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Multiply' checkbox is on.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===Center===
@@ -38,7 +40,7 @@ When selected the build sequence will be reversed on every odd layer so that the
 ===Separation over Perimeter Width===
 Default is fifteen.
 
-Defines the ratio of separation between the shape copies over the extrusion width.
+Defines the ratio of separation between the shape copies over the edge width.
 
 ==Examples==
 The following examples multiply the file Screw Holder Bottom.stl.  The examples are run in a terminal in the folder which contains Screw Holder Bottom.stl and multiply.py.
@@ -121,8 +123,7 @@ class MultiplyRepository:
 		self.numberOfRows = settings.IntSpin().getFromValue(1, 'Number of Rows (integer):', self, 10, 1)
 		settings.LabelSeparator().getFromRepository(self)
 		self.reverseSequenceEveryOddLayer = settings.BooleanSetting().getFromValue('Reverse Sequence every Odd Layer', self, False)
-		self.separationOverPerimeterWidth = settings.FloatSpin().getFromValue(
-			5.0, 'Separation over Perimeter Width (ratio):', self, 25.0, 15.0)
+		self.separationOverEdgeWidth = settings.FloatSpin().getFromValue(5.0, 'Separation over Perimeter Width (ratio):', self, 25.0, 15.0)
 		self.executeTitle = 'Multiply'
 
 	def execute(self):
@@ -138,7 +139,6 @@ class MultiplySkein:
 	def __init__(self):
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.isExtrusionActive = False
-		self.layerCount = settings.LayerCount()
 		self.layerIndex = 0
 		self.layerLines = []
 		self.lineIndex = 0
@@ -165,7 +165,6 @@ class MultiplySkein:
 
 	def addLayer(self):
 		'Add multiplied layer to the output.'
-		self.layerCount.printProgressIncrement('multiply')
 		self.addRemoveThroughLayer()
 		offset = self.centerOffset - self.arrayCenter - self.shapeCenter
 		for rowIndex in xrange(self.repository.numberOfRows.value):
@@ -179,6 +178,7 @@ class MultiplySkein:
 				elementOffset = complex(offset.real + xColumnOffset, offset.imag + yRowOffset)
 				self.addElement(elementOffset)
 			self.rowIndex += 1
+		settings.printProgress(self.layerIndex, 'multiply')
 		if len(self.layerLines) > 1:
 			self.layerIndex += 1
 		self.layerLines = []
@@ -225,8 +225,8 @@ class MultiplySkein:
 				self.distanceFeedRate.addLine(line)
 				self.lineIndex += 1
 				return
-			elif firstWord == '(<perimeterWidth>':
-				self.absolutePerimeterWidth = abs(float(splitLine[1]))
+			elif firstWord == '(<edgeWidth>':
+				self.absoluteEdgeWidth = abs(float(splitLine[1]))
 			self.distanceFeedRate.addLine(line)
 
 	def parseLine(self, line):
@@ -266,7 +266,7 @@ class MultiplySkein:
 				self.isExtrusionActive = False
 		self.extent = cornerMaximumComplex - cornerMinimumComplex
 		self.shapeCenter = 0.5 * (cornerMaximumComplex + cornerMinimumComplex)
-		self.separation = self.repository.separationOverPerimeterWidth.value * self.absolutePerimeterWidth
+		self.separation = self.repository.separationOverEdgeWidth.value * self.absoluteEdgeWidth
 		self.extentPlusSeparation = self.extent + complex(self.separation, self.separation)
 		columnsMinusOne = self.numberOfColumns - 1
 		rowsMinusOne = self.numberOfRows - 1

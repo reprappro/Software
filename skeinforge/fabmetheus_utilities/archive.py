@@ -42,6 +42,10 @@ def getAbsoluteFrozenFolderPath(filePath, folderName=''):
 		filePath = os.path.join(filePath, 'skeinforge_application')
 	return getAbsoluteFolderPath(filePath, folderName)
 
+def getAnalyzePluginsDirectoryPath(subName=''):
+	'Get the analyze plugins directory path.'
+	return getJoinedPath(getSkeinforgePluginsPath('analyze_plugins'), subName)
+
 def getCraftPluginsDirectoryPath(subName=''):
 	'Get the craft plugins directory path.'
 	return getJoinedPath(getSkeinforgePluginsPath('craft_plugins'), subName)
@@ -364,7 +368,7 @@ def writeFileMessageEnd(end, fileName, fileText, message):
 	'Write to a fileName with a suffix and print a message.'
 	suffixFileName = getUntilDot(fileName) + end
 	writeFileText(suffixFileName, fileText)
-	print( message + getSummarizedFileName(suffixFileName) )
+	print(message + getSummarizedFileName(suffixFileName))
 
 def writeFileText(fileName, fileText, writeMode='w+'):
 	'Write a text to a file.'

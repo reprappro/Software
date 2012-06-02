@@ -96,7 +96,3 @@ class WriteDerivation:
 		self.suffix = evaluate.getEvaluatedString('', elementNode, 'suffix')
 		self.targets = evaluate.getElementNodesByKey(elementNode, 'target')
 		self.writeMatrix = evaluate.getEvaluatedBoolean(True, elementNode, 'writeMatrix')
-
-	def __repr__(self):
-		"Get the string representation of this WriteDerivation."
-		return str(self.__dict__)

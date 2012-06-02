@@ -16,7 +16,6 @@ from fabmetheus_utilities import gcodec
 from fabmetheus_utilities import intercircle
 from fabmetheus_utilities import xml_simple_reader
 from fabmetheus_utilities import xml_simple_writer
-import cmath
 import cStringIO
 import math
 
@@ -57,9 +56,9 @@ def getCommonVertexIndex( edgeFirst, edgeSecond ):
 	for edgeFirstVertexIndex in edgeFirst.vertexIndexes:
 		if edgeFirstVertexIndex == edgeSecond.vertexIndexes[0] or edgeFirstVertexIndex == edgeSecond.vertexIndexes[1]:
 			return edgeFirstVertexIndex
-	print( "Inconsistent GNU Triangulated Surface" )
-	print( edgeFirst )
-	print( edgeSecond )
+	print("Inconsistent GNU Triangulated Surface")
+	print(edgeFirst)
+	print(edgeSecond)
 	return 0
 
 def getFaces(geometryOutput):

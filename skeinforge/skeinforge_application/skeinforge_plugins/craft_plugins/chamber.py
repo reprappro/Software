@@ -11,21 +11,42 @@ The chamber manual page is at:
 http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Chamber
 
 ==Operation==
-The default 'Activate Chamber' checkbox is on.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Chamber' checkbox is on.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
-===Bed Temperature===
-Default is 60C.
+===Bed===
+The initial bed temperature is defined by 'Bed Temperature'.  If the 'Bed Temperature End Change Height' is greater or equal to the 'Bed Temperature Begin Change Height' and the 'Bed Temperature Begin Change Height' is greater or equal to zero, then the temperature will be ramped toward the 'Bed Temperature End'.  The ramp will start once the extruder reaches the 'Bed Temperature Begin Change Height', then the bed temperature will approach the 'Bed Temperature End' as the extruder reaches the 'Bed Temperature End Change Height', finally the bed temperature will stay at the 'Bed Temperature End' for the remainder of the build.
 
-Defines the print_bed temperature in Celcius by adding an M140 command.
+The idea is described at:
+http://www.makerbot.com/blog/2011/03/17/if-you-cant-stand-the-heat/
+
+====Bed Temperature====
+Default: 60C
+
+Defines the initial print bed temperature in Celcius by adding an M140 command.
+
+====Bed Temperature Begin Change Height====
+Default: -1 mm
+
+Defines the height of the beginning of the temperature ramp.  If the 'Bed Temperature End Change Height' is less than zero, the bed temperature will remain at the initial 'Bed Temperature'.
+
+====Bed Temperature End Change Height====
+Default: -1 mm
+
+Defines the height of the end of the temperature ramp.  If the 'Bed Temperature End Change Height' is less than zero or less than the 'Bed Temperature Begin Change Height', the bed temperature will remain at the initial 'Bed Temperature'.
+
+====Bed Temperature End====
+Default: 20C
+
+Defines the end bed temperature if there is a temperature ramp.
 
 ===Chamber Temperature===
-Default is 30C.
+Default: 30C
 
 Defines the chamber temperature in Celcius by adding an M141 command.
 
 ===Holding Force===
-Default is zero.
+Default: 0
 
 Defines the holding pressure of a mechanism, like a vacuum table or electromagnet, to hold the bed surface or object, by adding an M142 command.  The holding pressure is in bars. For hardware which only has on/off holding, when the holding pressure is zero, turn off holding, when the holding pressure is greater than zero, turn on holding. 
 
@@ -73,11 +94,6 @@ http://www.hive76.org/handling-hot-build-surfaces
 
 http://www.hive76.org/heated-build-stage-success
 
-===Kulitorum===
-Kulitorum has made a heated bed.  It is a 5mm Alu sheet with a pattern laid out in kapton tape.  The wire is a 0.6mm2 Konstantin wire and it's held in place by small pieces of kapton tape.  The description and picture is at:
-
-http://gallery.kulitorum.com/main.php?g2_itemId=283
-
 ===Metalab===
 A heated base by the Metalab folks:
 
@@ -112,15 +128,6 @@ with articles at:
 http://prusadjs.cz/2010/01/heated-reprap-print-bed-mk2/
 
 http://prusadjs.cz/2009/11/look-ma-no-warping-heated-reprap-print-bed/
-
-===Pumpernickel2===
-A resistor heated aluminum plate by Pumpernickel2:
-
-http://dev.forums.reprap.org/profile.php?14,844
-
-with a picture at:
-
-http://dev.forums.reprap.org/file.php?14,file=1228,filename=heatedplate.jpg
 
 ===Zaggo===
 A resistor heated aluminum plate by Zaggo at Pleasant Software:
@@ -202,7 +209,13 @@ class ChamberRepository:
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Chamber', self, '')
 		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Chamber')
 		self.activateChamber = settings.BooleanSetting().getFromValue('Activate Chamber', self, True )
-		self.bedTemperature = settings.FloatSpin().getFromValue( 20.0, 'Bed Temperature (Celcius):', self, 90.0, 60.0 )
+		settings.LabelSeparator().getFromRepository(self)
+		settings.LabelDisplay().getFromName('- Bed -', self )
+		self.bedTemperature = settings.FloatSpin().getFromValue(20.0, 'Bed Temperature (Celcius):', self, 90.0, 60.0)
+		self.bedTemperatureBeginChangeHeight = settings.FloatSpin().getFromValue(-1.0, 'Bed Temperature Begin Change Height (mm):', self, 20.0, -1.0)
+		self.bedTemperatureEndChangeHeight = settings.FloatSpin().getFromValue(-1.0, 'Bed Temperature End Change Height (mm):', self, 40.0, -1.0)
+		self.bedTemperatureEnd = settings.FloatSpin().getFromValue(20.0, 'Bed Temperature End (Celcius):', self, 90.0, 20.0)
+		settings.LabelSeparator().getFromRepository(self)
 		self.chamberTemperature = settings.FloatSpin().getFromValue( 20.0, 'Chamber Temperature (Celcius):', self, 90.0, 30.0 )
 		self.holdingForce = settings.FloatSpin().getFromValue( 0.0, 'Holding Force (bar):', self, 100.0, 0.0 )
 		self.executeTitle = 'Chamber'
@@ -218,12 +231,24 @@ class ChamberRepository:
 class ChamberSkein:
 	"A class to chamber a skein of extrusions."
 	def __init__(self):
+		'Initialize.'
+		self.changeWidth = None
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
 		self.lineIndex = 0
 		self.lines = None
+		self.oldBedTemperature = None
+
+	def addBedTemperature(self, bedTemperature):
+		'Add bed temperature if it is different from the old.'
+		if bedTemperature != self.oldBedTemperature:
+			self.distanceFeedRate.addParameter('M140', bedTemperature)
+			self.oldBedTemperature = bedTemperature
 
 	def getCraftedGcode(self, gcodeText, repository):
 		"Parse gcode text and store the chamber gcode."
+		endAtLeastBegin = repository.bedTemperatureEndChangeHeight.value >= repository.bedTemperatureBeginChangeHeight.value
+		if endAtLeastBegin and repository.bedTemperatureBeginChangeHeight.value >= 0.0:
+			self.changeWidth = repository.bedTemperatureEndChangeHeight.value - repository.bedTemperatureBeginChangeHeight.value
 		self.repository = repository
 		self.lines = archive.getTextLines(gcodeText)
 		self.parseInitialization()
@@ -251,11 +276,20 @@ class ChamberSkein:
 		firstWord = splitLine[0]
 		if firstWord == '(<crafting>)':
 			self.distanceFeedRate.addLine(line)
-			self.distanceFeedRate.addParameter('M140', self.repository.bedTemperature.value ) # Set bed temperature.
-			self.distanceFeedRate.addParameter('M141', self.repository.chamberTemperature.value ) # Set chamber temperature.
-			self.distanceFeedRate.addParameter('M142', self.repository.holdingForce.value ) # Set holding pressure.
+			self.addBedTemperature(self.repository.bedTemperature.value)
+			self.distanceFeedRate.addParameter('M141', self.repository.chamberTemperature.value) # Set chamber temperature.
+			self.distanceFeedRate.addParameter('M142', self.repository.holdingForce.value) # Set holding pressure.
 			return
 		self.distanceFeedRate.addLine(line)
+		if firstWord == '(<layer>' and self.changeWidth != None:
+			z = float(splitLine[1])
+			if z >= self.repository.bedTemperatureEndChangeHeight.value:
+				self.addBedTemperature(self.repository.bedTemperatureEnd.value)
+				return
+			if z <= self.repository.bedTemperatureBeginChangeHeight.value:
+				return
+			along = (z - self.repository.bedTemperatureBeginChangeHeight.value) / self.changeWidth
+			self.addBedTemperature(self.repository.bedTemperature.value * (1 - along) + self.repository.bedTemperatureEnd.value * along)
 
 
 def main():

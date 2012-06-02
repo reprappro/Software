@@ -40,7 +40,10 @@ def getManipulatedPaths(close, elementNode, loop, prefix, sideLength):
 	'Get flipped paths.'
 	return [loop + flip.getFlippedLoop(elementNode, euclidean.getPathCopy(loop), prefix)]
 
+def getNewDerivation(elementNode, prefix, sideLength):
+	'Get new derivation.'
+	return evaluate.EmptyObject()
 
 def processElementNode(elementNode):
 	'Process the xml element.'
-	solid.processElementNodeByFunctions(elementNode, getManipulatedGeometryOutput, getManipulatedPaths)
+	solid.processElementNodeByFunctionPair(elementNode, getManipulatedGeometryOutput, getManipulatedPaths)

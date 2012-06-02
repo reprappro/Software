@@ -3,21 +3,25 @@
 This page is in the table of contents.
 Scale scales the carving to compensate for shrinkage after the extrusion has cooled.
 
-It is best to only change the XY Plane Scale, because that does not affect other variables.  If you choose to change the Z Axis Scale, that increases the layer thickness so you must increase the feed rate in speed by the same amount and maybe some other variables which depend on layer thickness.
+The scale manual page is at:
+
+http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Scale
+
+It is best to only change the XY Plane Scale, because that does not affect other variables.  If you choose to change the Z Axis Scale, that increases the layer height so you must increase the feed rate in speed by the same amount and maybe some other variables which depend on layer height.
 
 ==Operation==
-The default 'Activate Scale' checkbox is off.  When it is on, the functions described below will work, when it is off, the functions will not be called.
+The default 'Activate Scale' checkbox is off.  When it is on, the functions described below will work, when it is off, nothing will be done.
 
 ==Settings==
 ===XY Plane Scale===
 Default is 1.01.
 
-Defines the amount the xy plane of the carving will be scaled.  The xy coordinates will be scaled, but the perimeterWidth is not changed, so this can be changed without affecting other variables.
+Defines the amount the xy plane of the carving will be scaled.  The xy coordinates will be scaled, but the edge width is not changed, so this can be changed without affecting other variables.
 
 ===Z Axis Scale===
 Default is one.
 
-Defines the amount the z axis of the carving will be scaled.  The default is one because changing this changes many variables related to the layer thickness.  For example, the feedRate should be multiplied by the Z Axis Scale because the layers would be farther apart..
+Defines the amount the z axis of the carving will be scaled.  The default is one because changing this changes many variables related to the layer height.  For example, the feedRate should be multiplied by the Z Axis Scale because the layers would be farther apart.
 
 ===SVG Viewer===
 Default is webbrowser.
@@ -85,12 +89,12 @@ def getNewRepository():
 	'Get new repository.'
 	return ScaleRepository()
 
-def setLoopLayerScale(rotatedLoopLayer, xyPlaneScale, zAxisScale):
+def setLoopLayerScale(loopLayer, xyPlaneScale, zAxisScale):
 	"Set the slice element scale."
-	for loop in rotatedLoopLayer.loops:
+	for loop in loopLayer.loops:
 		for pointIndex in xrange(len(loop)):
 			loop[pointIndex] *= xyPlaneScale
-	rotatedLoopLayer.z *= zAxisScale
+	loopLayer.z *= zAxisScale
 
 def writeOutput(fileName, shouldAnalyze=True):
 	'Scale the carving.'
@@ -103,6 +107,7 @@ class ScaleRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.scale.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName(fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Scale', self, '')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Scale')
 		self.activateScale = settings.BooleanSetting().getFromValue('Activate Scale', self, False)
 		self.xyPlaneScale = settings.FloatSpin().getFromValue(0.99, 'XY Plane Scale (ratio):', self, 1.03, 1.01)
 		self.zAxisScale = settings.FloatSpin().getFromValue(0.99, 'Z Axis Scale (ratio):', self, 1.02, 1.0)
@@ -128,24 +133,24 @@ class ScaleSkein:
 		xyPlaneScale = repository.xyPlaneScale.value
 		zAxisScale = repository.zAxisScale.value
 		decimalPlacesCarried = int(svgReader.sliceDictionary['decimalPlacesCarried'])
-		layerThickness = zAxisScale * float(svgReader.sliceDictionary['layerThickness'])
-		perimeterWidth = float(svgReader.sliceDictionary['perimeterWidth'])
-		rotatedLoopLayers = svgReader.rotatedLoopLayers
-		for rotatedLoopLayer in rotatedLoopLayers:
-			setLoopLayerScale(rotatedLoopLayer, xyPlaneScale, zAxisScale)
+		layerHeight = zAxisScale * float(svgReader.sliceDictionary['layerHeight'])
+		edgeWidth = float(svgReader.sliceDictionary['edgeWidth'])
+		loopLayers = svgReader.loopLayers
+		for loopLayer in loopLayers:
+			setLoopLayerScale(loopLayer, xyPlaneScale, zAxisScale)
 		cornerMaximum = Vector3(-912345678.0, -912345678.0, -912345678.0)
 		cornerMinimum = Vector3(912345678.0, 912345678.0, 912345678.0)
-		svg_writer.setSVGCarvingCorners(cornerMaximum, cornerMinimum, layerThickness, rotatedLoopLayers)
+		svg_writer.setSVGCarvingCorners(cornerMaximum, cornerMinimum, layerHeight, loopLayers)
 		svgWriter = svg_writer.SVGWriter(
 			True,
 			cornerMaximum,
 			cornerMinimum,
 			decimalPlacesCarried,
-			layerThickness,
-			perimeterWidth)
+			layerHeight,
+			edgeWidth)
 		commentElement = svg_writer.getCommentElement(svgReader.documentElement)
 		procedureNameString = svgReader.sliceDictionary['procedureName'] + ',scale'
-		return svgWriter.getReplacedSVGTemplate(fileName, procedureNameString, rotatedLoopLayers, commentElement)
+		return svgWriter.getReplacedSVGTemplate(fileName, loopLayers, procedureNameString, commentElement)
 
 
 def main():

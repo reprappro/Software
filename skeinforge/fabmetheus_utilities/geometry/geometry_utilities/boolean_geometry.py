@@ -39,24 +39,30 @@ def getEmptyZLoops(archivableObjects, importRadius, shouldPrintWarning, z, zoneA
 	visibleObjectLoopsList = boolean_solid.getVisibleObjectLoopsList(importRadius, visibleObjects, emptyZ)
 	loops = euclidean.getConcatenatedList(visibleObjectLoopsList)
 	if euclidean.isLoopListIntersecting(loops):
-		loops = boolean_solid.getLoopsUnified(importRadius, visibleObjectLoopsList)
+		loops = boolean_solid.getLoopsUnion(importRadius, visibleObjectLoopsList)
 		if shouldPrintWarning:
 			print('Warning, the triangle mesh slice intersects itself in getExtruderPaths in boolean_geometry.')
-			print( 'Something will still be printed, but there is no guarantee that it will be the correct shape.' )
+			print('Something will still be printed, but there is no guarantee that it will be the correct shape.')
 			print('Once the gcode is saved, you should check over the layer with a z of:')
 			print(z)
 	return loops
+
+def getLoopLayers(archivableObjects, importRadius, layerHeight, maximumZ, shouldPrintWarning, z, zoneArrangement):
+	'Get loop layers.'
+	loopLayers = []
+	while z <= maximumZ:
+		triangle_mesh.getLoopLayerAppend(loopLayers, z).loops = getEmptyZLoops(archivableObjects, importRadius, True, z, zoneArrangement)
+		z += layerHeight
+	return loopLayers
 
 def getMinimumZ(geometryObject):
 	'Get the minimum of the minimum z of the archivableObjects and the object.'
 	booleanGeometry = BooleanGeometry()
 	booleanGeometry.archivableObjects = geometryObject.archivableObjects
 	booleanGeometry.importRadius = setting.getImportRadius(geometryObject.elementNode)
-	booleanGeometry.layerThickness = setting.getLayerThickness(geometryObject.elementNode)
+	booleanGeometry.layerHeight = setting.getLayerHeight(geometryObject.elementNode)
 	archivableMinimumZ = booleanGeometry.getMinimumZ()
 	geometryMinimumZ = geometryObject.getMinimumZ()
-	if archivableMinimumZ == None and geometryMinimumZ == None:
-		return None
 	if archivableMinimumZ == None:
 		return geometryMinimumZ
 	if geometryMinimumZ == None:
@@ -70,10 +76,9 @@ class BooleanGeometry:
 		'Add empty lists.'
 		self.archivableObjects = []
 		self.belowLoops = []
-		self.infillInDirectionOfBridge = False
 		self.importRadius = 0.6
-		self.layerThickness = 0.4
-		self.rotatedLoopLayers = []
+		self.layerHeight = 0.4
+		self.loopLayers = []
 
 	def __repr__(self):
 		'Get the string representation of this carving.'
@@ -88,6 +93,28 @@ class BooleanGeometry:
 		'Add xml for this object.'
 		xml_simple_writer.addXMLFromObjects( depth, self.archivableObjects, output )
 
+	def getCarveBoundaryLayers(self):
+		'Get the boundary layers.'
+		if self.getMinimumZ() == None:
+			return []
+		z = self.minimumZ + 0.5 * self.layerHeight
+		self.loopLayers = getLoopLayers(self.archivableObjects, self.importRadius, self.layerHeight, self.maximumZ, True, z, self.zoneArrangement)
+		self.cornerMaximum = Vector3(-912345678.0, -912345678.0, -912345678.0)
+		self.cornerMinimum = Vector3(912345678.0, 912345678.0, 912345678.0)
+		for loopLayer in self.loopLayers:
+			for loop in loopLayer.loops:
+				for point in loop:
+					pointVector3 = Vector3(point.real, point.imag, loopLayer.z)
+					self.cornerMaximum.maximize(pointVector3)
+					self.cornerMinimum.minimize(pointVector3)
+		self.cornerMaximum.z += self.halfHeight
+		self.cornerMinimum.z -= self.halfHeight
+		for loopLayerIndex in xrange(len(self.loopLayers) -1, -1, -1):
+			loopLayer = self.loopLayers[loopLayerIndex]
+			if len(loopLayer.loops) > 0:
+				return self.loopLayers[: loopLayerIndex + 1]
+		return []
+
 	def getCarveCornerMaximum(self):
 		'Get the corner maximum of the vertexes.'
 		return self.cornerMaximum
@@ -96,32 +123,9 @@ class BooleanGeometry:
 		'Get the corner minimum of the vertexes.'
 		return self.cornerMinimum
 
-	def getCarveLayerThickness(self):
-		'Get the layer thickness.'
-		return self.layerThickness
-
-	def getCarveRotatedBoundaryLayers(self):
-		'Get the rotated boundary layers.'
-		if self.getMinimumZ() == None:
-			return []
-		z = self.minimumZ + self.halfHeight
-		while z < self.maximumZ:
-			z = self.getZAddExtruderPaths(z)
-		self.cornerMaximum = Vector3(-912345678.0, -912345678.0, -912345678.0)
-		self.cornerMinimum = Vector3(912345678.0, 912345678.0, 912345678.0)
-		for rotatedLoopLayer in self.rotatedLoopLayers:
-			for loop in rotatedLoopLayer.loops:
-				for point in loop:
-					pointVector3 = Vector3(point.real, point.imag, rotatedLoopLayer.z)
-					self.cornerMaximum.maximize(pointVector3)
-					self.cornerMinimum.minimize(pointVector3)
-		self.cornerMaximum.z += self.halfHeight
-		self.cornerMinimum.z -= self.halfHeight
-		for rotatedLoopLayerIndex in xrange(len(self.rotatedLoopLayers) -1, -1, -1):
-			rotatedLoopLayer = self.rotatedLoopLayers[rotatedLoopLayerIndex]
-			if len(rotatedLoopLayer.loops) > 0:
-				return self.rotatedLoopLayers[: rotatedLoopLayerIndex + 1]
-		return []
+	def getCarveLayerHeight(self):
+		'Get the layer height.'
+		return self.layerHeight
 
 	def getFabmetheusXML(self):
 		'Return the fabmetheus XML.'
@@ -153,21 +157,14 @@ class BooleanGeometry:
 		for vertex in vertexes:
 			self.maximumZ = max(self.maximumZ, vertex.z)
 			self.minimumZ = min(self.minimumZ, vertex.z)
-		self.zoneArrangement = triangle_mesh.ZoneArrangement(self.layerThickness, vertexes)
-		self.halfHeight = 0.5 * self.layerThickness
+		self.zoneArrangement = triangle_mesh.ZoneArrangement(self.layerHeight, vertexes)
+		self.halfHeight = 0.5 * self.layerHeight
 		self.setActualMinimumZ()
 		return self.minimumZ
 
 	def getNumberOfEmptyZLoops(self, z):
 		'Get number of empty z loops.'
 		return len(getEmptyZLoops(self.archivableObjects, self.importRadius, False, z, self.zoneArrangement))
-
-	def getZAddExtruderPaths(self, z):
-		'Get next z and add extruder loops.'
-		settings.printProgress(len(self.rotatedLoopLayers), 'slice')
-		rotatedLoopLayer = euclidean.RotatedLoopLayer(z)
-		rotatedLoopLayer.loops = getEmptyZLoops(self.archivableObjects, self.importRadius, True, z, self.zoneArrangement)
-		return triangle_mesh.getZAddExtruderPathsBySolidCarving(rotatedLoopLayer, self, z)
 
 	def setActualMinimumZ(self):
 		'Get the actual minimum z at the lowest rotated boundary layer.'
@@ -184,20 +181,16 @@ class BooleanGeometry:
 						increment = -increment
 				self.minimumZ = round(self.minimumZ, -int(round(math.log10(halfHeightOverMyriad) + 1.5)))
 				return
-			self.minimumZ += self.layerThickness
+			self.minimumZ += self.layerHeight
 
 	def setCarveImportRadius( self, importRadius ):
 		'Set the import radius.'
 		self.importRadius = importRadius
 
-	def setCarveInfillInDirectionOfBridge( self, infillInDirectionOfBridge ):
-		'Set the infill in direction of bridge.'
-		self.infillInDirectionOfBridge = infillInDirectionOfBridge
-
 	def setCarveIsCorrectMesh( self, isCorrectMesh ):
 		'Set the is correct mesh flag.'
 		self.isCorrectMesh = isCorrectMesh
 
-	def setCarveLayerThickness( self, layerThickness ):
-		'Set the layer thickness.'
-		self.layerThickness = layerThickness
+	def setCarveLayerHeight( self, layerHeight ):
+		'Set the layer height.'
+		self.layerHeight = layerHeight

@@ -42,7 +42,7 @@ class SVGCarving:
 	'An svg carving.'
 	def __init__(self):
 		'Add empty lists.'
-		self.layerThickness = 1.0
+		self.layerHeight = 1.0
 		self.maximumZ = - 987654321.0
 		self.minimumZ = 987654321.0
 		self.svgReader = SVGReader()
@@ -53,7 +53,11 @@ class SVGCarving:
 
 	def addXML(self, depth, output):
 		'Add xml for this object.'
-		xml_simple_writer.addXMLFromObjects(depth, self.svgReader.rotatedLoopLayers, output)
+		xml_simple_writer.addXMLFromObjects(depth, self.svgReader.loopLayers, output)
+
+	def getCarveBoundaryLayers(self):
+		'Get the  boundary layers.'
+		return self.svgReader.loopLayers
 
 	def getCarveCornerMaximum(self):
 		'Get the corner maximum of the vertexes.'
@@ -65,15 +69,11 @@ class SVGCarving:
 
 	def getCarvedSVG(self):
 		'Get the carved svg text.'
-		return svg_writer.getSVGByLoopLayers(True, self, self.svgReader.rotatedLoopLayers)
+		return svg_writer.getSVGByLoopLayers(True, self, self.svgReader.loopLayers)
 
-	def getCarveLayerThickness(self):
-		'Get the layer thickness.'
-		return self.layerThickness
-
-	def getCarveRotatedBoundaryLayers(self):
-		'Get the rotated boundary layers.'
-		return self.svgReader.rotatedLoopLayers
+	def getCarveLayerHeight(self):
+		'Get the layer height.'
+		return self.layerHeight
 
 	def getFabmetheusXML(self):
 		'Return the fabmetheus XML.'
@@ -89,25 +89,21 @@ class SVGCarving:
 			return
 		self.fileName = fileName
 		self.svgReader.parseSVG(fileName, svgText)
-		self.layerThickness = euclidean.getFloatDefaultByDictionary(
-			self.layerThickness, self.svgReader.sliceDictionary, 'layerThickness')
+		self.layerHeight = euclidean.getFloatDefaultByDictionary(
+			self.layerHeight, self.svgReader.sliceDictionary, 'layerHeight')
 		self.cornerMaximum = Vector3(-987654321.0, -987654321.0, self.maximumZ)
 		self.cornerMinimum = Vector3(987654321.0, 987654321.0, self.minimumZ)
 		svg_writer.setSVGCarvingCorners(
-			self.cornerMaximum, self.cornerMinimum, self.layerThickness, self.svgReader.rotatedLoopLayers)
+			self.cornerMaximum, self.cornerMinimum, self.layerHeight, self.svgReader.loopLayers)
 
 	def setCarveImportRadius(self, importRadius):
 		'Set the import radius.'
-		pass
-
-	def setCarveInfillInDirectionOfBridge(self, infillInDirectionOfBridge):
-		'Set the infill in direction of bridge.'
 		pass
 
 	def setCarveIsCorrectMesh(self, isCorrectMesh):
 		'Set the is correct mesh flag.'
 		pass
 
-	def setCarveLayerThickness(self, layerThickness):
-		'Set the layer thickness.'
-		self.layerThickness = layerThickness
+	def setCarveLayerHeight(self, layerHeight):
+		'Set the layer height.'
+		self.layerHeight = layerHeight

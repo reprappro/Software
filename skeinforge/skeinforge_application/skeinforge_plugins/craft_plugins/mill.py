@@ -26,17 +26,17 @@ When selected, there will be alternating horizontal and vertical milling paths, 
 ====Loop Inner Outset over Perimeter Width====
 Default is 0.5.
 
-Defines the ratio of the amount the inner milling loop will be outset over the perimeter width.
+Defines the ratio of the amount the inner milling loop will be outset over the edge width.
 
 ====Loop Outer Outset over Perimeter Width====
 Default is one.
 
-Defines the ratio of the amount the outer milling loop will be outset over the perimeter width.  The 'Loop Outer Outset over Perimeter Width' ratio should be greater than the 'Loop Inner Outset over Perimeter Width' ratio.
+Defines the ratio of the amount the outer milling loop will be outset over the edge width.  The 'Loop Outer Outset over Perimeter Width' ratio should be greater than the 'Loop Inner Outset over Perimeter Width' ratio.
 
 ===Mill Width over Perimeter Width===
 Default is one.
 
-Defines the ratio of the mill line width over the perimeter width.  If the ratio is one, all the material will be milled.  The greater the 'Mill Width over Perimeter Width' the farther apart the mill lines will be and so less of the material will be directly milled, the remaining material might still be removed in chips if the ratio is not much greater than one.
+Defines the ratio of the mill line width over the edge width.  If the ratio is one, all the material will be milled.  The greater the 'Mill Width over Perimeter Width' the farther apart the mill lines will be and so less of the material will be directly milled, the remaining material might still be removed in chips if the ratio is not much greater than one.
 
 ==Examples==
 The following examples mill the file Screw Holder Bottom.stl.  The examples are run in a terminal in the folder which contains Screw Holder Bottom.stl and mill.py.
@@ -154,9 +154,9 @@ class MillRepository:
 		self.addOuterLoops = settings.BooleanSetting().getFromValue('Add Outer Loops', self, True )
 		self.crossHatch = settings.BooleanSetting().getFromValue('Cross Hatch', self, True )
 		settings.LabelDisplay().getFromName('- Loop Outset -', self )
-		self.loopInnerOutsetOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.3, 'Loop Inner Outset over Perimeter Width (ratio):', self, 0.7, 0.5 )
-		self.loopOuterOutsetOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.8, 'Loop Outer Outset over Perimeter Width (ratio):', self, 1.4, 1.0 )
-		self.millWidthOverPerimeterWidth = settings.FloatSpin().getFromValue( 0.8, 'Mill Width over Perimeter Width (ratio):', self, 1.8, 1.0 )
+		self.loopInnerOutsetOverEdgeWidth = settings.FloatSpin().getFromValue( 0.3, 'Loop Inner Outset over Perimeter Width (ratio):', self, 0.7, 0.5 )
+		self.loopOuterOutsetOverEdgeWidth = settings.FloatSpin().getFromValue( 0.8, 'Loop Outer Outset over Perimeter Width (ratio):', self, 1.4, 1.0 )
+		self.millWidthOverEdgeWidth = settings.FloatSpin().getFromValue( 0.8, 'Mill Width over Edge Width (ratio):', self, 1.8, 1.0 )
 		self.executeTitle = 'Mill'
 
 	def execute(self):
@@ -174,13 +174,12 @@ class MillSkein:
 		self.average = Average()
 		self.boundaryLayers = []
 		self.distanceFeedRate = gcodec.DistanceFeedRate()
+		self.edgeWidth = 0.6
 		self.isExtruderActive = False
-		self.layerCount = settings.LayerCount()
 		self.layerIndex = 0
 		self.lineIndex = 0
 		self.lines = None
 		self.oldLocation = None
-		self.perimeterWidth = 0.6
 
 	def addGcodeFromLoops(self, loops, z):
 		'Add gcode from loops.'
@@ -189,7 +188,7 @@ class MillSkein:
 		self.oldLocation.z = z
 		for loop in loops:
 			self.distanceFeedRate.addGcodeFromThreadZ(loop, z)
-			euclidean.addToThreadsFromLoop(self.halfPerimeterWidth, 'loop', loop, self.oldLocation, self)
+			euclidean.addToThreadsFromLoop(self.halfEdgeWidth, 'loop', loop, self.oldLocation, self)
 
 	def addGcodeFromThreadZ( self, thread, z ):
 		'Add a thread to the output.'
@@ -201,7 +200,7 @@ class MillSkein:
 		endpoints = euclidean.getEndpointsFromSegmentTable( boundaryLayer.segmentTable )
 		if len(endpoints) < 1:
 			return
-		paths = euclidean.getPathsFromEndpoints(endpoints, 5.0 * self.millWidth, self.aroundPixelTable, self.aroundWidth)
+		paths = euclidean.getPathsFromEndpoints(endpoints, 5.0 * self.millWidth, self.aroundPixelTable, 1.0, self.aroundWidth)
 		averageZ = self.average.getAverage()
 		if self.repository.addInnerLoops.value:
 			self.addGcodeFromLoops( boundaryLayer.innerLoops, averageZ )
@@ -303,8 +302,8 @@ class MillSkein:
 		if len(self.boundaryLayers) < 2:
 			return
 		for boundaryLayer in self.boundaryLayers:
-			boundaryLayer.innerOutsetLoops = intercircle.getInsetSeparateLoopsFromLoops( - self.loopInnerOutset, boundaryLayer.loops )
-			boundaryLayer.outerOutsetLoops = intercircle.getInsetSeparateLoopsFromLoops( - self.loopOuterOutset, boundaryLayer.loops )
+			boundaryLayer.innerOutsetLoops = intercircle.getInsetSeparateLoopsFromLoops(boundaryLayer.loops, -self.loopInnerOutset)
+			boundaryLayer.outerOutsetLoops = intercircle.getInsetSeparateLoopsFromLoops(boundaryLayer.loops, -self.loopOuterOutset)
 			boundaryLayer.innerHorizontalTable = self.getHorizontalXIntersectionsTable( boundaryLayer.innerOutsetLoops )
 			boundaryLayer.outerHorizontalTable = self.getHorizontalXIntersectionsTable( boundaryLayer.outerOutsetLoops )
 			boundaryLayer.innerVerticalTable = self.getHorizontalXIntersectionsTable( euclidean.getDiagonalFlippedLoops( boundaryLayer.innerOutsetLoops ) )
@@ -332,13 +331,13 @@ class MillSkein:
 			if firstWord == '(</extruderInitialization>)':
 				self.distanceFeedRate.addTagBracketedProcedure('mill')
 				return
-			elif firstWord == '(<perimeterWidth>':
-				self.perimeterWidth = float(splitLine[1])
-				self.aroundWidth = 0.1 * self.perimeterWidth
-				self.halfPerimeterWidth = 0.5 * self.perimeterWidth
-				self.millWidth = self.perimeterWidth * self.repository.millWidthOverPerimeterWidth.value
-				self.loopInnerOutset = self.halfPerimeterWidth + self.perimeterWidth * self.repository.loopInnerOutsetOverPerimeterWidth.value
-				self.loopOuterOutset = self.halfPerimeterWidth + self.perimeterWidth * self.repository.loopOuterOutsetOverPerimeterWidth.value
+			elif firstWord == '(<edgeWidth>':
+				self.edgeWidth = float(splitLine[1])
+				self.aroundWidth = 0.1 * self.edgeWidth
+				self.halfEdgeWidth = 0.5 * self.edgeWidth
+				self.millWidth = self.edgeWidth * self.repository.millWidthOverEdgeWidth.value
+				self.loopInnerOutset = self.halfEdgeWidth + self.edgeWidth * self.repository.loopInnerOutsetOverEdgeWidth.value
+				self.loopOuterOutset = self.halfEdgeWidth + self.edgeWidth * self.repository.loopOuterOutsetOverEdgeWidth.value
 			self.distanceFeedRate.addLine(line)
 
 	def parseLine(self, line):
@@ -359,7 +358,7 @@ class MillSkein:
 		elif firstWord == 'M103':
 			self.isExtruderActive = False
 		elif firstWord == '(<layer>':
-			self.layerCount.printProgressIncrement('mill')
+			settings.printProgress(self.layerIndex, 'mill')
 			self.aroundPixelTable = {}
 			self.average.reset()
 		elif firstWord == '(</layer>)':

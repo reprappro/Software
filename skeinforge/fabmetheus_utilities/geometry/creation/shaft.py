@@ -80,7 +80,3 @@ class ShaftDerivation:
 		self.depthTop = self.radius * self.depthTopOverRadius
 		self.depthTop = evaluate.getEvaluatedFloat(self.depthTop, elementNode, 'depth')
 		self.depthTop = evaluate.getEvaluatedFloat(self.depthTop, elementNode, 'depthTop')
-
-	def __repr__(self):
-		"Get the string representation of this ShaftDerivation."
-		return str(self.__dict__)

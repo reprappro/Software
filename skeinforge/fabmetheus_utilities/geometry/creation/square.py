@@ -70,8 +70,7 @@ class SquareDerivation:
 	"Class to hold square variables."
 	def __init__(self, elementNode):
 		'Set defaults.'
-		self.inradius = lineation.getComplexByPrefixes(elementNode, ['demisize', 'inradius'], complex(1.0, 1.0))
-		self.inradius = lineation.getComplexByMultiplierPrefix(elementNode, 2.0, 'size', self.inradius)
+		self.inradius = lineation.getInradius(complex(1.0, 1.0), elementNode)
 		self.demiwidth = lineation.getFloatByPrefixBeginEnd(elementNode, 'demiwidth', 'width', self.inradius.real)
 		self.demiheight = lineation.getFloatByPrefixBeginEnd(elementNode, 'demiheight', 'height', self.inradius.imag)
 		self.bottomDemiwidth = lineation.getFloatByPrefixBeginEnd(elementNode, 'bottomdemiwidth', 'bottomwidth', self.demiwidth)
@@ -79,7 +78,3 @@ class SquareDerivation:
 		self.interiorAngle = evaluate.getEvaluatedFloat(90.0, elementNode, 'interiorangle')
 		self.revolutions = evaluate.getEvaluatedInt(1, elementNode, 'revolutions')
 		self.spiral = evaluate.getVector3ByPrefix(None, elementNode, 'spiral')
-
-	def __repr__(self):
-		"Get the string representation of this SquareDerivation."
-		return str(self.__dict__)

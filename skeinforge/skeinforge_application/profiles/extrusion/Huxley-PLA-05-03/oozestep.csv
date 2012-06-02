@@ -8,7 +8,7 @@ First layer feed (mm/s):	12.0
 Output G1 for linear feed moves	True
 First path press dist (mm):	4.0
 First path press feed (mm/s):	8.0
-First layer path press dist (mm):	2.5
-Next path press XY (mm):	0.2
-Extruder early stop XY (mm):	0.2
+First layer path press dist (mm):	2.8
+Next path press XY (mm):	0.32
+Extruder early stop XY (mm):	0.32
 Bed T at layer, (Layer,Temp;Layer,Temp;...):	999,10

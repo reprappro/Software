@@ -126,36 +126,18 @@ def getGcodeFileText(fileName, gcodeText):
 
 def getGcodeWithoutDuplication(duplicateWord, gcodeText):
 	'Get gcode text without duplicate first words.'
-	isExtruderActive = False
 	lines = archive.getTextLines(gcodeText)
-	oldDuplicationLine = None
-	outputLines = []
+	oldWrittenLine = None
 	output = cStringIO.StringIO()
 	for line in lines:
 		firstWord = getFirstWordFromLine(line)
 		if firstWord == duplicateWord:
-			oldDuplicationLine = line
+			if line != oldWrittenLine:
+				output.write(line + '\n')
+				oldWrittenLine = line
 		else:
-			if firstWord == 'M101':
-				isExtruderActive = True
-			elif firstWord == 'M103':
-				isExtruderActive = False
-			if isExtruderActive and oldDuplicationLine != None and firstWord.startswith('G'):
-				outputLines.append(oldDuplicationLine)
-				oldDuplicationLine = None
-			if len(line) != 0:
-				outputLines.append(line)
-	if oldDuplicationLine != None:
-		outputLines.append(oldDuplicationLine)
-	oldWrittenLine = None
-	for outputLine in outputLines:
-		firstWord = getFirstWordFromLine(outputLine)
-		if firstWord == duplicateWord:
-			if outputLine != oldWrittenLine:
-				output.write(outputLine + '\n')
-				oldWrittenLine = outputLine
-		else:
-			output.write(outputLine + '\n')
+			if len(line) > 0:
+				output.write(line + '\n')
 	return output.getvalue()
 
 def getIndexOfStartingWithSecond(letter, splitLine):
@@ -219,6 +201,11 @@ def isProcedureDone(gcodeText, procedure):
 		return False
 	extruderInitializationIndex = gcodeText.find('(</extruderInitialization>)')
 	if extruderInitializationIndex == -1:
+		metadataBeginIndex = gcodeText.find('<metadata>')
+		metadataEndIndex = gcodeText.find('</metadata>')
+		if metadataBeginIndex != -1 and metadataEndIndex != -1:
+			attributeString = "procedureName='%s'" % procedure
+			return gcodeText.find(attributeString, metadataBeginIndex, metadataEndIndex) != -1
 		return False
 	return gcodeText.find(getTagBracketedProcedure(procedure), 0, extruderInitializationIndex) != -1
 
@@ -278,6 +265,10 @@ class DistanceFeedRate:
 		self.decimalPlacesCarried = 3
 		self.output = cStringIO.StringIO()
 
+	def addFlowRateLine(self, flowRate):
+		'Add a flow rate line.'
+		self.output.write('M108 S%s\n' % euclidean.getFourSignificantFigures(flowRate))
+
 	def addGcodeFromFeedRateThreadZ(self, feedRateMinute, thread, travelFeedRateMinute, z):
 		'Add a thread to the output.'
 		if len(thread) > 0:
@@ -288,10 +279,10 @@ class DistanceFeedRate:
 			print('thread of only one point in addGcodeFromFeedRateThreadZ in gcodec, this should never happen.')
 			print(thread)
 			return
-		self.addLine('M101') # Turn extruder on.
+		self.output.write('M101\n') # Turn extruder on.
 		for point in thread[1 :]:
 			self.addGcodeMovementZWithFeedRate(feedRateMinute, point, z)
-		self.addLine('M103') # Turn extruder off.
+		self.output.write('M103\n') # Turn extruder off.
 
 	def addGcodeFromLoop(self, loop, z):
 		'Add the gcode loop.'
@@ -310,18 +301,24 @@ class DistanceFeedRate:
 			print('thread of only one point in addGcodeFromThreadZ in gcodec, this should never happen.')
 			print(thread)
 			return
-		self.addLine('M101') # Turn extruder on.
+		self.output.write('M101\n') # Turn extruder on.
 		for point in thread[1 :]:
 			self.addGcodeMovementZ(point, z)
-		self.addLine('M103') # Turn extruder off.
+		self.output.write('M103\n') # Turn extruder off.
 
 	def addGcodeMovementZ(self, point, z):
 		'Add a movement to the output.'
-		self.addLine(self.getLinearGcodeMovement(point, z))
+		self.output.write(self.getLinearGcodeMovement(point, z) + '\n')
 
 	def addGcodeMovementZWithFeedRate(self, feedRateMinute, point, z):
 		'Add a movement to the output.'
-		self.addLine(self.getLinearGcodeMovementWithFeedRate(feedRateMinute, point, z))
+		self.output.write(self.getLinearGcodeMovementWithFeedRate(feedRateMinute, point, z) + '\n')
+
+	def addGcodeMovementZWithFeedRateVector3(self, feedRateMinute, vector3):
+		'Add a movement to the output by Vector3.'
+		xRounded = self.getRounded(vector3.x)
+		yRounded = self.getRounded(vector3.y)
+		self.output.write('G1 X%s Y%s Z%s F%s\n' % (xRounded, yRounded, self.getRounded(vector3.z), self.getRounded(feedRateMinute)))
 
 	def addLine(self, line):
 		'Add a line of text and a newline to the output.'
@@ -357,7 +354,7 @@ class DistanceFeedRate:
 				absoluteDistanceMode = True
 			elif firstWord == 'G91':
 				absoluteDistanceMode = False
-			self.addLine(line)
+			self.addLine('(<alterationDeleteThisPrefix/>)' + line)
 		if not absoluteDistanceMode:
 			self.addLine('G90')
 		self.addLine('(</alteration>)')
@@ -367,15 +364,15 @@ class DistanceFeedRate:
 		self.addLine(firstWord + ' S' + euclidean.getRoundedToThreePlaces(parameter))
 
 	def addPerimeterBlock(self, loop, z):
-		'Add the perimeter gcode block for the loop.'
+		'Add the edge gcode block for the loop.'
 		if len(loop) < 2:
 			return
-		if euclidean.isWiddershins(loop): # Indicate that a perimeter is beginning.
-			self.addLine('(<perimeter> outer )')
+		if euclidean.isWiddershins(loop): # Indicate that an edge is beginning.
+			self.addLine('(<edge> outer )')
 		else:
-			self.addLine('(<perimeter> inner )')
+			self.addLine('(<edge> inner )')
 		self.addGcodeFromThreadZ(loop + [loop[0]], z)
-		self.addLine('(</perimeter>)') # Indicate that a perimeter is beginning.
+		self.addLine('(</edge>)') # Indicate that an edge is beginning.
 
 	def addTagBracketedLine(self, tagName, value):
 		'Add a begin tag, value and end tag.'
@@ -410,7 +407,7 @@ class DistanceFeedRate:
 
 	def getLinearGcodeMovement(self, point, z):
 		'Get a linear gcode movement.'
-		return 'G1 X%s Y%s Z%s' % ( self.getRounded( point.real ), self.getRounded( point.imag ), self.getRounded(z) )
+		return 'G1 X%s Y%s Z%s' % (self.getRounded(point.real), self.getRounded(point.imag), self.getRounded(z))
 
 	def getLinearGcodeMovementWithFeedRate(self, feedRateMinute, point, z):
 		'Get a z limited gcode movement.'

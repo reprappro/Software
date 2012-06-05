@@ -40,5 +40,5 @@ button 9 "BR" G1 X15 Y15 F12000
 button 10 "FL" G1 X135 Y135 F12000
 button 11 "UP" G1 Z6 F200
 button 12 "FR" G1 X15 Y135 F12000
-set sliceoptscommand pypy ./skeinforge/skeinforge_application/skeinforge.py
-set slicecommand pypy ./skeinforge/skeinforge_application/skeinforge_utilities/skeinforge_craft.py $s
+set sliceoptscommand python ./skeinforge/skeinforge_application/skeinforge.py
+set slicecommand python ./skeinforge/skeinforge_application/skeinforge_utilities/skeinforge_craft.py $s

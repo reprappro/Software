@@ -193,6 +193,7 @@ class oozestepSkein:
 		self.TatL_ = []
 		self.eAbsolute = False
 		self.retractAmount = 0
+		self.ignoreE = False
 
 	def getCraftedGcode( self, gcodeText, repository ):
 		"Parse gcode text and store the oozestep gcode."
@@ -272,19 +273,25 @@ class oozestepSkein:
 						#we see an E word but extruderActive = False, store value as press dist
 						if not self.isFirstPath:
 							if not self.isNewLayer:
-								self.nextPathPressDist = float(getStringFromCharacterSplitLine('E', splitLine ))
-							else:
+								if self.ignoreE:
+									self.ignoreE = False
+								else:
+									self.nextPathPressDist = float(getStringFromCharacterSplitLine('E', splitLine ))
+								#endif
+							else:#new layer
 								if self.eAbsolute:
 									self.nextPathPressDist = float(getStringFromCharacterSplitLine('E', splitLine ))
 									self.distanceFeedRate.addLine("G92 E" + str(myformat(self.nextPathPressDist - self.repository.firstLayerPathPressDist.value,3)))
 								else:
+									#if self.nextPathPressDist == self.retractAmount:
 									self.nextPathPressDist = self.repository.firstLayerPathPressDist.value
+									#endif
 								#endif
+								print "nextPathPressDist " + str(self.nextPathPressDist) + ", lastZString " + str(self.lastZString)
 								self.isNewLayer = False
 							#endif
 						else:
 							self.nextPathPressDist = self.repository.firstPathPressDist.value
-							#self.isFirstPath = False
 						#endif
 						#print 'nextPathPressDist=' + self.nextPathPressDist
 						self.currPos[E] = self.nextPathPressDist
@@ -353,6 +360,7 @@ class oozestepSkein:
 			path[0][E] = path[0][E] / 2
 		#endif
 		if dist < (self.repository.nextPathPressXY.value + self.repository.extruderEarlyStopXY.value):
+			self.ignoreE = True
 			return
 		#endif
 		currDist = 0
@@ -382,6 +390,7 @@ class oozestepSkein:
 						#print 'b'
 						mX = self.currPos[X] + ((Segment[X] - self.currPos[X]) * dXY)
 						mY = self.currPos[Y] + ((Segment[Y] - self.currPos[Y]) * dXY)
+						#sometimes breaks when retract within islands is off?!
 						self.move_XY( [mX , mY , self.nextPathPressDist * mXY / self.repository.nextPathPressXY.value ] , feed )
 						feed = self.xyFeed
 						#print 'c'

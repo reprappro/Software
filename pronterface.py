@@ -747,7 +747,7 @@ class PronterWindow(wx.Frame,pronsole.pronsole):
     def plate(self,e):
         import plater
         print "plate function activated"
-        plater.stlwin(size=(800,580),callback=self.platecb,parent=self).Show()
+        plater.stlwin(size=(800,580),callback=self.platecb,parent=self, initdir=self.settings.last_file_path).Show()
 
     def platecb(self,name):
         print "plated: "+name

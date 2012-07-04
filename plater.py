@@ -245,7 +245,7 @@ class showstl(wx.Window):
 
 
 class stlwin(wx.Frame):
-    def __init__(self, size=(800, 580), callback=None, parent=None):
+    def __init__(self, size=(800, 580), callback=None, parent=None, initdir="."):
         wx.Frame.__init__(self, parent, title=_("Plate building tool"), size=size)
         self.SetIcon(wx.Icon("plater.ico", wx.BITMAP_TYPE_ICO))
         self.mainsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -274,7 +274,8 @@ class stlwin(wx.Frame):
         self.cb.Bind(wx.EVT_BUTTON, self.center)
         self.db.Bind(wx.EVT_BUTTON, self.delete)
         self.ab.Bind(wx.EVT_BUTTON, self.autoplate)
-        self.basedir = "."
+        self.basedir = initdir
+        print self.basedir
         self.models = {}
         #self.SetBackgroundColour((10, 10, 10))
         self.mainsizer.Add(self.panel)
@@ -392,7 +393,17 @@ class stlwin(wx.Frame):
             o = i.offsets
             #print os.path.split(i.filename)
             #print self.basedir
-            sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, self.basedir + "/" + os.path.split(i.filename)[1]))
+            #sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, self.basedir + "/" + os.path.split(i.filename)[1]))
+            if os.path.split(i.filename)[0] != os.path.split(sf.name)[0]:
+                relpath = os.path.relpath(i.filename,sf.name)
+            else:
+                relpath = os.path.split(i.filename)[1]
+            #endif
+            #relpath = os.path.relpath(i.filename,sf.name)[3:]
+            #print "basedir " + self.basedir
+            #print "sf " + sf.name
+            #print "relpath " + relpath
+            sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, relpath))
             if r != 0:
                 i = i.rotate([0, 0, r])
             if o != [0, 0, 0]:
@@ -407,7 +418,7 @@ class stlwin(wx.Frame):
         dlg.SetWildcard(_("STL files (;*.stl;*.STL;)|*.stl|OpenSCAD files (;*.scad;)|*.scad"))
         if(dlg.ShowModal() == wx.ID_OK):
             name = dlg.GetPath()
-            print "Current directory " + dlg.GetDirectory()
+            #print "Current directory " + dlg.GetDirectory()
             self.basedir = dlg.GetDirectory()
             if (name.lower().endswith(".stl")):
                 self.load_stl(event, name)
@@ -440,7 +451,9 @@ class stlwin(wx.Frame):
                 c += 1
             stl_path = os.path.join(os.path.split(name)[0:len(os.path.split(stl_file)) - 1])
             stl_full_path = os.path.join(stl_path[0], str(stl_file))
-            self.load_stl_into_model(stl_full_path, stl_file, translate_list, rotate_list[2])
+            #self.load_stl_into_model(stl_full_path, stl_file, translate_list, rotate_list[2])
+            #print os.path.split(name)[0] + "/" + str(stl_file)
+            self.load_stl_into_model(os.path.split(name)[0] + "/" + str(stl_file), stl_file, translate_list, rotate_list[2])
 
     def load_stl(self, event, name):
         if not(os.path.exists(name)):

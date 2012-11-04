@@ -3,6 +3,7 @@
 *.pyc
 .pronsolerc
 
-# Back up of settings #
-#######################
+# Back up files #
+#################
 .pronsolerc~old
+*~

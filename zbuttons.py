@@ -47,9 +47,7 @@ class ZButtons(BufferedCanvas):
         self.moveCallback = moveCallback
         self.enabled = False
 
-        BufferedCanvas.__init__(self, parent, ID)
-
-        self.SetSize(wx.Size(59, 244))
+        BufferedCanvas.__init__(self, parent, ID, wx.DefaultPosition, self.bg_bmp.GetSize())
 
         # Set up mouse and keyboard event capture
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)

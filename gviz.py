@@ -215,8 +215,12 @@ class gviz(wx.Panel):
         
     def resize(self,event):
         size=self.GetClientSize()
+	if size[0]==0:
+	    size[0]=1
+	if size[1]==0:
+	    size[1]=1
         newsize=min(float(size[0])/self.size[0],float(size[1])/self.size[1])
-        self.size=self.GetClientSize()
+        self.size=size
         wx.CallAfter(self.zoom,0,0,newsize)
         
 

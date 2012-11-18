@@ -58,8 +58,7 @@ class XYButtons(BufferedCanvas):
         self.cornerCallback = cornerCallback
         self.enabled = False
     
-        BufferedCanvas.__init__(self, parent, ID)
-        self.SetSize(self.bg_bmp.GetSize())
+        BufferedCanvas.__init__(self, parent, ID, wx.DefaultPosition, self.bg_bmp.GetSize())
 
         # Set up mouse and keyboard event capture
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)

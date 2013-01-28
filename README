@@ -11,7 +11,7 @@ On Windows, download the following, and install in this order:
 http://python.org/ftp/python/2.7.2/python-2.7.2.msi
 http://pypi.python.org/packages/any/p/pyserial/pyserial-2.5.win32.exe
 http://downloads.sourceforge.net/wxpython/wxPython2.8-win32-unicode-2.8.12.0-py27.exe
-http://launchpad.net/pyreadline/trunk/1.7/+download/pyreadline-1.7.win32.exe
+http://pypi.python.org/packages/any/p/pyreadline/pyreadline-1.7.1.win32.exe#md5=ffe3987562d0891901ebccdd94933a39
 
 On Ubuntu/debian, do:
 sudo apt-get install python-serial python-wxgtk2.8

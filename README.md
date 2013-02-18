@@ -23,7 +23,7 @@ go into the the directory you unpacked it in and run
 `python setup.py install`
 
 ## Ubuntu/Debian
-`sudo apt-get install python-serial python-wxgtk2.8 python-pyglet`
+`sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-tk`
 
 ## Fedora 15
 `sudo yum install pyserial wxpython pyglet`

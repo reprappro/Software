@@ -28,6 +28,8 @@ class window(wx.Frame):
         toolbar.AddSimpleTool(3, wx.Image('./images/arrow_up.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move Up a Layer [U]', '')
         toolbar.AddSimpleTool(4, wx.Image('./images/arrow_down.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move Down a Layer [D]', '')
         toolbar.AddSimpleTool(5, wx.EmptyBitmap(16,16), 'Reset view', '')
+        toolbar.AddSimpleTool(6, wx.Image('./images/arrow_right.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to next Segment [->]', '')
+        toolbar.AddSimpleTool(7, wx.Image('./images/arrow_left.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to previous Segment [<-]', '')
         toolbar.AddSeparator()
         #toolbar.AddSimpleTool(5, wx.Image('./images/inject.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Insert Code at start of this layer', '')
         toolbar.Realize()
@@ -38,6 +40,8 @@ class window(wx.Frame):
         self.Bind(wx.EVT_TOOL, lambda x:self.p.layerup(), id=3)
         self.Bind(wx.EVT_TOOL, lambda x:self.p.layerdown(), id=4)
         self.Bind(wx.EVT_TOOL, self.resetview, id=5)
+        self.Bind(wx.EVT_TOOL, lambda x:self.p.line_next(), id=6)
+        self.Bind(wx.EVT_TOOL, lambda x:self.p.line_prev(), id=7)
         #self.Bind(wx.EVT_TOOL, lambda x:self.p.inject(), id=5)
         
         
@@ -95,6 +99,16 @@ class window(wx.Frame):
             self.p.repaint()
             self.p.Refresh()
         
+        
+        #TODO sort out coordinates - jmg
+        elif event.Moving():
+            e=event.GetPositionTuple()
+            self.basetrans=self.p.translate
+            _x = (e[0] - self.p.translate[0]) / self.p.scale[0]
+            #e[0] = self.scale[0]*x[0]+self.translate[0]
+            _y = (e[1]  - self.p.translate[1]) / self.p.scale[1]
+            #self.SetStatusText("X%0.3f Y%0.3f Scale %0.3f Pan X%0.3f Y%0.3f Cursor X%0.3f Y%0.3f" % (e[0], e[1], self.p.scale[0], self.p.translate[0], self.p.translate[1], _x, _y))
+            self.SetStatusText("Cursor X%0.3f Y%0.3f" % (_x, _y))
         else:
             event.Skip()
     
@@ -102,8 +116,10 @@ class window(wx.Frame):
         #  Keycode definitions
         kup=[85, 315]               # Up keys
         kdo=[68, 317]               # Down Keys 
-        kzi=[388, 316, 61]        # Zoom In Keys
-        kzo=[390, 314, 45]       # Zoom Out Keys
+        klf=[wx.WXK_LEFT]
+        krt=[wx.WXK_RIGHT]
+        kzi=[388, 61]        # Zoom In Keys
+        kzo=[390, 45]       # Zoom Out Keys
         x=event.GetKeyCode()
         #print "Key event - "+str(x)
         #if event.ShiftDown():
@@ -112,7 +128,7 @@ class window(wx.Frame):
         #      self.p.zoom(cx,cy,1.2)
         #   if x==wx.WXK_DOWN:
         #       self.p.zoom(cx,cy,1/1.2)
-        #else:
+        #else:	
         #   if x==wx.WXK_UP:
         #       self.p.layerup()
         #   if x==wx.WXK_DOWN:  
@@ -121,6 +137,10 @@ class window(wx.Frame):
             self.p.layerup()
         if x in kdo:
             self.p.layerdown()
+        if x in klf:
+            self.p.line_prev()
+        if x in krt:
+            self.p.line_next()
         if x in kzi:
             self.p.zoom(cx,cy,1.2)
         if x in kzo:
@@ -135,6 +155,7 @@ class window(wx.Frame):
         else:
             if z > 0:   self.p.zoom(event.GetX(),event.GetY(),1.2)
             elif z < 0: self.p.zoom(event.GetX(),event.GetY(),1/1.2)
+            print self.p.scale
         
 class gviz(wx.Panel):
     def __init__(self,parent,size=(200,200),build_dimensions=[200,200,100,0,0,0],grid=(10,50),extrusion_width=0.5):
@@ -169,6 +190,7 @@ class gviz(wx.Panel):
         self.hilightarcs=[]
         self.dirty=1
         self.blitmap=wx.EmptyBitmap(self.GetClientSize()[0],self.GetClientSize()[1],-1)
+        self.lines_=0
     
     def inject(self):
         #import pdb; pdb.set_trace()
@@ -193,6 +215,7 @@ class gviz(wx.Panel):
             self.layerindex+=1
             # Display layer info on statusbar (Jezmy)
             self.parent.SetStatusText("Layer "+str(self.layerindex +1)+" - Going Up - Z = "+str(self.layers[self.layerindex])+" mm",0)
+            self.lines_ = 0
             self.repaint()
             self.Refresh()
     
@@ -201,9 +224,30 @@ class gviz(wx.Panel):
             self.layerindex-=1            
             # Display layer info on statusbar (Jezmy)
             self.parent.SetStatusText("Layer "+str(self.layerindex + 1)+" - Going Down - Z = "+str(self.layers[self.layerindex])+ " mm",0)
+            self.lines_ = 0
             self.repaint()
             self.Refresh()
     
+    def _move_pens(self,pen):
+        newpen = self.hlpen if pen != self.travelpen else self.travelpen
+        #pens = wx.Pen(wx.Colour(0,255,0),max(1.0,self.filament_width*((self.scale[0]+self.scale[1])/2.0)))#self.hlpen
+        return newpen
+
+    def line_next(self):
+        self.lines_ += 1
+        #print "move_lines " + str(self.lines_);
+        self.move_pens = map(self._move_pens,self.pens[self.layers[self.layerindex]][:self.lines_])
+        #print self.move_pens
+        self.repaint(self.lines_)
+        self.Refresh()
+
+    def line_prev(self):
+        self.lines_ -= 1
+        #print "move_lines " + str(self.lines_);
+        self.move_pens = map(self._move_pens,self.pens[self.layers[self.layerindex]][:self.lines_])
+        self.repaint(self.lines_)
+        self.Refresh()
+
     def setlayer(self,layer):
         try:
             self.layerindex=self.layers.index(layer)
@@ -237,7 +281,7 @@ class gviz(wx.Panel):
         self.Refresh()
         
         
-    def repaint(self):
+    def repaint(self, lines=-1):
         self.blitmap=wx.EmptyBitmap(self.GetClientSize()[0],self.GetClientSize()[1],-1)
         dc=wx.MemoryDC()
         dc.SelectObject(self.blitmap)
@@ -291,10 +335,14 @@ class gviz(wx.Panel):
             return
         if self.layerindex<len(self.layers) and self.layers[self.layerindex] in self.lines.keys():
             for layer_i in xrange(max(0,self.layerindex-6),self.layerindex):
-                #print i, self.layerindex, self.layerindex-i
                 _drawlines(self.lines[self.layers[layer_i]], self.fades[self.layerindex-layer_i-1])
                 _drawarcs(self.arcs[self.layers[layer_i]], self.fades[self.layerindex-layer_i-1])
-            _drawlines(self.lines[self.layers[self.layerindex]], self.pens[self.layers[self.layerindex]])
+            if (lines > 0 and lines <= len(self.lines[self.layers[self.layerindex]])):
+                _drawlines(self.lines[self.layers[self.layerindex]][:lines], self.move_pens)
+               #_drawlines(self.lines[self.layers[self.layerindex]][lines:], self.pens[self.layers[self.layerindex]][lines:])
+                self.parent.SetStatusText("X" + str(self.lines[self.layers[self.layerindex]][lines][0]) + " Y" + str(self.build_dimensions[1]-self.lines[self.layers[self.layerindex]][lines][1]))
+            else:
+               _drawlines(self.lines[self.layers[self.layerindex]], self.pens[self.layers[self.layerindex]])
             _drawarcs(self.arcs[self.layers[self.layerindex]], self.arcpens[self.layers[self.layerindex]])
         
         _drawlines(self.hilight, self.hlpen)

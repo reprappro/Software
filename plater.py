@@ -44,7 +44,6 @@ if "-nogl" not in sys.argv:
 
 def evalme(s):
     s = ' '.join(s.split())
-    print s
     return eval(s[s.find("(") + 1:s.find(")")])
 
 
@@ -387,28 +386,27 @@ class stlwin(wx.Frame):
     def writefiles(self, name):
         sf = open(name.replace(".", "_") + ".scad", "w")
         facets = []
-        for i in self.models.values():
+        for model in self.models.values():
 
-            r = i.rot
-            o = i.offsets
-            #print os.path.split(i.filename)
+            r = model.rot
+            o = model.offsets
             #print self.basedir
             #sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, self.basedir + "/" + os.path.split(i.filename)[1]))
-            if os.path.split(i.filename)[0] != os.path.split(sf.name)[0]:
-                relpath = os.path.relpath(i.filename,sf.name)
+            if os.path.split(model.filename)[0] != os.path.split(sf.name)[0]:
+                relpath = os.path.relpath(model.filename,sf.name)
             else:
-                relpath = os.path.split(i.filename)[1]
+                relpath = os.path.split(model.filename)[1]
             #endif
-            #relpath = os.path.relpath(i.filename,sf.name)[3:]
+            relpath = model.filename
             #print "basedir " + self.basedir
             #print "sf " + sf.name
             #print "relpath " + relpath
             sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, relpath))
             if r != 0:
-                i = i.rotate([0, 0, r])
+                model = model.rotate([0, 0, r])
             if o != [0, 0, 0]:
-                i = i.translate([o[0], o[1], o[2]])
-            facets += i.facets
+                model = model.translate([o[0], o[1], o[2]])
+            facets += model.facets
         sf.close()
         stltool.emitstl(name, facets, "plater_export")
         print _("wrote %s") % name
@@ -451,9 +449,9 @@ class stlwin(wx.Frame):
                 c += 1
             stl_path = os.path.join(os.path.split(name)[0:len(os.path.split(stl_file)) - 1])
             stl_full_path = os.path.join(stl_path[0], str(stl_file))
-            #self.load_stl_into_model(stl_full_path, stl_file, translate_list, rotate_list[2])
+            self.load_stl_into_model(stl_full_path, stl_file, translate_list, rotate_list[2])
             #print os.path.split(name)[0] + "/" + str(stl_file)
-            self.load_stl_into_model(os.path.split(name)[0] + "/" + str(stl_file), stl_file, translate_list, rotate_list[2])
+            #self.load_stl_into_model(os.path.split(name)[0] + "/" + str(stl_file), stl_file, translate_list, rotate_list[2])
 
     def load_stl(self, event, name):
         if not(os.path.exists(name)):
@@ -480,6 +478,7 @@ class stlwin(wx.Frame):
         self.models[newname].rot = rotation
         self.models[newname].scale = scale
         self.models[newname].filename = name
+        print name
         minx, miny, minz, maxx, maxy, maxz = (10000, 10000, 10000, 0, 0, 0)
         for i in self.models[newname].facets:
             for j in i[1]:

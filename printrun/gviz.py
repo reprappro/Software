@@ -31,8 +31,8 @@ class window(wx.Frame):
         toolbar.AddSimpleTool(3, wx.Image(imagefile('arrow_up.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move Up a Layer [U]', '')
         toolbar.AddSimpleTool(4, wx.Image(imagefile('arrow_down.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move Down a Layer [D]', '')
         toolbar.AddSimpleTool(5, wx.EmptyBitmap(16, 16), 'Reset view', '')
-        toolbar.AddSimpleTool(6, wx.Image('./images/arrow_right.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to next Segment [->]', '')
-        toolbar.AddSimpleTool(7, wx.Image('./images/arrow_left.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to previous Segment [<-]', '')
+        toolbar.AddSimpleTool(6, wx.Image(imagefile('arrow_right.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to next Segment [->]', '')
+        toolbar.AddSimpleTool(7, wx.Image(imagefile('arrow_left.png'), wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Move to previous Segment [<-]', '')
         toolbar.AddSeparator()
         #toolbar.AddSimpleTool(5, wx.Image('./images/inject.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Insert Code at start of this layer', '')
         toolbar.Realize()
@@ -76,7 +76,8 @@ class window(wx.Frame):
         #self.bd.Bind(wx.EVT_KEY_DOWN, self.key)
         #self.bi.Bind(wx.EVT_KEY_DOWN, self.key)
         #self.bo.Bind(wx.EVT_KEY_DOWN, self.key)
-        self.Bind(wx.EVT_KEY_DOWN, self.key)
+        #self.Bind(wx.EVT_KEY_DOWN, self.key)
+        self.Bind(wx.EVT_CHAR_HOOK, self.key)
         self.p.Bind(wx.EVT_MOUSEWHEEL, self.zoom)
         self.Bind(wx.EVT_MOUSEWHEEL, self.zoom)
         self.p.Bind(wx.EVT_MOUSE_EVENTS, self.mouse)
@@ -119,12 +120,12 @@ class window(wx.Frame):
         #  Keycode definitions
         kup = [85, 315]               # Up keys
         kdo = [68, 317]               # Down Keys
-        klf=[wx.WXK_LEFT]
-        krt=[wx.WXK_RIGHT]
+        klf = [80, 314] #[wx.WXK_LEFT]
+        krt = [78, 316] #[wx.WXK_RIGHT]
         kzi=[388, 61]        # Zoom In Keys
         kzo=[390, 45]       # Zoom Out Keys
         x = event.GetKeyCode()
-        #print "Key event - "+str(x)
+        print "Key event - "+str(x)
         #if event.ShiftDown():
         cx, cy = self.p.translate
         #   if x == wx.WXK_UP:

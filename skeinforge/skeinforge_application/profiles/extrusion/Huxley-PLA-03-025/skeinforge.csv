@@ -1,9 +1,0 @@
-Format is tab separated skeinforge settings.
-_Name                          	Value
-WindowPosition	361+41
-Open File for Skeinforge	/home/jeanmarc/Documents/Models/test parts/stl/20mm_no_hole.stl
-analyze	False
-craft	True
-help	False
-meta	False
-profile	False

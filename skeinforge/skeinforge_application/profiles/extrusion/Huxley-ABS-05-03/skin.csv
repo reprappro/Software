@@ -1,8 +1,0 @@
-Format is tab separated skin settings.
-_Name                          	Value
-WindowPosition	700+0
-Open File for Skin	
-Activate Skin	False
-Half Width Perimeter	True
-Hop When Extruding Infill	False
-Layers From (index):	1

@@ -28,6 +28,7 @@ set preview_extrusion_width 0.5
 set build_dimensions 150x150x75+0+0+0
 set sliceoptscommand ./Slic3r/bin/slic3r
 set slicecommand ./Slic3r/bin/slic3r $s --load ./profiles/H-PLA-05-03-1.ini --output $o
+set sliceconfig ./profiles
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22

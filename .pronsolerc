@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Mendel/Print-mendel/GCode
+set last_file_path /home/jeanmarc/Downloads
 set xy_feedrate 12000
 set z_feedrate 150
 set e_feedrate 1800
@@ -25,8 +25,8 @@ set bedtemp_pla 57
 set bedtemp_abs 110
 set baudrate 115200
 set preview_extrusion_width 0.5
-set sliceoptscommand ./Slic3r/bin/slic3r
-set slicecommand ./Slic3r/bin/slic3r $s
+set sliceoptscommand ./Slic3r/slic3r.pl
+set slicecommand ./Slic3r/slic3r.pl $s  --output $o
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22
@@ -55,3 +55,4 @@ macro fan
       !self.onecmd('button %d "FAN ON)" /c red fan' % self.cur_button)
 
 
+set sliceconfig ./Slic3r/profiles

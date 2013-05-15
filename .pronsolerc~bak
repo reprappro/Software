@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Mendel/Print-mendel/GCode
+set last_file_path /home/jeanmarc/Documents/Models/test parts/stl
 set xy_feedrate 12000
 set z_feedrate 150
 set e_feedrate 1800
@@ -25,34 +25,34 @@ set bedtemp_pla 57
 set bedtemp_abs 110
 set baudrate 115200
 set preview_extrusion_width 0.5
-set sliceoptscommand ./Slic3r/bin/slic3r
-set slicecommand ./Slic3r/bin/slic3r $s
+set sliceoptscommand ./Slic3r/slic3r.pl
+set slicecommand ./Slic3r/slic3r.pl $s  --output $o
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22
 button 2 "LIST" /c "#C8C8C8" M20
-#button 3 "FAN ON" /c "#C8C8C8" M106 S200
-button 4 "GET POS" /c "#C8C8C8" M114
+button 3 "GET POS" /c "#C8C8C8" M114
+button 4 "FAN OFF" /c "D1FFCC" fan
 button 5 "ECHO" /c "#C8C8C8" loud
 button 6 "QUIET" /c "#C8C8C8" quiet
-button 7 "BL" G1 X135 Y15 F12000
+button 7 "    BL    " G1 X135 Y15 F12000
 button 8 "CENTRE" G1 X70 Y70 F12000
-button 9 "BR" G1 X15 Y15 F12000
-button 10 "FL" G1 X135 Y135 F12000
-button 11 "UP" G1 Z6 F200
-button 12 "FR" G1 X15 Y135 F12000
+button 9 "    BR    " G1 X15 Y15 F12000
+button 10 "    FL    " G1 X135 Y135 F12000
+button 11 "    UP    " G1 Z6 F200
+button 12 "    FR    " G1 X15 Y135 F12000
 macro fan
   !global _fan
   !if '_fan' in globals() and _fan:
     !_fan = 0
     M107
     !if hasattr(self,"cur_button") and self.cur_button is not None: 
-      !self.onecmd('button %d "fan (off)" /c "D1FFCC" fan' % self.cur_button)
+      !self.onecmd('button %d "FAN OFF" /c "D1FFCC" fan' % self.cur_button)
   !else:
     !_fan = 1
     M106
     !if hasattr(self,"cur_button") and self.cur_button is not None: 
-      !self.onecmd('button %d "fan (on)" /c red fan' % self.cur_button)
-button 3 "GET POS" /c "#C8C8C8" M114
+      !self.onecmd('button %d "FAN ON)" /c red fan' % self.cur_button)
 
 
+set sliceconfig ./Slic3r/profiles

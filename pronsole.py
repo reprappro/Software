@@ -212,6 +212,7 @@ class pronsole(cmd.Cmd):
         self.settings._temperature_pla_cb = self.set_temp_preset
         self.settings._bedtemp_abs_cb = self.set_temp_preset
         self.settings._bedtemp_pla_cb = self.set_temp_preset
+        self.settings.sliceconfig = ""
         self.monitoring = 0
         self.helpdict = {}
         self.helpdict["baudrate"] = _("Communications Speed (default: 115200)")
@@ -1108,13 +1109,22 @@ class pronsole(cmd.Cmd):
         try:
             import shlex
             if(settings):
-                param = self.expandcommand(self.settings.sliceoptscommand).replace("\\", "\\\\").encode()
+                datadir = ''
+                if(self.settings.sliceconfig <> ''):
+                    datadir = " --datadir " + self.settings.sliceconfig + " "
+                param = self.expandcommand(self.settings.sliceoptscommand).replace("\\", "\\\\").encode() + datadir
                 print "Entering slicer settings: ", param
                 subprocess.call(shlex.split(param))
             else:
                 param = self.expandcommand(self.settings.slicecommand).encode()
                 print "Slicing: ", param
                 params = [i.replace("$s", l[0]).replace("$o", l[0].replace(".stl", "_export.gcode").replace(".STL", "_export.gcode")).encode() for i in shlex.split(param.replace("\\", "\\\\").encode())]
+                #add profiles
+                if(self.settings.sliceconfig <> ''):
+                    datadir = "--datadir " + self.settings.sliceconfig + " "
+                profilescmd = open(self.settings.sliceconfig + 'slic3r.ini', 'r').read()
+                print profilescmd
+                params += datadir + profilescmd
                 subprocess.call(params)
                 print "Loading sliced file."
                 self.do_load(l[0].replace(".stl", "_export.gcode"))

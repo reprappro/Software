@@ -1175,6 +1175,12 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             except:
                 pass
 
+#    def profilesloaded(self):
+#        dlg = wx.SingleChoiceDialog(self, _("Select a print profile"), _("Pick profile"), self.listprofiles)
+#        if(dlg.ShowModal() == wx.ID_OK):
+#            #self.settings.profile = dlg.GetStringSelection()
+#            print 'boo'
+        
     def filesloaded(self):
         dlg = wx.SingleChoiceDialog(self, _("Select the file to print"), _("Pick SD file"), self.sdfiles)
         if(dlg.ShowModal() == wx.ID_OK):
@@ -1198,6 +1204,13 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         try:
             import shlex
             param = self.expandcommand(self.settings.slicecommand).encode()
+            #add profiles
+            profiles = open(self.settings.sliceconfig + '/slic3r.ini', 'r').read()
+            import re
+            profilescmd = '--load "' + self.settings.sliceconfig + '/filament/' + re.search('filament = (.*\.ini)', profiles).group(1) + '" '
+            profilescmd += '--load "' + self.settings.sliceconfig + '/print/' + re.search('print = (.*\.ini)', profiles).group(1) + '" '
+            profilescmd += '--load "' + self.settings.sliceconfig + '/printer/' + re.search('printer = (.*\.ini)', profiles).group(1) + '" '
+            param += ' ' + profilescmd
             print "Slicing: ", param
             if self.webInterface:
                 self.webInterface.AddLog("Slicing: "+param)

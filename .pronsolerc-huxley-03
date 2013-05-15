@@ -12,10 +12,10 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/test parts/stl
+set last_file_path /home/jeanmarc/Documents/Models/things/Twisted_Bottle
 set xy_feedrate 12000
 set z_feedrate 150
-set e_feedrate 1800
+set e_feedrate 3800
 set port /dev/ttyUSB0
 set last_bed_temperature 57.0
 set last_temperature 140.0

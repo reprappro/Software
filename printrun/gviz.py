@@ -125,7 +125,7 @@ class window(wx.Frame):
         kzi=[388, 61]        # Zoom In Keys
         kzo=[390, 45]       # Zoom Out Keys
         x = event.GetKeyCode()
-        print "Key event - "+str(x)
+        #print "Key event - "+str(x)
         #if event.ShiftDown():
         cx, cy = self.p.translate
         #   if x == wx.WXK_UP:
@@ -159,7 +159,7 @@ class window(wx.Frame):
         else:
             if z > 0:   self.p.zoom(event.GetX(), event.GetY(), 1.2)
             elif z < 0: self.p.zoom(event.GetX(), event.GetY(), 1/1.2)
-            print self.p.scale
+            #print self.p.scale
 
 class gviz(wx.Panel):
     def __init__(self, parent, size = (200, 200), build_dimensions = [200, 200, 100, 0, 0, 0], grid = (10, 50), extrusion_width = 0.5):

@@ -42,6 +42,7 @@ if "-nogl" not in sys.argv:
 
 
 def evalme(s):
+    s = ' '.join(s.split())
     return eval(s[s.find("(") + 1:s.find(")")])
 
 
@@ -242,7 +243,7 @@ class showstl(wx.Window):
 
 
 class stlwin(wx.Frame):
-    def __init__(self, size = (800, 580), callback = None, parent = None):
+    def __init__(self, size = (800, 580), callback = None, parent = None, initdir="."):
         wx.Frame.__init__(self, parent, title = _("Plate building tool"), size = size)
         self.SetIcon(wx.Icon(pixmapfile("plater.ico"), wx.BITMAP_TYPE_ICO))
         self.mainsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -271,7 +272,8 @@ class stlwin(wx.Frame):
         self.cb.Bind(wx.EVT_BUTTON, self.center)
         self.db.Bind(wx.EVT_BUTTON, self.delete)
         self.ab.Bind(wx.EVT_BUTTON, self.autoplate)
-        self.basedir = "."
+        self.basedir = initdir
+        print self.basedir
         self.models = {}
         #self.SetBackgroundColour((10, 10, 10))
         self.mainsizer.Add(self.panel)
@@ -361,7 +363,11 @@ class stlwin(wx.Frame):
             os.mkdir("tempstl")
         except:
             pass
-        name = "tempstl/" + str(int(time.time()) % 10000) + ".stl"
+        if len(self.basedir) > 1:
+            name = self.basedir + "/" + str(int(time.time()) % 10000) + ".stl"
+        else:
+            name = "tempstl/" + str(int(time.time()) % 10000) + ".stl"
+        #endif
         self.writefiles(name)
         if cb is not None:
             cb(name)
@@ -372,22 +378,34 @@ class stlwin(wx.Frame):
         dlg.SetWildcard(_("STL files (;*.stl;*.STL;)"))
         if(dlg.ShowModal() == wx.ID_OK):
             name = dlg.GetPath()
+            self.basedir = dlg.GetDirectory()
             self.writefiles(name)
         dlg.Destroy()
 
     def writefiles(self, name):
         sf = open(name.replace(".", "_") + ".scad", "w")
         facets = []
-        for i in self.models.values():
+        for model in self.models.values():
 
-            r = i.rot
-            o = i.offsets
-            sf.write('translate([%s, %s, %s]) rotate([0, 0, %s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, os.path.split(i.filename)[1]))
+            r = model.rot
+            o = model.offsets
+            #print self.basedir
+            #sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, self.basedir + "/" + os.path.split(i.filename)[1]))
+            if os.path.split(model.filename)[0] != os.path.split(sf.name)[0]:
+                relpath = os.path.relpath(model.filename,sf.name)
+            else:
+                relpath = os.path.split(model.filename)[1]
+            #endif
+            relpath = model.filename
+            #print "basedir " + self.basedir
+            #print "sf " + sf.name
+            #print "relpath " + relpath
+            sf.write('translate([%s,%s,%s]) rotate([0,0,%s]) import_stl("%s");\n' % (str(o[0]), str(o[1]), str(o[2]), r, relpath))
             if r != 0:
-                i = i.rotate([0, 0, r])
+                model = model.rotate([0, 0, r])
             if o != [0, 0, 0]:
-                i = i.translate([o[0], o[1], o[2]])
-            facets += i.facets
+                model = model.translate([o[0], o[1], o[2]])
+            facets += model.facets
         sf.close()
         stltool.emitstl(name, facets, "plater_export")
         print _("wrote %s") % name
@@ -397,6 +415,8 @@ class stlwin(wx.Frame):
         dlg.SetWildcard(_("STL files (;*.stl;*.STL;)|*.stl|OpenSCAD files (;*.scad;)|*.scad"))
         if(dlg.ShowModal() == wx.ID_OK):
             name = dlg.GetPath()
+            #print "Current directory " + dlg.GetDirectory()
+            self.basedir = dlg.GetDirectory()
             if (name.lower().endswith(".stl")):
                 self.load_stl(event, name)
             elif (name.lower().endswith(".scad")):
@@ -455,6 +475,7 @@ class stlwin(wx.Frame):
         self.models[newname].rot = rotation
         self.models[newname].scale = scale
         self.models[newname].filename = name
+        print name
         minx, miny, minz, maxx, maxy, maxz = (10000, 10000, 10000, 0, 0, 0)
         for i in self.models[newname].facets:
             for j in i[1]:

@@ -12,12 +12,12 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Huxley/Print-Huxley/GCodes
+set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Zip/To Print
 set build_dimensions 150x150x75+0+0+0
 set xy_feedrate 12000
 set z_feedrate 150
 set e_feedrate 200
-set port /dev/ttyUSB1
+set port /dev/ttyUSB0
 set last_bed_temperature 57.0
 set last_temperature 140.0
 set temperature_abs 240

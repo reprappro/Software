@@ -8,7 +8,7 @@ Printrun consists of printcore, pronsole and pronterface, and a small collection
 
 ## Windows
 
-A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
+A precompiled version is available at http://reprappro.com/wiki/index.php/File:RepRapPro-Printrun-Slic3r.zip
 
 Download the following, and install in this order:
 

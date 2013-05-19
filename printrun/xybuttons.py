@@ -43,6 +43,7 @@ class XYButtons(BufferedCanvas):
 
     def __init__(self, parent, moveCallback = None, cornerCallback = None, spacebarCallback = None, bgcolor = "#FFFFFF", ID=-1):
         self.bg_bmp = wx.Image(imagefile("control_xy.png"), wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        #self.bg_bmp = wx.Image("./images/control_xy.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap()
         self.keypad_bmp = wx.Image(imagefile("arrow_keys.png"), wx.BITMAP_TYPE_PNG).ConvertToBitmap()
         self.keypad_idx = -1
         self.quadrant = None

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import wx
+
 # This file is part of the Printrun suite.
 #
 # Printrun is free software: you can redistribute it and/or modify
@@ -20,11 +22,11 @@ import os, Queue, re
 from printrun.printrun_utils import install_locale
 install_locale('pronterface')
 
-try:
-    import wx
-except:
-    print _("WX is not installed. This program requires WX to run.")
-    raise
+#try:
+#    import wx
+#except:
+#    print _("WX is not installed. This program requires WX to run.")
+#    raise
 import sys, glob, time, datetime, threading, traceback, cStringIO, subprocess
 
 from printrun.pronterface_widgets import *

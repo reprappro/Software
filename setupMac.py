@@ -6,10 +6,14 @@ Usage:
 """
 
 from setuptools import setup
+from glob import glob
 
 APP = ['pronterface.py']
-DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
+DATA_FILES = [
+	('',['P-face.ico','plater.ico','pronsole.ico']),
+	('images',glob('images/*.png'))
+]
+OPTIONS = {'arch': 'i386', 'argv_emulation': True, 'includes': 'wx','iconfile':'P-face.icns'}
 
 setup(
     app=APP,

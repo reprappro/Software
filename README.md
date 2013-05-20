@@ -30,7 +30,7 @@ go into the the directory you unpacked it in and run
 
 ## Mac OS X Lion
 
-A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
+A precompiled version is available at http://reprappro.com/wiki/index.php/File:RepRapPro-Pronterface-Mac.zip
 
   1. Ensure that the active Python is the system version. (`brew uninstall python` or other appropriate incantations)
   2. Download an install [wxPython2.8-osx-unicode] matching to your python version (most likely 2.7 on Lion, 

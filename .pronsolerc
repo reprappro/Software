@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Zip/To Print
+set last_file_path /home/jeanmarc/Documents/Models/things/spool core
 set build_dimensions 150x150x75+0+0+0
 set xy_feedrate 12000
 set z_feedrate 150

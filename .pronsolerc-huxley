@@ -16,7 +16,7 @@ set last_file_path /home/jeanmarc/Documents/Models/test parts/stl
 set xy_feedrate 12000
 set z_feedrate 150
 set e_feedrate 1800
-set port /dev/ttyUSB0
+set port /dev/ttyUSB1
 set last_bed_temperature 57.0
 set last_temperature 140.0
 set temperature_abs 240
@@ -26,9 +26,9 @@ set bedtemp_abs 110
 set baudrate 115200
 set preview_extrusion_width 0.5
 set build_dimensions 150x150x75+0+0+0
-set sliceoptscommand ./Slic3r/bin/slic3r
-set slicecommand ./Slic3r/bin/slic3r $s --load ./profiles/H-PLA-05-03-1.ini --output $o
-set sliceconfig ./profiles
+set sliceoptscommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl
+set slicecommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl $s --output $o
+set sliceconfig ./Slic3r/profiles
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22
@@ -56,3 +56,5 @@ macro fan
     !if hasattr(self,"cur_button") and self.cur_button is not None: 
       !self.onecmd('button %d "FAN ON)" /c red fan' % self.cur_button)
 
+set preview_grid_step1 0.5
+set preview_grid_step2 10.0

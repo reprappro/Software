@@ -34,7 +34,7 @@ set preview_extrusion_width 0.3
 
 set sliceoptscommand ./Slic3r/slic3r.exe
 set slicecommand ./Slic3r/slic3r.exe $s  --output $o
-set sliceconfig ./Slic3r/profiles
+set sliceconfig ../profiles
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22

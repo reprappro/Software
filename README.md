@@ -4,11 +4,28 @@ Printrun consists of printcore, pronsole and pronterface, and a small collection
   * pronsole.py is an interactive command-line host software with tabcompletion goodness
   * pronterface.py is a graphical host software with the same functionality as pronsole
 
-# INSTALLING DEPENDENCIES
+# PRE-COMPILED SOFTWARE
 
 ## Windows
 
-A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
+A precompiled version is available at http://reprappro.com/wiki/index.php/File:RepRapPro-Printrun-Slic3r.zip
+
+## Mac
+A precompiled version is available at http://reprappro.com/wiki/index.php/File:RepRapPro-Pronterface-Mac.zip
+
+## Ubuntu
+
+Run from source. See below.
+
+# INSTALLING DEPENDENCIES
+
+## Ubuntu/Debian
+`sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-tk`
+
+## Fedora 15
+`sudo yum install pyserial wxpython pyglet`
+
+## Windows
 
 Download the following, and install in this order:
 
@@ -22,15 +39,7 @@ For the last one, you will need to unpack it, open a command terminal,
 go into the the directory you unpacked it in and run
 `python setup.py install`
 
-## Ubuntu/Debian
-`sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-tk`
-
-## Fedora 15
-`sudo yum install pyserial wxpython pyglet`
-
 ## Mac OS X Lion
-
-A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
 
   1. Ensure that the active Python is the system version. (`brew uninstall python` or other appropriate incantations)
   2. Download an install [wxPython2.8-osx-unicode] matching to your python version (most likely 2.7 on Lion, 

@@ -56,9 +56,9 @@ class LeftPane(wx.GridBagSizer):
     def __init__(self, root):
         super(LeftPane, self).__init__()
         llts = wx.BoxSizer(wx.HORIZONTAL)
-        self.Add(llts, pos = (0, 0), span = (1, 9))
+        self.Add(llts, pos = (0, 0), span = (1, 6))
         self.xyzsizer = XYZControlsSizer(root)
-        self.Add(self.xyzsizer, pos = (1, 0), span = (1, 8), flag = wx.ALIGN_CENTER)
+        self.Add(self.xyzsizer, pos = (1, 0), span = (1, 6), flag = wx.ALIGN_CENTER)
         
         for i in root.cpbuttons:
             btn = make_button(root.panel, i.label, root.procbutton, i.tooltip, style = wx.BU_EXACTFIT)
@@ -84,7 +84,7 @@ class LeftPane(wx.GridBagSizer):
 
         root.monitorbox = wx.CheckBox(root.panel,-1, _("Watch"))
         root.monitorbox.SetToolTip(wx.ToolTip("Monitor Temperatures in Graph"))
-        self.Add(root.monitorbox, pos = (2, 6))
+        self.Add(root.monitorbox, pos = (3, 5))
         root.monitorbox.Bind(wx.EVT_CHECKBOX, root.setmonitor)
 
         self.Add(wx.StaticText(root.panel,-1, _("Heat:")), pos = (2, 0), span = (1, 1), flag = wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
@@ -97,7 +97,7 @@ class LeftPane(wx.GridBagSizer):
         if root.settings.last_temperature not in map(float, root.temps.values()):
             htemp_choices = [str(root.settings.last_temperature)] + htemp_choices
         root.htemp = wx.ComboBox(root.panel, -1,
-                choices = htemp_choices, style = wx.CB_DROPDOWN, size = (70,-1))
+                choices = htemp_choices, style = wx.CB_DROPDOWN, size = (80,-1))
         root.htemp.SetToolTip(wx.ToolTip("Select Temperature for Hotend"))
         root.htemp.Bind(wx.EVT_COMBOBOX, root.htemp_change)
 
@@ -116,7 +116,7 @@ class LeftPane(wx.GridBagSizer):
         if root.settings.last_bed_temperature not in map(float, root.bedtemps.values()):
             btemp_choices = [str(root.settings.last_bed_temperature)] + btemp_choices
         root.btemp = wx.ComboBox(root.panel, -1,
-                choices = btemp_choices, style = wx.CB_DROPDOWN, size = (70,-1))
+                choices = btemp_choices, style = wx.CB_DROPDOWN, size = (80,-1))
         root.btemp.SetToolTip(wx.ToolTip("Select Temperature for Heated Bed"))
         root.btemp.Bind(wx.EVT_COMBOBOX, root.btemp_change)
         self.Add(root.btemp, pos = (3, 2), span = (1, 2))
@@ -165,8 +165,8 @@ class LeftPane(wx.GridBagSizer):
         root.zfeedc.SetForegroundColour("black")
 
         root.graph = Graph(root.panel, wx.ID_ANY)
-        self.Add(root.graph, pos = (3, 5), span = (3, 3))
-        self.Add(root.tempdisp, pos = (6, 0), span = (1, 9))
+        self.Add(root.graph, pos = (4, 5), span = (3, 1))
+        self.Add(root.tempdisp, pos = (7, 0), span = (1, 6))
 
 class VizPane(wx.BoxSizer):
 
@@ -190,8 +190,8 @@ class VizPane(wx.BoxSizer):
         root.gviz.Bind(wx.EVT_LEFT_DOWN, root.showwin)
         root.gwindow.Bind(wx.EVT_CLOSE, lambda x:root.gwindow.Hide())
         self.Add(root.gviz, 1, flag = wx.SHAPED)
-        cs = root.centersizer = wx.GridBagSizer()
-        self.Add(cs, 0, flag = wx.EXPAND)
+        root.centersizer = wx.GridBagSizer()
+        self.Add(root.centersizer, 0, flag = wx.EXPAND)
 
 class LogPane(wx.BoxSizer):
 
@@ -199,6 +199,7 @@ class LogPane(wx.BoxSizer):
         super(LogPane, self).__init__(wx.VERTICAL)
         root.lowerrsizer = self
         root.logbox = wx.TextCtrl(root.panel, style = wx.TE_MULTILINE, size = (350,-1))
+        root.logbox.SetMinSize((100,-1))
         root.logbox.SetEditable(0)
         self.Add(root.logbox, 1, wx.EXPAND)
         lbrs = wx.BoxSizer(wx.HORIZONTAL)
@@ -223,7 +224,7 @@ class MainToolbar(wx.BoxSizer):
 
         root.serialport = wx.ComboBox(root.panel, -1,
                 choices = root.scanserial(),
-                style = wx.CB_DROPDOWN, size = (100, 25))
+                style = wx.CB_DROPDOWN, size = (-1, 25))
         root.serialport.SetToolTip(wx.ToolTip("Select Port Printer is connected to"))
         root.rescanports()
         self.Add(root.serialport)
@@ -263,10 +264,10 @@ class MainWindow(wx.Frame):
         self.mainsizer = wx.BoxSizer(wx.VERTICAL)
         self.uppersizer = MainToolbar(self)
         self.lowersizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.lowersizer.Add(LeftPane(self))
+        self.lowersizer.Add(LeftPane(self), 0)
         self.lowersizer.Add(VizPane(self), 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL)
-        self.lowersizer.Add(LogPane(self), 0, wx.EXPAND)
-        self.mainsizer.Add(self.uppersizer)
+        self.lowersizer.Add(LogPane(self), 1, wx.EXPAND)
+        self.mainsizer.Add(self.uppersizer,0)
         self.mainsizer.Add(self.lowersizer, 1, wx.EXPAND)
         self.panel.SetSizer(self.mainsizer)
         self.status = self.CreateStatusBar()
@@ -276,6 +277,12 @@ class MainWindow(wx.Frame):
 
         self.mainsizer.Layout()
         self.mainsizer.Fit(self)
+        # This prevents resizing below a reasonnable value
+        # We sum the lowersizer (left pane / viz / log) min size
+        # the toolbar height and the statusbar/menubar sizes
+        minsize = self.lowersizer.GetMinSize() # lower pane
+        minsize[1] += self.uppersizer.GetMinSize()[1] # toolbar height
+        self.SetMinSize(self.ClientToWindowSize(minsize)) # client to window
 
         # disable all printer controls until we connect to a printer
         self.pausebtn.Disable()

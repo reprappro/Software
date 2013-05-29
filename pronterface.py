@@ -51,6 +51,8 @@ def dosify(name):
 
 def parse_temperature_report(report, key):
     if key in report:
+        #print report
+        #print report.split()
         return float(filter(lambda x: x.startswith(key), report.split())[0].split(":")[1].split("/")[0])
     else: 
         return -1.0
@@ -1059,7 +1061,10 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             string = ""
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
             try:
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
+                wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
             except:
                 pass
@@ -1120,17 +1125,24 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         return retval
 
     def recvcb(self, l):
-        if "T:" in l:
+        if ("T:" in l) or ("T0:" in l) or ("T1:" in l) or ("T2:" in l):
             self.tempreport = l
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
+            temps = re.findall("T([0-9]*): ([0-9]+\.[0-9])",self.tempreport.strip())
             try:
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, float(temps[0][1]))
+                #wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
+                wx.CallAfter(self.graph.SetExtruder1Temperature, float(temps[1][1]))
+                #wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
+                wx.CallAfter(self.graph.SetExtruder2Temperature, float(temps[2][1]))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
             except:
                 traceback.print_exc()
         tstring = l.rstrip()
         #print tstring
-        if (tstring!="ok") and (tstring!="wait") and ("ok T:" not in tstring) and (not self.p.loud):
+        if (tstring!="ok") and (tstring!="wait") and ("ok T" not in tstring) and (not self.p.loud):
            # print "*"+tstring+"*"
            # print "[" + time.strftime('%H:%M:%S',time.localtime(time.time())) + "] " + tstring
             wx.CallAfter(self.addtexttolog, tstring + "\n");

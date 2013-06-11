@@ -56,7 +56,6 @@ in a terminal before running Pronterface
 
 ## Mac OS X (pre Lion)
 
-A precompiled version is available at http://koti.kapsi.fi/~kliment/printrun/
 
   1. Download and install http://downloads.sourceforge.net/wxpython/wxPython2.8-osx-unicode-2.8.12.0-universal-py2.6.dmg
   2. Grab the source for pyserial from http://pypi.python.org/packages/source/p/pyserial/pyserial-2.5.tar.gz

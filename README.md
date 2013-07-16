@@ -8,10 +8,10 @@ Printrun consists of printcore, pronsole and pronterface, and a small collection
 
 ## Windows
 
-A precompiled version is available at http://reprappro.com/documentation/index.php/File:RepRapPro-Printrun-Slic3r.zip
+A precompiled version is available at http://reprappro.com/documentation/File:RepRapPro-Printrun-Slic3r.zip
 
 ## Mac
-A precompiled version is available at http://reprappro.com/documentation/index.php/File:RepRapPro-Pronterface-Mac.zip
+A precompiled version is available at http://reprappro.com/documentation/File:RepRapPro-Pronterface-Mac.zip
 
 ## Ubuntu
 

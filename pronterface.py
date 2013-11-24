@@ -54,7 +54,7 @@ def parse_temperature_report(report, key):
         #print report
         #print report.split()
         return float(filter(lambda x: x.startswith(key), report.split())[0].split(":")[1].split("/")[0])
-    else: 
+    else:
         return -1.0
 
 def format_time(timestamp):
@@ -433,6 +433,8 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         m = wx.Menu()
         self.Bind(wx.EVT_MENU, self.loadfile, m.Append(-1, _("&Open..."), _(" Opens file")))
         self.Bind(wx.EVT_MENU, self.do_editgcode, m.Append(-1, _("&Edit..."), _(" Edit open file")))
+        self.Bind(wx.EVT_MENU, self.do_uploadconfig, m.Append(-1, _("&Upload config.g..."), _(" Upload new configuration file.")))
+        self.Bind(wx.EVT_MENU, self.do_uploadhtm, m.Append(-1, _("&Upload reprap.htm..."), _(" Upoload new web interface file.")))
         self.Bind(wx.EVT_MENU, self.clearOutput, m.Append(-1, _("Clear console"), _(" Clear output console")))
         self.Bind(wx.EVT_MENU, self.project, m.Append(-1, _("Projector"), _(" Project slices")))
         self.Bind(wx.EVT_MENU, self.OnExit, m.Append(wx.ID_EXIT, _("E&xit"), _(" Closes the Window")))
@@ -1192,7 +1194,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
 #        if(dlg.ShowModal() == wx.ID_OK):
 #            #self.settings.profile = dlg.GetStringSelection()
 #            print 'boo'
-        
+
     def filesloaded(self):
         dlg = wx.SingleChoiceDialog(self, _("Select the file to print"), _("Pick SD file"), self.sdfiles)
         if(dlg.ShowModal() == wx.ID_OK):
@@ -1402,6 +1404,59 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             self.p.send_now("M21")
             self.p.send_now("M28 "+str(dlg.GetValue()))
             self.recvlisteners+=[self.uploadtrigger]
+
+    def do_uploadconfig(self, event, filename = None):
+        #choose file
+        basedir = self.settings.last_file_path
+        if not os.path.exists(basedir):
+            basedir = "."
+            try:
+                basedir = os.path.split(self.filename)[0]
+            except:
+                pass
+        dlg = wx.FileDialog(self, _("Open file to print"), basedir, style = wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+        dlg.SetWildcard(_("GCODE file (*.g)|*.g|All Files (*.*)|*.*"))
+        if(dlg.ShowModal() == wx.ID_OK):
+            filename = dlg.GetPath()
+            if not "config.g" in filename:
+                self.status.SetStatusText(_("Invalid file!"))
+                return
+            if not(os.path.exists(filename)):
+                self.status.SetStatusText(_("File not found!"))
+                return
+            of = open(filename)
+            self.f = [i.replace("\n", "").replace("\r", "") for i in of]
+            of.close()
+            self.p.send_now("M559")
+            self.recvlisteners+=[self.uploadtrigger]
+        self.status.SetStatusText(_("Configuration updated"))
+    def do_uploadhtm(self, event, filename = None):
+        #choose file
+        basedir = self.settings.last_file_path
+        if not os.path.exists(basedir):
+            basedir = "."
+            try:
+                basedir = os.path.split(self.filename)[0]
+            except:
+                pass
+        dlg = wx.FileDialog(self, _("Open file to print"), basedir, style = wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+        dlg.SetWildcard(_("HTM file (*.htm)|*.htm|All Files (*.*)|*.*"))
+        if(dlg.ShowModal() == wx.ID_OK):
+            filename = dlg.GetPath()
+            if(not "reprap.htm" in filename):
+                self.status.SetStatusText(_("Invalid file!"))
+                return
+            if not(os.path.exists(filename)):
+                self.status.SetStatusText(_("File not found!"))
+                return
+            of = open(filename)
+            self.f = [i.replace("\n", "").replace("\r", "") for i in of]
+            of.close()
+            self.p.send_now("M560")
+            for line in self.f:
+                self.p.send_now(line)
+            #self.recvlisteners+=[self.uploadtrigger]
+        self.status.SetStatusText(_("reprap.htm updated"))
 
     def pause(self, event):
         print _("Paused.")

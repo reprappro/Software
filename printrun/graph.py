@@ -36,6 +36,8 @@ class Graph(BufferedCanvas):
         self.extruder0targettemps = [0]
         self.extruder1temps       = [0]
         self.extruder1targettemps = [0]
+        self.extruder2temps       = [0]
+        self.extruder2targettemps = [0]
         self.bedtemps             = [0]
         self.bedtargettemps       = [0]
 
@@ -68,8 +70,10 @@ class Graph(BufferedCanvas):
         self.AddBedTargetTemperature(self.bedtargettemps[-1])
         self.AddExtruder0Temperature(self.extruder0temps[-1])
         self.AddExtruder0TargetTemperature(self.extruder0targettemps[-1])
-        #self.AddExtruder1Temperature(self.extruder1temps[-1])
-        #self.AddExtruder1TargetTemperature(self.extruder1targettemps[-1])
+        self.AddExtruder1Temperature(self.extruder1temps[-1])
+        self.AddExtruder1TargetTemperature(self.extruder1targettemps[-1])
+        self.AddExtruder2Temperature(self.extruder2temps[-1])
+        self.AddExtruder2TargetTemperature(self.extruder2targettemps[-1])
         self.Refresh()
 
     def drawgrid(self, dc, gc):
@@ -171,11 +175,16 @@ class Graph(BufferedCanvas):
 
 
     def drawextruder1temp(self, dc, gc):
-        self.drawtemperature(dc, gc, self.extruder1temps, "Ex1", 3, 55, 55, 0, 128)
+        self.drawtemperature(dc, gc, self.extruder1temps, "Ex1", 1, 255, 155, 0, 128)
 
     def drawextruder1targettemp(self, dc, gc):
         self.drawtemperature(dc, gc, self.extruder1targettemps, "Ex1 Target", 2, 55, 55, 0, 128)
 
+    def drawextruder2temp(self, dc, gc):
+        self.drawtemperature(dc, gc, self.extruder2temps, "Ex2", 1, 255, 0, 0, 128)
+
+    def drawextruder2targettemp(self, dc, gc):
+        self.drawtemperature(dc, gc, self.extruder2targettemps, "Ex2 Target", 2, 155, 155, 0, 128)
 
     def SetBedTemperature(self, value):
         self.bedtemps.pop()
@@ -231,6 +240,24 @@ class Graph(BufferedCanvas):
         if (len(self.extruder1targettemps)-1) * float(self.width)/self.xsteps > self.width:
             self.extruder1targettemps.pop(0)
 
+    def SetExtruder2Temperature(self, value):
+        self.extruder2temps.pop()
+        self.extruder2temps.append(value)
+
+    def AddExtruder2Temperature(self, value):
+        self.extruder2temps.append(value)
+        if (len(self.extruder2temps)-1) * float(self.width)/self.xsteps > self.width:
+            self.extruder2temps.pop(0)
+
+    def SetExtruder2TargetTemperature(self, value):
+        self.extruder2targettemps.pop()
+        self.extruder2targettemps.append(value)
+
+    def AddExtruder2TargetTemperature(self, value):
+        self.extruder2targettemps.append(value)
+        if (len(self.extruder2targettemps)-1) * float(self.width)/self.xsteps > self.width:
+            self.extruder2targettemps.pop(0)
+
     def StartPlotting(self, time):
         self.Refresh()
         self.timer.Start(time)
@@ -251,3 +278,5 @@ class Graph(BufferedCanvas):
         self.drawextruder0temp(dc, gc)
         self.drawextruder1targettemp(dc, gc)
         self.drawextruder1temp(dc, gc)
+        self.drawextruder2targettemp(dc, gc)
+        self.drawextruder2temp(dc, gc)

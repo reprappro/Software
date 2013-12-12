@@ -51,8 +51,10 @@ def dosify(name):
 
 def parse_temperature_report(report, key):
     if key in report:
+        #print report
+        #print report.split()
         return float(filter(lambda x: x.startswith(key), report.split())[0].split(":")[1].split("/")[0])
-    else: 
+    else:
         return -1.0
 
 def format_time(timestamp):
@@ -431,6 +433,8 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         m = wx.Menu()
         self.Bind(wx.EVT_MENU, self.loadfile, m.Append(-1, _("&Open..."), _(" Opens file")))
         self.Bind(wx.EVT_MENU, self.do_editgcode, m.Append(-1, _("&Edit..."), _(" Edit open file")))
+        self.Bind(wx.EVT_MENU, self.do_uploadconfig, m.Append(-1, _("&Upload config.g..."), _(" Upload new configuration file.")))
+        self.Bind(wx.EVT_MENU, self.do_uploadhtm, m.Append(-1, _("&Upload reprap.htm..."), _(" Upoload new web interface file.")))
         self.Bind(wx.EVT_MENU, self.clearOutput, m.Append(-1, _("Clear console"), _(" Clear output console")))
         self.Bind(wx.EVT_MENU, self.project, m.Append(-1, _("Projector"), _(" Project slices")))
         self.Bind(wx.EVT_MENU, self.OnExit, m.Append(wx.ID_EXIT, _("E&xit"), _(" Closes the Window")))
@@ -1059,7 +1063,10 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             string = ""
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
             try:
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
+                wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
             except:
                 pass
@@ -1120,17 +1127,24 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         return retval
 
     def recvcb(self, l):
-        if "T:" in l:
+        if ("T:" in l) or ("T0:" in l) or ("T1:" in l) or ("T2:" in l):
             self.tempreport = l
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
+            temps = re.findall("T([0-9]*): ([0-9]+\.[0-9])",self.tempreport.strip())
             try:
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
+                #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, float(temps[0][1]))
+                #wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
+                wx.CallAfter(self.graph.SetExtruder1Temperature, float(temps[1][1]))
+                #wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
+                wx.CallAfter(self.graph.SetExtruder2Temperature, float(temps[2][1]))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
             except:
                 traceback.print_exc()
         tstring = l.rstrip()
         #print tstring
-        if (tstring!="ok") and (tstring!="wait") and ("ok T:" not in tstring) and (not self.p.loud):
+        if (tstring!="ok") and (tstring!="wait") and ("ok T" not in tstring) and (not self.p.loud):
            # print "*"+tstring+"*"
            # print "[" + time.strftime('%H:%M:%S',time.localtime(time.time())) + "] " + tstring
             wx.CallAfter(self.addtexttolog, tstring + "\n");
@@ -1180,7 +1194,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
 #        if(dlg.ShowModal() == wx.ID_OK):
 #            #self.settings.profile = dlg.GetStringSelection()
 #            print 'boo'
-        
+
     def filesloaded(self):
         dlg = wx.SingleChoiceDialog(self, _("Select the file to print"), _("Pick SD file"), self.sdfiles)
         if(dlg.ShowModal() == wx.ID_OK):
@@ -1390,6 +1404,59 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             self.p.send_now("M21")
             self.p.send_now("M28 "+str(dlg.GetValue()))
             self.recvlisteners+=[self.uploadtrigger]
+
+    def do_uploadconfig(self, event, filename = None):
+        #choose file
+        basedir = self.settings.last_file_path
+        if not os.path.exists(basedir):
+            basedir = "."
+            try:
+                basedir = os.path.split(self.filename)[0]
+            except:
+                pass
+        dlg = wx.FileDialog(self, _("Open file to print"), basedir, style = wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+        dlg.SetWildcard(_("GCODE file (*.g)|*.g|All Files (*.*)|*.*"))
+        if(dlg.ShowModal() == wx.ID_OK):
+            filename = dlg.GetPath()
+            if not "config.g" in filename:
+                self.status.SetStatusText(_("Invalid file!"))
+                return
+            if not(os.path.exists(filename)):
+                self.status.SetStatusText(_("File not found!"))
+                return
+            of = open(filename)
+            self.f = [i.replace("\n", "").replace("\r", "") for i in of]
+            of.close()
+            self.p.send_now("M559")
+            self.recvlisteners+=[self.uploadtrigger]
+        self.status.SetStatusText(_("Configuration updated"))
+    def do_uploadhtm(self, event, filename = None):
+        #choose file
+        basedir = self.settings.last_file_path
+        if not os.path.exists(basedir):
+            basedir = "."
+            try:
+                basedir = os.path.split(self.filename)[0]
+            except:
+                pass
+        dlg = wx.FileDialog(self, _("Open file to print"), basedir, style = wx.FD_OPEN|wx.FD_FILE_MUST_EXIST)
+        dlg.SetWildcard(_("HTM file (*.htm)|*.htm|All Files (*.*)|*.*"))
+        if(dlg.ShowModal() == wx.ID_OK):
+            filename = dlg.GetPath()
+            if(not "reprap.htm" in filename):
+                self.status.SetStatusText(_("Invalid file!"))
+                return
+            if not(os.path.exists(filename)):
+                self.status.SetStatusText(_("File not found!"))
+                return
+            of = open(filename)
+            self.f = [i.replace("\n", "").replace("\r", "") for i in of]
+            of.close()
+            self.p.send_now("M560")
+            for line in self.f:
+                self.p.send_now(line)
+            #self.recvlisteners+=[self.uploadtrigger]
+        self.status.SetStatusText(_("reprap.htm updated"))
 
     def pause(self, event):
         print _("Paused.")

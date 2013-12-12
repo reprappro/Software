@@ -412,7 +412,7 @@ class stlwin(wx.Frame):
 
     def right(self, event):
         dlg = wx.FileDialog(self, _("Pick file to load"), self.basedir, style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-        dlg.SetWildcard(_("STL files (;*.stl;*.STL;)|*.stl|OpenSCAD files (;*.scad;)|*.scad"))
+        dlg.SetWildcard(_("STL files (;*.stl;*.STL;)|*.stl;*.STL|OpenSCAD files (;*.scad;)|*.scad"))
         if(dlg.ShowModal() == wx.ID_OK):
             name = dlg.GetPath()
             #print "Current directory " + dlg.GetDirectory()
@@ -457,17 +457,19 @@ class stlwin(wx.Frame):
         self.basedir = path
         t = time.time()
         #print name
-        if name.lower().endswith(".stl"):
+        if name.lower().endswith((".stl",".STL")):
             #Filter out the path, just show the STL filename.
             self.load_stl_into_model(name, name)
         self.Refresh()
         #print time.time()-t
 
     def load_stl_into_model(self, path, name, offset = [0, 0, 0], rotation = 0, scale = [1.0, 1.0, 1.0]):
-        newname = os.path.split(name.lower())[1]
+        #newname = os.path.split(name.lower())[1]
+        newname = os.path.split(name)[1]
         c = 1
         while newname in self.models:
-            newname = os.path.split(name.lower())[1]
+            #newname = os.path.split(name.lower())[1]
+            newname = os.path.split(name)[1]
             newname = newname + "(%d)" % c
             c += 1
         self.models[newname] = stltool.stl(path)

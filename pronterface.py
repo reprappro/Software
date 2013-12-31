@@ -1427,7 +1427,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             of = open(filename)
             self.f = [i.replace("\n", "").replace("\r", "") for i in of]
             of.close()
-            self.p.send_now("M559")
+            self.p.send_now("M559 P" + dlg.GetFilename())
             self.recvlisteners+=[self.uploadtrigger]
         self.status.SetStatusText(_("Configuration updated"))
     def do_uploadhtm(self, event, filename = None):

@@ -16,7 +16,7 @@ set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Ormerod/stl/individ
 set xy_feedrate 12000
 set z_feedrate 300
 set e_feedrate 200
-set port /dev/ttyUSB0
+set port /dev/ttyACM0
 set last_bed_temperature 57.0
 set last_temperature 200.0
 set temperature_abs 240
@@ -37,7 +37,7 @@ button 3 "GET POS" /c "#C8C8C8" M114
 button 4 "FAN OFF" /c "D1FFCC" fan
 button 5 "ECHO" /c "#C8C8C8" loud
 button 6 "QUIET" /c "#C8C8C8" quiet
-button 7 "50,20" G1 X50 Y20 F12000
+button 7 "65,17" G1 X65 Y17 F12000
 button 8 "CENTRE" G1 X70 Y70 F12000
 button 9 "BR" G1 X55 Y8 F12000
 button 10 "FL" G1 X135 Y135 F30000

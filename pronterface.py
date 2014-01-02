@@ -1130,15 +1130,17 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         if ("T:" in l) or ("T0:" in l) or ("T1:" in l) or ("T2:" in l):
             self.tempreport = l
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
-            temps = re.findall("T([0-9]*): ([0-9]+\.[0-9])",self.tempreport.strip())
+            temps = re.findall("T[0-9]*:\s*([0-9]+\.[0-9])",self.tempreport.strip())
             try:
                 #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
                 #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
-                wx.CallAfter(self.graph.SetExtruder0Temperature, float(temps[0][1]))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, float(temps[0]))
                 #wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
-                wx.CallAfter(self.graph.SetExtruder1Temperature, float(temps[1][1]))
+                if len(temps) > 1:
+                    wx.CallAfter(self.graph.SetExtruder1Temperature, float(temps[1]))
                 #wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
-                wx.CallAfter(self.graph.SetExtruder2Temperature, float(temps[2][1]))
+                if len(temps) > 2:
+                    wx.CallAfter(self.graph.SetExtruder2Temperature, float(temps[2]))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
             except:
                 traceback.print_exc()
@@ -1418,16 +1420,16 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         dlg.SetWildcard(_("GCODE file (*.g)|*.g|All Files (*.*)|*.*"))
         if(dlg.ShowModal() == wx.ID_OK):
             filename = dlg.GetPath()
-            if not "config.g" in filename:
-                self.status.SetStatusText(_("Invalid file!"))
-                return
+            #if not "config.g" in filename:
+            #    self.status.SetStatusText(_("Invalid file!"))
+            #    return
             if not(os.path.exists(filename)):
                 self.status.SetStatusText(_("File not found!"))
                 return
             of = open(filename)
             self.f = [i.replace("\n", "").replace("\r", "") for i in of]
             of.close()
-            self.p.send_now("M559")
+            self.p.send_now("M559 P" + dlg.GetFilename())
             self.recvlisteners+=[self.uploadtrigger]
         self.status.SetStatusText(_("Configuration updated"))
     def do_uploadhtm(self, event, filename = None):

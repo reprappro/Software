@@ -179,7 +179,8 @@ class gviz(wx.Panel):
         self.layers = []
         self.layerindex = 0
         self.filament_width = extrusion_width # set it to 0 to disable scaling lines with zoom
-        self.basescale = [min(float(size[0])/build_dimensions[0], float(size[1])/build_dimensions[1])]*2
+        self.basescale = 2 * [min(float(self.size[0] - 1) / self.build_dimensions[0],
+                                  float(self.size[1] - 1) / self.build_dimensions[1])]
         self.scale = self.basescale
         penwidth = max(1.0, self.filament_width*((self.scale[0]+self.scale[1])/2.0))
         self.translate = [0.0, 0.0]

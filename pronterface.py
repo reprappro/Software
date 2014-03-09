@@ -1064,7 +1064,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
             try:
                 #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, ("T0:","T:")))
                 wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
                 wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))

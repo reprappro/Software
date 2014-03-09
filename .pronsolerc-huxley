@@ -12,10 +12,10 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Models/RepRapPro/Ormerod/stl/individual parts
+set last_file_path /home/jeanmarc
 set xy_feedrate 12000
 set z_feedrate 300
-set e_feedrate 200
+set e_feedrate 300
 set port /dev/ttyACM0
 set last_bed_temperature 57.0
 set last_temperature 200.0
@@ -41,7 +41,7 @@ button 7 "65,17" G1 X65 Y17 F12000
 button 8 "CENTRE" G1 X70 Y70 F12000
 button 9 "BR" G1 X55 Y8 F12000
 button 10 "FL" G1 X135 Y135 F30000
-button 11 "UP2" G1 Z2 F300
+button 11 "UP1.5" G1 Z1.5 F300
 button 12 "    FR    " G1 X15 Y135 F12000
 macro fan
   !global _fan

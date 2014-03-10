@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "pronterface.py", line 1621, in <module>
+  File "pronterface.py", line 131, in __init__
+  File "pronsole.pyc", line 1185, in parse_cmdline
+  File "pronsole.pyc", line 450, in load_rc
+  File "codecs.pyc", line 881, in open
+IOError: [Errno 2] No such file or directory: 'Win7/.pronsolerc-huxley'
+Traceback (most recent call last):
+  File "pronterface.py", line 1621, in <module>
+  File "pronterface.py", line 131, in __init__
+  File "pronsole.pyc", line 1185, in parse_cmdline
+  File "pronsole.pyc", line 450, in load_rc
+  File "codecs.pyc", line 881, in open
+IOError: [Errno 2] No such file or directory: '.pronsolerc-huxley'

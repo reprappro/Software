@@ -1,3 +1,3 @@
 #! /bin/bash
 
-python pronterface.py -c .pronsolerc-mendel
+python ./pronterface/pronterface.py -c ./pronterface/.pronsolerc-mendel

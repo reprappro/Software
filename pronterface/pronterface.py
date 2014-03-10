@@ -1064,7 +1064,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             wx.CallAfter(self.tempdisp.SetLabel, self.tempreport.strip().replace("ok ", ""))
             try:
                 #wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T:"))
-                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, "T0:"))
+                wx.CallAfter(self.graph.SetExtruder0Temperature, parse_temperature_report(self.tempreport, ("T0:","T:")))
                 wx.CallAfter(self.graph.SetExtruder1Temperature, parse_temperature_report(self.tempreport, "T1:"))
                 wx.CallAfter(self.graph.SetExtruder2Temperature, parse_temperature_report(self.tempreport, "T2:"))
                 wx.CallAfter(self.graph.SetBedTemperature, parse_temperature_report(self.tempreport, "B:"))
@@ -1221,12 +1221,13 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             import shlex
             param = self.expandcommand(self.settings.slicecommand).encode()
             #add profiles
-            profiles = open(self.settings.sliceconfig + '/slic3r.ini', 'r').read()
-            import re
-            profilescmd = '--load "' + self.settings.sliceconfig + '/filament/' + re.search('filament = (.*\.ini)', profiles).group(1) + '" '
-            profilescmd += '--load "' + self.settings.sliceconfig + '/print/' + re.search('print = (.*\.ini)', profiles).group(1) + '" '
-            profilescmd += '--load "' + self.settings.sliceconfig + '/printer/' + re.search('printer = (.*\.ini)', profiles).group(1) + '" '
-            param += ' ' + profilescmd
+            if self.settings.sliceconfig:
+                profiles = open(self.settings.sliceconfig + '/slic3r.ini', 'r').read()
+                import re
+                profilescmd = '--load "' + self.settings.sliceconfig + '/filament/' + re.search('filament = (.*\.ini)', profiles).group(1) + '" '
+                profilescmd += '--load "' + self.settings.sliceconfig + '/print/' + re.search('print = (.*\.ini)', profiles).group(1) + '" '
+                profilescmd += '--load "' + self.settings.sliceconfig + '/printer/' + re.search('printer = (.*\.ini)', profiles).group(1) + '" '
+                param += ' ' + profilescmd
             print "Slicing: ", param
             if self.webInterface:
                 self.webInterface.AddLog("Slicing: "+param)
@@ -1373,7 +1374,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
             wx.CallAfter(self.status.SetStatusText, _("Not connected to printer."))
             return
         self.on_startprint()
-        self.p.startprint(self.f)
+        self.p.startprint(self.f, 0, self.settings.clearNext)
 
     def on_startprint(self):
         wx.CallAfter(self.pausebtn.SetLabel, _("Pause"))
@@ -1390,7 +1391,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
     def uploadtrigger(self, l):
         if "Writing to file" in l:
             self.uploading = True
-            self.p.startprint(self.f)
+            self.p.startprint(self.f, 0, self.settings.clearNext)
             self.p.endcb = self.endupload
             self.recvlisteners.remove(self.uploadtrigger)
         elif "open failed, File" in l:
@@ -1540,7 +1541,7 @@ class PronterWindow(MainWindow, pronsole.pronsole):
         # Home X and Y
         self.p.send_now("G28 X Y")
         self.on_startprint()
-        self.p.startprint(self.predisconnect_mainqueue, self.p.queueindex)
+        self.p.startprint(self.predisconnect_mainqueue, self.p.queueindex, self.settings.clearNext)
 
     def store_predisconnect_state(self):
         self.predisconnect_mainqueue = self.p.mainqueue

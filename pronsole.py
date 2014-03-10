@@ -152,6 +152,7 @@ class Settings:
         self.slicecommand = "python skeinforge/skeinforge_application/skeinforge_utilities/skeinforge_craft.py $s"
         self.sliceoptscommand = "python skeinforge/skeinforge_application/skeinforge.py"
         self.final_command = ""
+        self.clearNext = 0
 
     def _set(self, key, value):
         try:
@@ -626,7 +627,7 @@ class pronsole(cmd.Cmd):
         print("Uploading "+self.filename)
         self.p.send_now("M28 "+tname)
         print("Press Ctrl-C to interrupt upload.")
-        self.p.startprint(self.f)
+        self.p.startprint(self.f, 0, self.settings.clearNext)
         try:
             sys.stdout.write("Progress: 00.0%")
             sys.stdout.flush()
@@ -683,7 +684,7 @@ class pronsole(cmd.Cmd):
             return
         print("Printing "+self.filename)
         print("You can monitor the print with the monitor command.")
-        self.p.startprint(self.f)
+        self.p.startprint(self.f, 0, self.settings.clearNext)
         #self.p.pause()
         #self.paused = True
         #self.do_resume(None)

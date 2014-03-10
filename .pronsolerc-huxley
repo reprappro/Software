@@ -12,16 +12,16 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc
+set last_file_path /home/jeanmarc/Documents/Electronics/proximity/gerber
 set xy_feedrate 12000
 set z_feedrate 300
 set e_feedrate 300
-set port /dev/ttyACM0
+set port /dev/ttyUSB0
 set last_bed_temperature 57.0
 set last_temperature 200.0
 set temperature_abs 240
 set temperature_pla 200
-set bedtemp_pla 57
+set bedtemp_pla 56
 set bedtemp_abs 110
 set baudrate 115200
 set preview_extrusion_width 0.25
@@ -29,6 +29,7 @@ set build_dimensions 200x200x75+0+0+0
 set sliceoptscommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl
 set slicecommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl $s --output $o
 set sliceconfig /home/jeanmarc/.Slic3r
+set clearNext 1
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22

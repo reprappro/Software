@@ -198,12 +198,13 @@ class printcore():
     def _checksum(self, command):
         return reduce(lambda x, y:x^y, map(ord, command))
 
-    def startprint(self, data, startindex = 0):
+    def startprint(self, data, startindex = 0, clearNext = False):
         """Start a print, data is an array of gcode commands.
         returns True on success, False if already printing.
         The print queue will be replaced with the contents of the data array, the next line will be set to 0 and the firmware notified.
         Printing will then start in a parallel thread.
         """
+        self.clearNext = clearNext
         if self.printing or not self.online or not self.printer:
             return False
         self.printing = True
@@ -297,7 +298,8 @@ class printcore():
             return
         while self.printer and self.printing and not self.clear:
             time.sleep(0.001)
-        self.clear = False
+        if self.clearNext:
+            self.clear = False
         if not (self.printing and self.printer and self.online):
             self.clear = True
             return

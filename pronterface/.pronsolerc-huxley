@@ -26,8 +26,8 @@ set bedtemp_abs 110
 set baudrate 115200
 set preview_extrusion_width 0.5
 set build_dimensions 140x140x75+0+0+0
-set sliceoptscommand ./Slic3r/bin/slic3r
-set slicecommand ./Slic3r/bin/slic3r $s --output $o
+set sliceoptscommand ./Slic3r/slic3r
+set slicecommand ./Slic3r/slic3r $s --output $o
 set sliceconfig
 set clearNext 1
 

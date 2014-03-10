@@ -12,7 +12,7 @@ macro printme
 macro loud !self.p.loud = 1
 macro quiet !self.p.loud = 0
 
-set last_file_path /home/jeanmarc/Documents/Electronics/proximity/gerber
+set last_file_path
 set xy_feedrate 12000
 set z_feedrate 300
 set e_feedrate 300
@@ -24,12 +24,12 @@ set temperature_pla 200
 set bedtemp_pla 56
 set bedtemp_abs 110
 set baudrate 115200
-set preview_extrusion_width 0.25
-set build_dimensions 200x200x75+0+0+0
-set sliceoptscommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl
-set slicecommand /home/jeanmarc/Documents/Software/Slic3r/slic3r.pl $s --output $o
-set sliceconfig /home/jeanmarc/.Slic3r
-set clearNext 1
+set preview_extrusion_width 0.5
+set build_dimensions 200x200x200+0+0+0
+set sliceoptscommand ./Slic3r/bin/slic3r
+set slicecommand ./Slic3r/bin/slic3r $s --output $o
+set sliceconfig
+set clearNext 0
 
 button 0 "INIT SD" /c "#C8C8C8" M21
 button 1 "EJECT" /c "#C8C8C8" M22
@@ -39,11 +39,11 @@ button 4 "FAN OFF" /c "D1FFCC" fan
 button 5 "ECHO" /c "#C8C8C8" loud
 button 6 "QUIET" /c "#C8C8C8" quiet
 button 7 "65,17" G1 X65 Y17 F12000
-button 8 "CENTRE" G1 X70 Y70 F12000
+button 8 "CENTRE" G1 X100 Y100 F12000
 button 9 "BR" G1 X55 Y8 F12000
-button 10 "FL" G1 X135 Y135 F30000
+button 10 "FL" G1 X190 Y190 F30000
 button 11 "UP1.5" G1 Z1.5 F300
-button 12 "    FR    " G1 X15 Y135 F12000
+button 12 "    FR    " G1 X55 Y190 F12000
 macro fan
   !global _fan
   !if '_fan' in globals() and _fan:

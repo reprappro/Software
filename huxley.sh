@@ -1,3 +1,3 @@
 #! /bin/bash
 
-python pronterface.py -c .pronsolerc-huxley
+python ./pronterface/pronterface.py -c ./pronterface/.pronsolerc-huxley

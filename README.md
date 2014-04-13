@@ -4,14 +4,26 @@ Printrun consists of printcore, pronsole and pronterface, and a small collection
   * pronsole.py is an interactive command-line host software with tabcompletion goodness
   * pronterface.py is a graphical host software with the same functionality as pronsole
 
+# INSTALLATION
+This repository includes scripts to run pronterface for Linux and Windows, for each of Huxley, Mendel
+and Ormerod machines. Slic3r v0.9.10b is also integrated. To use, donwload as ZIP or clone the repository,
+then simply rename the Slic3r-unix or Slic3r-win to Slic3r, so you can use Slic3r from within Pronterface.
+
+On Windows, run the relevant .cmd script.
+On Linux, run the relevant .sh script (after installing dependencies, see below).
+
 # PRE-COMPILED SOFTWARE
 
 ## Windows
+A precompiled version is available at...
 
-A precompiled version is available at http://reprappro.com/documentation/File:RepRapPro-Printrun-Slic3r.zip
+Mendel/Huxley: http://myreprappro.com/data/RepRapPro-Printrun-Slic3r.zip
+Ormerod: http://myreprappro.com/data/Pronterface-Ormerod-Win7.zip
 
 ## Mac
-A precompiled version is available at http://reprappro.com/documentation/File:RepRapPro-Pronterface-Mac.zip
+A precompiled version is available at...
+
+Mendel/Huxley: http://myreprappro.com/data/RepRapPro-Pronterface-Mac.zip
 
 ## Ubuntu
 

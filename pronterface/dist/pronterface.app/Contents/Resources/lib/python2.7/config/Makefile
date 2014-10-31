@@ -28,10 +28,10 @@ MODLIBS=        $(LOCALMODLIBS) $(BASEMODLIBS)
 VERSION=	2.7
 srcdir=		.
 
-abs_srcdir=	/private/var/tmp/python/python-76~157/2.7/python
-abs_builddir=	/private/var/tmp/python/python-76~157/2.7/python
-build=		x86_64-apple-darwin13.0
-host=		x86_64-apple-darwin13.0
+abs_srcdir=	/BinaryCache/python/python-89~7/Objects/2.7/python
+abs_builddir=	/BinaryCache/python/python-89~7/Objects/2.7/python
+build=		x86_64-apple-darwin14.0
+host=		x86_64-apple-darwin14.0
 
 CC=		cc
 CXX=		c++
@@ -71,7 +71,7 @@ MAKESETUP=      $(srcdir)/Modules/makesetup
 OPT=		-DNDEBUG -g -fwrapv -Os -Wall -Wstrict-prototypes
 EXTRA_CFLAGS=	 -DENABLE_DTRACE
 BASECFLAGS=	 -fno-strict-aliasing -fno-common -dynamic
-CFLAGS=		$(BASECFLAGS) -arch x86_64 -arch i386 -g -Os -pipe -fno-common -fno-strict-aliasing -fwrapv -mno-fused-madd -DENABLE_DTRACE -DMACOSX -DNDEBUG -Wall -Wstrict-prototypes -Wshorten-64-to-32 $(OPT) $(EXTRA_CFLAGS)
+CFLAGS=		$(BASECFLAGS) -arch x86_64 -arch i386 -g -Os -pipe -fno-common -fno-strict-aliasing -fwrapv -DENABLE_DTRACE -DMACOSX -DNDEBUG -Wall -Wstrict-prototypes -Wshorten-64-to-32 $(OPT) $(EXTRA_CFLAGS)
 # Both CPPFLAGS and LDFLAGS need to contain the shell's value for setup.py to
 # be able to build extension modules using the directories specified in the
 # environment variables
@@ -140,14 +140,14 @@ PYTHONFRAMEWORKINSTALLDIR= /System/Library/Frameworks/Python.framework
 # Deployment target selected during configure, to be checked
 # by distutils. The export statement is needed to ensure that the
 # deployment target is active during build.
-MACOSX_DEPLOYMENT_TARGET=10.9
+MACOSX_DEPLOYMENT_TARGET=10.10
 export MACOSX_DEPLOYMENT_TARGET
 
 # Options to enable prebinding (for fast startup prior to Mac OS X 10.3)
 OTHER_LIBTOOL_OPT=
 
 # Environment to run shared python without installed libraries
-RUNSHARED=       DYLD_FRAMEWORK_PATH=/private/var/tmp/python/python-76~157/2.7/python:
+RUNSHARED=       DYLD_FRAMEWORK_PATH=/BinaryCache/python/python-89~7/Objects/2.7/python:
 
 # Modes for directories, executables and data files created by the
 # install process.  Default to user-only-writable for all file types.
@@ -156,7 +156,7 @@ EXEMODE=	755
 FILEMODE=	644
 
 # configure script arguments
-CONFIG_ARGS=	 '--prefix=/usr' '--mandir=/usr/share/man' '--infodir=/usr/share/info' '--disable-dependency-tracking' '--enable-ipv6' '--with-system-expat' '--with-threads' '--enable-framework=/System/Library/Frameworks' '--enable-toolbox-glue' '--with-system-ffi' 'CC=cc' 'CFLAGS=-arch x86_64 -arch i386 -g -Os -pipe -fno-common -fno-strict-aliasing -fwrapv -mno-fused-madd -DENABLE_DTRACE -DMACOSX -DNDEBUG -Wall -Wstrict-prototypes -Wshorten-64-to-32' 'LDFLAGS=-arch x86_64 -arch i386            -Wl,-F.'
+CONFIG_ARGS=	 '--prefix=/usr' '--mandir=/usr/share/man' '--infodir=/usr/share/info' '--disable-dependency-tracking' '--enable-ipv6' '--with-system-expat' '--with-threads' '--enable-framework=/System/Library/Frameworks' '--enable-toolbox-glue' '--with-system-ffi' 'CC=cc' 'CFLAGS=-arch x86_64 -arch i386 -g -Os -pipe -fno-common -fno-strict-aliasing -fwrapv -DENABLE_DTRACE -DMACOSX -DNDEBUG -Wall -Wstrict-prototypes -Wshorten-64-to-32' 'LDFLAGS=-arch x86_64 -arch i386            -Wl,-F.'
 
 
 # Subdirectories with code
@@ -199,7 +199,11 @@ BUILDPYTHON=	python$(BUILDEXE)
 
 PYTHON_FOR_BUILD=./$(BUILDPYTHON) -E
 _PYTHON_HOST_PLATFORM=
-HOST_GNU_TYPE=  x86_64-apple-darwin13.0
+HOST_GNU_TYPE=  x86_64-apple-darwin14.0
+
+# Tcl and Tk config info from --with-tcltk-includes and -libs options
+TCLTK_INCLUDES=	
+TCLTK_LIBS=	
 
 # The task to run while instrument when building the profile-opt target
 PROFILE_TASK=	$(srcdir)/Tools/pybench/pybench.py -n 2 --with-gc --with-syscheck
@@ -477,6 +481,7 @@ sharedmods: $(BUILDPYTHON) pybuilddir.txt
 	    *) quiet="";; \
 	esac; \
 	$(RUNSHARED) CC='$(CC) $(RC_CFLAGS)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
+		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
 		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
 
 # Build static library
@@ -944,7 +949,7 @@ PLATMACDIRS= plat-mac plat-mac/Carbon plat-mac/lib-scriptpackages \
 	plat-mac/lib-scriptpackages/SystemEvents
 PLATMACPATH=:plat-mac:plat-mac/lib-scriptpackages
 LIBSUBDIRS=	lib-tk lib-tk/test lib-tk/test/test_tkinter \
-		lib-tk/test/test_ttk site-packages test test/data \
+		lib-tk/test/test_ttk site-packages test test/audiodata test/data \
 		test/cjkencodings test/decimaltestdata test/xmltestdata test/subprocessdata \
 		test/tracedmodules \
 		encodings compiler hotshot \
@@ -1327,11 +1332,11 @@ distclean: clobber
 		Modules/ld_so_aix Modules/python.exp Misc/python.pc
 	-rm -f python*-gdb.py
 	-rm -f pybuilddir.txt
-	find $(srcdir) '(' -name '*.fdc' -o -name '*~' \
-			   -o -name '[@,#]*' -o -name '*.old' \
-			   -o -name '*.orig' -o -name '*.rej' \
-			   -o -name '*.bak' ')' \
-			   -exec rm -f {} ';'
+	find $(srcdir)/[a-zA-Z]* '(' -name '*.fdc' -o -name '*~' \
+				     -o -name '[@,#]*' -o -name '*.old' \
+				     -o -name '*.orig' -o -name '*.rej' \
+				     -o -name '*.bak' ')' \
+				     -exec rm -f {} ';'
 
 # Check for smelly exported symbols (not starting with Py/_Py)
 smelly: all

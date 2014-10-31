@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>LSArchitecturePriority</key>
-	<array>
-		<string>i386</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
@@ -73,7 +69,8 @@
 		<false/>
 	</dict>
 	<key>PyResourcePackages</key>
-	<array/>
+	<array>
+	</array>
 	<key>PyRuntimeLocations</key>
 	<array>
 		<string>@executable_path/../Frameworks/Python.framework/Versions/2.7/Python</string>
@@ -83,8 +80,8 @@
 		<key>PythonExecutable</key>
 		<string>/usr/bin/python</string>
 		<key>PythonLongVersion</key>
-		<string>2.7.5 (default, Aug 25 2013, 00:04:04) 
-[GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.0.68)]</string>
+		<string>2.7.6 (default, Sep  9 2014, 15:04:36) 
+[GCC 4.2.1 Compatible Apple LLVM 6.0 (clang-600.0.39)]</string>
 		<key>PythonShortVersion</key>
 		<string>2.7</string>
 		<key>py2app</key>
@@ -94,7 +91,7 @@
 			<key>template</key>
 			<string>app</string>
 			<key>version</key>
-			<string>0.7.1</string>
+			<string>0.7.3</string>
 		</dict>
 	</dict>
 </dict>

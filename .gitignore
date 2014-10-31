@@ -9,7 +9,6 @@
 *~
 *bak
 .DS_Store
-dist/
 build/
 
 profiles/

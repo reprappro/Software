@@ -1,0 +1,69 @@
+# Sample .pronsolerc file - copy this into your home directory
+macro up G1 Z6 F200
+macro printnow !self.p.send_now("M23 [0]")
+macro printme
+	G21
+	G90
+	move z 6
+	home
+	move z 6
+	M109 {0}
+	
+macro loud !self.p.loud = 1
+macro quiet !self.p.loud = 0
+
+set last_file_path /home/support/Github repositories/Fisher 1 SD Image 171015 /gcodes
+set xy_feedrate 12000
+set z_feedrate 300
+set e_feedrate 300
+set port /dev/ttyACM0
+set last_bed_temperature 0
+set last_temperature 200.0
+set temperature_abs 240
+set temperature_pla 200
+set bedtemp_pla 0
+set bedtemp_abs 0
+set baudrate 115200
+set preview_extrusion_width 0.5
+set build_dimensions 150x150x150-75-75+0
+set sliceoptscommand ./Slic3r/slic3r
+set slicecommand ./Slic3r/slic3r $s --output $o
+set sliceconfig
+set clearNext 0
+
+button 0 "INIT SD" /c "#C8C8C8" M21
+button 1 "EJECT" /c "#C8C8C8" M22
+button 2 "LIST" /c "#C8C8C8" M20
+button 3 "GET POS" /c "#C8C8C8" M114
+button 4 "FAN OFF" /c "D1FFCC" fan
+button 5 "ECHO" /c "#C8C8C8" loud
+button 6 "QUIET" /c "#C8C8C8" quiet
+button 7 "65,17" G1 X65 Y17 F12000
+button 8 "CENTRE" G1 X100 Y100 F12000
+button 9 "BR" G1 X55 Y8 F12000
+button 10 "FL" G1 X190 Y190 F30000
+button 11 "UP1.5" G1 Z1.5 F300
+button 12 "    FR    " G1 X55 Y190 F12000
+macro fan
+  !global _fan
+  !if '_fan' in globals() and _fan:
+    !_fan = 0
+    M107
+    !if hasattr(self,"cur_button") and self.cur_button is not None: 
+      !self.onecmd('button %d "FAN OFF" /c "D1FFCC" fan' % self.cur_button)
+  !else:
+    !_fan = 1
+    M106
+    !if hasattr(self,"cur_button") and self.cur_button is not None: 
+      !self.onecmd('button %d "FAN ON)" /c red fan' % self.cur_button)
+
+set preview_grid_step1 10
+set preview_grid_step2 50
+button 13 "M503" M503
+button 14 "G31" G31
+macro calibrate
+  G1 X50 Y20 F12000
+  G28 Z0
+  G32
+  G1 X50 Y20 F12000
+button 15 "g32" G32

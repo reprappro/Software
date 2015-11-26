@@ -7,31 +7,29 @@ Printrun consists of printcore, pronsole and pronterface, and a small collection
   * pronterface.py is a graphical host software with the same functionality as pronsole
 
 # INSTALLATION
-This repository includes scripts to run pronterface for Linux and Windows, for each of Huxley, Mendel
-and Ormerod machines. Slic3r v0.9.10b is also integrated. To use, donwload as ZIP or clone the repository,
-then simply rename the Slic3r-unix or Slic3r-win to Slic3r, so you can use Slic3r from within Pronterface.
 
-On Windows, run the relevant .cmd script.
-On Linux, run the relevant .sh script (after installing dependencies, see below).
+This repository includes a pre-compiled version of Pronterface for Windows, the original Python-based Printrun files, and scripts to run pronterface in Windows and Linux, for Fisher, Huxley, Mendel and Ormerod printers, with variations for the electronics supplied (Duet/Melzi). 
+
+To install, download the ZIP and extract to a sensible place, or clone the repository. To run:
+
+* On Windows, run the relevant .cmd script.
+* On Linux, install dependencies (see below), then run the relevant .sh script
+* On Apple OS X, install dependencies (see below), then run pronterface/pronterface.py
 
 # PRE-COMPILED SOFTWARE
 
+For your convenience, pre-compiled versions of Pronterface are available. If you use a pre-compiled version of Pronterface, you do not need to 'install dependencies', which is the next step of the instructions. Just run the application.
+
 ## Windows
-A precompiled version is available at...
+A precompiled version is supplied in this repository, in the 'Win7' folder. Run 'pronterface.exe'.
 
-Mendel/Huxley: http://myreprappro.com/data/RepRapPro-Printrun-Slic3r.zip
-Ormerod: http://myreprappro.com/data/Pronterface-Ormerod-Win7.zip
-
-## Mac
-A precompiled version is available at...
-
-Mendel/Huxley: http://myreprappro.com/data/RepRapPro-Pronterface-Mac.zip
-
-## Ubuntu
-
-Run from source. See below.
+## Apple OS X
+A precompiled version is available here: https://reprappro.com/wp-content/uploads/2014/02/RepRapPro-Pronterface-Mac.zip
+Download, extract, and run the Pronterface application.
 
 # INSTALLING DEPENDENCIES
+
+If you prefer to run the Python-based pronterface.py application in the 'pronterface' folder, rather than any pre-compiled version, you need to install support files (called 'dependencies') for it to run.
 
 ## Ubuntu/Debian
 `sudo apt-get install python-serial python-wxgtk2.8 python-pyglet python-tk`
@@ -53,7 +51,7 @@ For the last one, you will need to unpack it, open a command terminal,
 go into the the directory you unpacked it in and run
 `python setup.py install`
 
-## Mac OS X Lion
+## Mac OS X 10.7 (Lion) and later
 
   1. Ensure that the active Python is the system version. (`brew uninstall python` or other appropriate incantations)
   2. Download an install [wxPython2.8-osx-unicode] matching to your python version (most likely 2.7 on Lion, 
@@ -68,7 +66,7 @@ with any of the 32bit settings. In case they don't, try
   5. export VERSIONER_PYTHON_PREFER_32_BIT=yes
 in a terminal before running Pronterface
 
-## Mac OS X (pre Lion)
+## Mac OS X 10.6 (Snow Leopard) and earlier
 
 
   1. Download and install http://downloads.sourceforge.net/wxpython/wxPython2.8-osx-unicode-2.8.12.0-universal-py2.6.dmg
@@ -99,14 +97,12 @@ To use pronterface, you need:
   * pyreadline (not needed on Linux) and
   * wxPython
 
-Download and install the above, and start pronterface.py
+Download and install the above (as covered in the 'Installing dependencies' instructions above.
+Start pronterface by running  pronterface.py
 Select the port name you are using from the first drop-down, select your baud rate, and hit connect.
-Load an STL (see the note on skeinforge below) or GCODE file, and you can upload it to SD or print it directly.
+Load a GCODE file. You can upload it to SD or print it directly.
 The "monitor printer" function, when enabled, checks the printer state (temperatures, SD print progress) every 3 seconds.
 The command box recognizes all pronsole commands, but has no tabcompletion.
-
-If you want to load stl files, you need to put a version of skeinforge (doesn't matter which one) in a folder called "skeinforge".
-The "skeinforge" folder must be in the same folder as pronterface.py
 
 # USING PRONSOLE
 
